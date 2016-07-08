@@ -24,7 +24,8 @@ library(ggplot2)
 #
 # Import data
 #
-grass.data <- read.csv("public_checklist_flat_plant_dl_20160705_poaceae.csv",stringsAsFactors = FALSE)
+grass.data <- read.csv("public_checklist_flat_plant_dl_20160705_poaceae.csv",
+                       stringsAsFactors = FALSE)
 loc.data <- read.csv("Poaceae_distribution.csv",stringsAsFactors = FALSE)
 #
 # Tidy up publication date data into numeric format
@@ -45,7 +46,15 @@ grass.data[,15] <- as.numeric(stringr::str_sub(grass.data[,15],-5,-2))
 #
 # Append location data with species status and year of publication
 #
-loc.data <- table.merge(loc.data[,1:17],grass.data,id=c(2,1),data.index=c(15,17),split = 17)
+tmp.id <- c(which.index(loc.data,"plant_name_id"),
+            which.index(grass.data,"plant_name_id"))
+tmp.dat <- which.index(grass.data,c("first_published","taxon_status_id",
+                                    "genus_hybrid_marker","species_hybrid_marker"))
+#
+loc.data <- table.merge(loc.data,grass.data,id=tmp.id,data.index=tmp.dat,
+                        split = ncol(loc.data))
+#
+rm(tmp.id,tmp.dat)
 #
 # Select only accepted species
 #
