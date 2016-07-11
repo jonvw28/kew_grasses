@@ -60,6 +60,11 @@ rm(tmp.id,tmp.dat)
 #
 Accep.loc <- dplyr::filter(loc.data,taxon_status_id == "A")
 #
+# remove hybrids
+#
+Accep.loc <- dplyr::filter(Accep.loc, genus_hybrid_marker != "x") %>%
+        dplyr::filter(species_hybrid_marker != "x")
+#
 #
 ################################################################################
 #
