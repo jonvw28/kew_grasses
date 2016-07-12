@@ -193,3 +193,34 @@ name.formatter <- function(df,col.ind,comma = TRUE,in.tag=TRUE,in.inc=TRUE,
         }
         df
 }
+#
+taxonomic.splitting.function<-function(dataset,taxonomist.column){
+        #
+        # Function taken from Joppa et al 2011, but modified for our
+        # purposes
+        #
+        start.data<-as.matrix(dataset)
+        # additional line - to minimise issue of any whitespace
+        start.data[,taxonomist.column] <- gsub(' ','',
+                                               start.data[,taxonomist.column])
+        #
+        #Line edited to reflect lack of whitespace
+        split.in<-strsplit(start.data[,taxonomist.column],split=c("&"))
+        mx.tx<-max(unlist(lapply(split.in,function(x){x<-length(x)}))) 
+        # (Joppa) the maximum number of authors describing a single species#
+        
+        
+        #(Joppa) THIS SPLITS THE AUTHORS INTO INDIVIDUAL COLUMNS
+        na.matrix<-matrix(data="NA",ncol=mx.tx,nrow=nrow(start.data))
+        start.data1<-cbind(start.data,na.matrix) 
+        #(Joppa) there are never more than mx.tx authors per species...
+        colnames(start.data1)<-c(colnames(start.data),
+                                 paste("Taxonomist_",seq(1,mx.tx,1),sep=""))
+        
+        for(j in 1:mx.tx){
+                start.data1[,(j+ncol(start.data))]<-unlist(lapply(split.in,function(x){x<-noquote(x[j])}))
+        }
+        # Edited to avoid factoring
+        start.data1<-as.data.frame(start.data1,stringsAsFactors = FALSE)
+        return(start.data1)
+}

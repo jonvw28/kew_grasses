@@ -42,6 +42,10 @@ grass.data[,15] <- as.numeric(stringr::str_sub(grass.data[,15],-5,-2))
 # 2 NAs from (
 # 1 NA from (v)
 #
+# Removes the NAs
+#
+grass.data <- grass.data[which(is.na(grass.data[,15])==FALSE),]
+
 names.data <- grass.data[,c(1,15,11,12)]
 rm(grass.data)
 #
@@ -60,3 +64,15 @@ names.data <- name.formatter(names.data, col.ind = c(3,4), T,T,T,T,F)
 miss.ind <- which(summary(strsplit(names.data[,3],'&'))[,1] == 0)
 names.data <- names.data[-miss.ind,]
 rm(miss.ind)
+#
+# Apply Method from Joppa et al, 2011 to count authors
+#
+names.data <- taxonomic.splitting.function(names.data,3)
+#
+# Keep format as numeric for id and year
+#
+names.data[,1] <- as.numeric(names.data[,1])
+names.data[,2] <- as.numeric(names.data[,2])
+#
+#
+#
