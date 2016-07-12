@@ -1,4 +1,4 @@
-setwd("~/Kew Summer/Data/07_05")
+setwd("~/Kew Summer")
 #
 # Install any dependancies
 #
@@ -21,10 +21,11 @@ if(!require("ggplot2")){
         install.packages("ggplot2")
 }
 library(ggplot2)
+source("./kew_grasses/16_07_12_functions.R")
 #
 # Import data
 #
-grass.data <- read.csv("public_checklist_flat_plant_dl_20160705_poaceae.csv",
+grass.data <- read.csv("./Data/07_05/public_checklist_flat_plant_dl_20160705_poaceae.csv",
                        stringsAsFactors = FALSE)
 #
 # Tidy up publication date data into numeric format
@@ -41,43 +42,21 @@ grass.data[,15] <- as.numeric(stringr::str_sub(grass.data[,15],-5,-2))
 # 2 NAs from (
 # 1 NA from (v)
 #
-names.data <- grass.data[,c(1,11,12)]
+names.data <- grass.data[,c(1,15,11,12)]
 rm(grass.data)
 #
-# Splitting will be on & so replace ','
+# Deal with one exception where ex. is not followed by a space
 #
-names.data[,2] <- gsub(',',' & ',names.data[,2])
+tmp <- grep('ex\\..',names.data[,3])
+names.data[tmp,3] <- gsub('ex\\.','ex. ',names.data[tmp,3])
+rm(tmp)
 #
-# in is relevant for publication and hence for activity level so replace this 
-# also with &
+# Re format to have breaks between authors given by &
 #
-names.data[,2] <- gsub(' in',' & ',names.data[,2])
+names.data <- name.formatter(names.data, col.ind = c(3,4), T,T,T,T,F)
 #
-# ex is not linked to current period and hence will need to be removed
+# Deal with the missing author names
 #
-ex.ind <- grep('ex ',names.data[,2])
-ex.ind2 <- grep('ex\\..',names.data[,2]) # allow cases of ex.
-ex.ind <- c(ex.ind,ex.ind2)
-rm(ex.ind2)
-ex.split <- strsplit(names.data[ex.ind,2],' ex')
-#
-# Deal with issue of multiple occurances of ex
-#
-multi.split <- which(as.numeric(summary(ex.split)[,1]) > 2)
-multi.len <- c()
-for (i in 1:length(multi.split)){
-        multi.len[i] <- length(ex.split[[multi.split[i]]])
-}
-rm(i)
-ex.split <- unlist(ex.split)
-for (i in 1:length(multi.split)){
-        ex.split <- ex.split[-((2*multi.split[i]+1):(2*multi.split[i]+multi.len[i]-2))]
-}
-rm(i)
-rm(multi.len,multi.split)
-#
-# take only first half of the strings
-#
-ex.split <- ex.split[c(TRUE,FALSE)]
-names.data[ex.ind,2] <- ex.split
-
+miss.ind <- which(summary(strsplit(names.data[,3],'&'))[,1] == 0)
+names.data <- names.data[-miss.ind,]
+rm(miss.ind)

@@ -87,14 +87,14 @@ str.trunc <- function(spl.list){
         if(length(m.spl) > 0){
                 m.len <- c()
                 for (i in 1:length(m.spl)){
-                        mu.len[i] <- length(spl.list[[m.spl[i]]])
+                        m.len[i] <- length(spl.list[[m.spl[i]]])
                 }
                 rm(i)
         }
         # reformat the list to pull out strings of interest
         out <- unlist(spl.list)
         # Deal with any multi split cases
-        if(length(mu.spl) > 0){
+        if(length(m.spl) > 0){
                 for (i in 1:length(m.spl)){
                         out <- out[-((2*m.spl[i]+1):(2*m.spl[i]+m.len[i]-2))]
                 }
@@ -144,35 +144,52 @@ name.formatter <- function(df,col.ind,comma = TRUE,in.tag=TRUE,in.inc=TRUE,
                 stop("ex.inc must be of class logical")
         }
         #
-        for(i in length(col.indices)){
+        for(i in 1:length(col.ind)){
                 # Replace commas with &
                 if(comma){
-                        df[,col.ind[i]] <- gsub(',',' & ',df[col.ind[i]])
+                        df[,col.ind[i]] <- gsub(',',' & ',df[,col.ind[i]])
                 }
                 # Remove in from names and include the authors
-                if(in.tag == TRUE && in.inc == TRUE){
-                        df[,col.ind[i]] <- gsub(' in ',' & ',df[col.ind[i]])
+                if(in.tag){
+                        if(in.inc){
+                                df[,col.ind[i]] <- gsub(' in ',
+                                                        ' & ',df[,col.ind[i]])
+                        } 
                 }
                 # Remove in from names and exclude following authors
-                if(in.tag == TRUE && in.inc == FALSE){
-                        tmp <- grep(' in ',df[,col.ind[i]])
-                        df[tmp,col.ind[i]] <- str.trunc(strsplit(df[tmp,col.ind[i]],
-                                                                 ' in '))
-                        rm(tmp)
+                if(in.tag){
+                        if(in.inc == FALSE){
+                                tmp <- grep(' in ',df[,col.ind[i]])
+                                if(length(tmp) > 0){
+                                        df[tmp,col.ind[i]] <- str.trunc(
+                                                strsplit(df[tmp,col.ind[i]],
+                                                         ' in '))
+                                }
+                                rm(tmp)
+                        }
                 }
                 # Remove ex from names and include the authors
-                if(ex.tag == TRUE && ex.inc == TRUE){
+                if(ex.tag){
+                        if(ex.inc){
                         df[,col.ind[i]] <- gsub(' ex\\. ',' & ',df[,col.ind[i]])
                         df[,col.ind[i]] <- gsub(' ex ',' & ',df[,col.ind[i]])
+                        }
                 }
                 # Remove ex from names and exlude following authors
-                if(ex.tag == TRUE && ex.inc == FALSE){
-                        tmp1 <- grep(' ex ',df[col.ind[i]])
-                        tmp2 <- grep(' ex\\. ',df[col.ind[i]])
-                        tmp <- c (tmp1,tmp2)
-                        rm(tmp1,tmp2)
-                        df[tmp,col.ind[i]] <- str.trunc(strsplit(df[tmp,col.ind[i]],
-                                                                 ' ex'))
+                if(ex.tag){
+                        if(ex.inc == FALSE){
+                                tmp1 <- grep(' ex ',df[,col.ind[i]])
+                                tmp2 <- grep(' ex\\. ',df[,col.ind[i]])
+                                tmp <- c (tmp1,tmp2)
+                                rm(tmp1,tmp2)
+                                if(length(tmp) > 0){
+                                        df[tmp,col.ind[i]] <- str.trunc(
+                                                strsplit(df[tmp,col.ind[i]],
+                                                         ' ex'))
+                                }
+                                
+                        } 
                 }
         }
+        df
 }
