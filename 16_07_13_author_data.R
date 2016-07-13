@@ -51,10 +51,13 @@ out.name1 <- "5_year_taxon_summary_grass"
 # Output file name for window author tallies (again without .csv)
 out.name2 <- "5_year_taxon_breakdown_grass"
 #
+# SET DIRECTORY where you have downloaded repository
+#
+setwd("~/Kew Summer")
+#
 # DO NOT EDIT CODE BELOW THIS LINE
 #
 ################################################################################
-setwd("~/Kew Summer")
 #
 # Install any dependancies and load functions
 #
