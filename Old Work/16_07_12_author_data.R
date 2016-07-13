@@ -74,5 +74,6 @@ names.data <- taxonomic.splitting.function(names.data,3)
 names.data[,1] <- as.numeric(names.data[,1])
 names.data[,2] <- as.numeric(names.data[,2])
 #
+# Get table of taxonomist data
 #
-#
+taxon.data <- taxonimist.summary(names.data,2,1753,2015,5)

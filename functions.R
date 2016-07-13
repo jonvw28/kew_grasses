@@ -105,6 +105,39 @@ str.trunc <- function(spl.list){
         out
 }
 
+str.trunc_r <- function(spl.list){
+        #
+        # Function that takes as its argument a list object created via a call
+        # to the base function strsplit. This function will return the portion
+        # of each string after the last split as a character vector
+        #
+        if(class(spl.list) != "list"){
+                stop("input must be a list prepared with strsplit")
+        }
+        # First deal with cases where there was more than one split
+        m.spl <- which(as.numeric(summary(spl.list)[,1]) > 2)
+        # find number of parts for each split string
+        if(length(m.spl) > 0){
+                m.len <- c()
+                for (i in 1:length(m.spl)){
+                        m.len[i] <- length(spl.list[[m.spl[i]]])
+                }
+                rm(i)
+        }
+        # reformat the list to pull out strings of interest
+        out <- unlist(spl.list)
+        # Deal with any multi split cases to cut to only two strings
+        if(length(m.spl) > 0){
+                for (i in 1:length(m.spl)){
+                        out <- out[-((2*m.spl[i]-1):(2*m.spl[i]+m.len[i]-4))]
+                }
+                rm(i,m.len,m.spl)
+        }
+        # Take only the second half of each remaining string
+        out <- out[c(FALSE,TRUE)]
+        out
+}
+
 name.formatter <- function(df,col.ind,comma = TRUE,in.tag=TRUE,in.inc=TRUE,
                            ex.tag = TRUE, ex.inc = FALSE){
         #
@@ -183,7 +216,7 @@ name.formatter <- function(df,col.ind,comma = TRUE,in.tag=TRUE,in.inc=TRUE,
                                 tmp <- c (tmp1,tmp2)
                                 rm(tmp1,tmp2)
                                 if(length(tmp) > 0){
-                                        df[tmp,col.ind[i]] <- str.trunc(
+                                        df[tmp,col.ind[i]] <- str.trunc_r(
                                                 strsplit(df[tmp,col.ind[i]],
                                                          ' ex'))
                                 }
@@ -193,6 +226,12 @@ name.formatter <- function(df,col.ind,comma = TRUE,in.tag=TRUE,in.inc=TRUE,
         }
         df
 }
+#
+################################################################################
+#                                                                              #
+# Functions based on work of Joppa et al 2011                                  #
+#                                                                              #
+################################################################################
 #
 taxonomic.splitting.function<-function(dataset,taxonomist.column){
         #
@@ -226,27 +265,19 @@ taxonomic.splitting.function<-function(dataset,taxonomist.column){
         return(start.data1)
 }
 #
-################################################################################
-#                                                                              #
-# Functions based on work of Joppa et al 2011                                  #
-#                                                                              #
-################################################################################
-#
 taxonimist.summary<-function(data,yr.col,start.year,end.year,year.interval){
         #
         # Heavily modified form of the Joppa et al (2011) function 
         # yearly.summary.function
         #
-        # This has been adapted to our needs and so simply returns a dataframe
-        # with the number of unique authors in each time window defined by
-        # the year arguments
-        #
         # Note: the data argument must be the output of the related
         # taxonomic.splitting.function
         #
         # Output is now a list with the aggregated data for totals as the first 
-        # element, and the second element being a list of the set of all
-        # taxonomists reported for each time window
+        # element, and the second element being a data frame showing all 
+        # taxonomists for each time window and a break down of their publication
+        # record in that window broken down by number of authors for their 
+        # publications.
         #
         #
         # Set up output
@@ -258,8 +289,9 @@ taxonimist.summary<-function(data,yr.col,start.year,end.year,year.interval){
         # Pull out maximum number of taxonimists per species
         tx.pos<-grep("Taxonomist_",colnames(data))
         n.tx<-length(tx.pos)
-        # preapre to collect a list of taxonomists
-        taxons.list <- list()
+        # prepare to collect a table of taxonomists and their publication 
+        # breakdown
+        tax.tbl <- c()
         # Deal with each time window
         for (q in 1:length(mat[,1])){
                 # subset data
@@ -271,6 +303,7 @@ taxonimist.summary<-function(data,yr.col,start.year,end.year,year.interval){
                 for (j in 1:n.tx){
                         assign(paste("sam.tax",j,sep=""),
                                as.matrix(sam[,tx.pos[j]]))
+                        
                 }
                 tax.dat<-ls()[grep("sam.tax",ls())]
                 out.list<-c()
@@ -281,9 +314,48 @@ taxonimist.summary<-function(data,yr.col,start.year,end.year,year.interval){
                 sam.all.tax<-unique(out.list)
                 sam.un.tax<-sam.all.tax[!is.na(sam.all.tax)]
                 mat[q,2]<-length(sam.un.tax)
-                taxons.list[[length(taxons.list)+1]] <- sam.un.tax
+                #
+                # Create a table of tallies for number of publications and 
+                # number of co-authors for each author in the window
+                #
+                tmp.mat <- matrix(data = 0, nrow = length(sam.un.tax),
+                                  ncol = n.tx + 2)
+                tmp.mat[,1] <- rep(yrs[q],times = length(sam.un.tax))
+                # table of no of authors for each species
+                tot.tx <- sam[,tx.pos]
+                tot.tx <- cbind(tot.tx,num_auth = 6 - apply(is.na(tot.tx),1,sum))
+                #deal with each author
+                for(i in 1:length(sam.un.tax)){
+                        tmp.mat[i,2] <- sam.un.tax[i]
+                        tmp.ind <- c()
+                        #pick publications for that author in this window
+                        for (j in 1:n.tx){
+                                tmp.ind <- c(tmp.ind,
+                                             grep(sam.un.tax[i],tot.tx[,j]))
+                        }
+                        rm(j)
+                        tmp.dat <- tot.tx[tmp.ind,ncol(tot.tx)]
+                        rm(tmp.ind)
+                        #tally for pubs with each no of authors
+                        for(k in 1:n.tx){
+                                tmp.mat[i,k+2] <- sum(tmp.dat == k)
+                        }
+                        rm(k,tmp.dat)
+                }
+                tax.tbl <- rbind(tax.tbl,tmp.mat)
+                rm(tmp.mat)
                 rm(sam,tax.dat,out.list,sam.all.tax,sam.un.tax)
         }
-        names(taxons.list) <- as.character(yrs)
-        return(list(as.data.frame(mat),taxons.list))
+        colnames(tax.tbl) <- c("Start_Year","author",
+                               paste("Pubs_w_",seq(1,n.tx,1),"_authors",sep=""))
+        # housekeeping for data formats
+        mat <- as.data.frame(mat,stringsAsFactors = FALSE)
+        mat[,1] <- as.numeric(mat[,1])
+        mat[,2] <- as.numeric(mat[,2])
+        tax.tbl <- as.data.frame(tax.tbl,stringsAsFactors = FALSE)
+        tax.tbl[,1] <- as.numeric(tax.tbl[,1])
+        for(l in 1:n.tx){
+                tax.tbl[,l+2] <- as.numeric(tax.tbl[,l+2])
+        }
+        return(list(mat,tax.tbl))
 }

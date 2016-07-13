@@ -1,0 +1,19 @@
+if(!require("dplyr")){
+        install.packages("dplyr")
+}
+library(dplyr)
+#
+if(!require("stringr")){
+        install.packages("stringr")
+}
+library(stringr)
+#
+if(!require("reshape")){
+        install.packages("reshape")
+}
+library(reshape)
+#
+if(!require("ggplot2")){
+        install.packages("ggplot2")
+}
+library(ggplot2)
