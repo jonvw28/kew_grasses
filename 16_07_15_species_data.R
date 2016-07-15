@@ -1,11 +1,15 @@
 ################################################################################
 #                                                                              #
 # Script that takes as input a csv file of a list of species including their   #
-# year of publication and a column of thie primary authors. This will return   #
-# a csv file of aggregated numbers of active taxonimists for time windows      #
-# defined by the inputs below as well as a breakdown of these taxonimists for  #
-# each window, showing how many species they were authors on, broken down by   #
-# the number of authors on each of these papers                                #
+# year of publication and a csv of the locations of thsese species. The script #
+# will ouput a series of csv files of numbers of new species published in each #
+# time window as defined by the inputs below as well as cumulative numbers of  #
+# species discovered.                                                          #
+#                                                                              #
+# The csv files outputted include aggregated worldwide data, as well as a      #
+# breakdown at the specified geograhic levels of levels of endogenous species  #
+# Here endogenous is taken to mean only naturally present in one region at     #
+# the given level of geographic zoning                                         #
 #                                                                              #
 # Excluding brackets, the year of publication will need to be in a 4 digit     #
 # format and be at the end of the entry in the year column for each row.       #
