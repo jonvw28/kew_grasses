@@ -169,7 +169,7 @@ rm(loc.data,spec.data,acc.string)
 #
 Acc.sp <- Acc.sp[,c(id.ind[1],yr.ind)]
 Acc.loc <- Acc.loc[,1:(tmp.l+1)]
-rm(yr.ind,stat.ind,hyb.mk,hyb.id,tmp.l)
+rm(yr.ind,stat.ind,hyb.mk,hyb.id,tmp.l,id.ind)
 #
 # Summarise totals in each window plus cumulative total
 #
@@ -181,19 +181,10 @@ rm(st.yr,en.yr)
 spec.sum<-matrix(data=0,ncol=3,nrow=length(yrs))
 colnames(spec.sum)<-c("Start_Year","New_species","Cumulative_species")
 spec.sum[,1]<-yrs
-loc.sum <- c()
-for (j in 1:(ncol(Acc.loc)-2)){
-        loc.sum[[j]] <- as.data.frame(matrix(data=0,nrow=length(yrs),
-                                             ncol=2*length(unique(
-                                                     Acc.loc[,j+1]))+1))
-        loc.sum[[j]][,1] <- yrs
-        names(loc.sum[[j]])[1] <- "Start_Year"
-}
 #
-#
+# Deal with aggregate species data
 #
 for (q in 1:length(yrs)){
-        # overall species data
         tmp <- which(
                 Acc.sp[,2] >= yrs[q] & Acc.sp[,2] < yrs[q]+int.yr)
         spec.sum[q,2] <- length(tmp)
@@ -202,168 +193,85 @@ for (q in 1:length(yrs)){
 }
 rm(q)
 #
-# Output the species tallies summary
+# Output the tallies
 #
 write.csv(spec.sum,
           file=paste("./output/",out.name1,".csv",sep =""),
           row.names = FALSE)
-rm(spec.sum,Acc.sp,out.name1,tmp.data)
+rm(spec.sum,Acc.sp,out.name1)
 #
-##############################################################################
+# Deal with location data
 #
-# LOCATION DATA
-
-
-
-
-
-
-
-
-
-
-################################################################################
+loc.sum <- c()
+loc.code <-c()
+for (j in 1:(ncol(Acc.loc)-2)){
+        loc.sum[[j]] <- as.data.frame(matrix(data=0,nrow=length(yrs),
+                                             ncol=2*length(unique(
+                                                     Acc.loc[,j+1]))+3))
+        loc.code[[j]] <- unique(Acc.loc[,j+1])
+        loc.sum[[j]][,1] <- yrs
+        names(loc.sum[[j]]) <- c("Start_Year",loc.code[[j]],"Non_endogenous",
+                                 paste(loc.code[[j]],"cumulative",
+                                       sep = "_"),"Non_endogenous_cumulative")
+}
+rm(j)
 #
-# Now pick out continent TDGW level 1 info for discoveries
+# Collect data
 #
-loc.trend <- dplyr::group_by(loc.data,plant_name_id,continent_code_l1) %>%
-        dplyr::summarise(continent = unique(continent))
-temp <- numeric(length = nrow(loc.trend))
-#
-# Add year of publication
-#
-loc.trend <- cbind(loc.trend,temp)
-rm(temp)
-names(loc.trend)[4] <- "first_published"
-indices <- match(loc.trend[,1],grass.data[,1])
-loc.trend[,4] <- grass.data[indices,15]
-rm(indices)
-#
-# Filter missing values
-#
-loc.trend <- loc.trend[which(is.na(loc.trend[,4])==FALSE),]
-#
-################################################################################
-#
-# Cumulative curves for each continent per TDWG level 1
-#
-nyears <- 2015 -1753 +1
-
-cum.spec.reg <- matrix(nrow = nyears,
-                        ncol = length(unique(loc.trend[,2]))+1)
-reg.label <- character(length(unique(loc.trend[,2])))
-cum.spec.reg[,ncol(cum.spec.reg)] <- 1753:(1753+nyears-1)
-#
-# Calculate cumulative species discovered for each region
-#
-for (reg in unique(loc.trend[,2])){
-        tmp.data <- dplyr::filter(loc.trend,continent_code_l1 == reg)
-        reg.label[reg] <- unique(tmp.data[,3])
-        
-        for(j in 1:nyears){
-                cum.spec.reg[j,reg] <- sum(tmp.data[,4] <= j+1752)
+for(k in 1:(ncol(Acc.loc)-2)){
+        # slimline data to non-redundant data at relevent detail level
+        tmp.data <- unique(Acc.loc[,c(1,k+1,ncol(Acc.loc))])
+        leng <- length(loc.code[[k]])
+        #
+        # Deal with endogeny
+        #
+        end.test <- as.data.frame(table(tmp.data[,1]),stringsAsFactors = F)
+        end.test[,1] <- as.numeric(end.test[,1])
+        end.id <- end.test[which(end.test[,2] == 1),1] %>%
+                match(tmp.data[,1],.) %>%
+                is.na() == F
+        end.ind <- which(end.id)
+        non.id <- end.test[which(end.test[,2] > 1),1] %>%
+                match(tmp.data[,1],.) %>%
+                is.na() == F
+        non.ind <- which(non.id)
+        rm(end.id,non.id,end.test)
+        #
+        tmp <- character(nrow(tmp.data))
+        tmp.data <- cbind(tmp.data,tmp,stringsAsFactors=F)
+        names(tmp.data)[ncol(tmp.data)] <- "endogeny_status"
+        rm(tmp)
+        tmp.data[end.ind,ncol(tmp.data)] <- "E"
+        tmp.data[non.ind,ncol(tmp.data)] <- "NE"
+        rm(end.ind,non.ind)
+        #
+        # Year window summaries
+        #
+        for (p in 1:length(yrs)){
+                tmp <- tmp.data[which(
+                        tmp.data[,3] >= yrs[p] & tmp.data[,3] < yrs[p]+int.yr),]
+                non.end <- tmp[which(tmp[,4]=="NE"),]
+                loc.sum[[k]][p,leng+2] <- length(unique(non.end[,1]))
+                loc.sum[[k]][p,2*leng+3] <- sum(loc.sum[[k]][,leng+2])
+                rm(non.end)
+                end <- tmp[which(tmp[,4]=="E"),]
+                for(r in 1:leng){
+                        tmp.inf <- end[which(end[,2] == loc.code[[k]][r]),]
+                        loc.sum[[k]][p,r+1] <- nrow(tmp.inf)
+                        loc.sum[[k]][p,leng+2+r] <- sum(loc.sum[[k]][,r+1])
+                        rm(tmp.inf)
+                }
+                rm(tmp,end,r)
         }
-        
-        rm(tmp.data)
+        rm(p,leng,tmp.data)
 }
-cum.spec.reg <- as.data.frame(cum.spec.reg)
-names(cum.spec.reg)[ncol(cum.spec.reg)] <- "year"
-names(cum.spec.reg)[1:(ncol(cum.spec.reg)-1)] <- reg.label
-rm(j,reg,nyears)
+rm(k,int.yr,yrs,Acc.loc,loc.code)
 #
-# Plot
+# Save Output
 #
-melt.trend <- reshape::melt(cum.spec.reg, id = "year")
-#
-g <- ggplot2::ggplot(data = melt.trend,
-                     aes(x = year, y = value, colour = variable))
-g <- g + geom_line()
-g
-
-rm(g,reg.label,melt.trend)
-#
-#
-################################################################################
-#
-# Isolate endogenous species
-#
-end.test <- dplyr::group_by(loc.trend,plant_name_id) %>%
-        dplyr::summarise(count = n())
-
-end.spec <- dplyr::filter(end.test,count == 1)[,1]
-nonend.spec <- dplyr::filter(end.test, count >1)[,1]
-rm(end.test)
-
-tmp <- character(nrow(loc.trend))
-loc.trend <- cbind(loc.trend,tmp,stringsAsFactors=F)
-names(loc.trend)[ncol(loc.trend)] <- "endogeny_status"
-rm(tmp)
-#
-# Add endgoeny tag to existing trend data
-#
-end.ind <- which(is.na(match(loc.trend[,1],as.data.frame(end.spec)[,1])) == F)
-nonend.ind <- which(is.na(match(loc.trend[,1],
-                                as.data.frame(nonend.spec)[,1])) == F)
-rm(end.spec,nonend.spec)
-#
-loc.trend[end.ind,ncol(loc.trend)] <- "E"
-loc.trend[nonend.ind,ncol(loc.trend)] <- "NE"
-loc.trend[,5] <- as.factor(loc.trend[,5])
-rm(end.ind,nonend.ind)
-#
-#
-# Endogenous info first
-#
-end.data <- dplyr::filter(loc.trend, endogeny_status == "E")
-#
-# Cumulative curves for each continent per TDWG level 1
-#
-nyears <- 2015 -1753 +1
-
-cum.spec.reg <- matrix(nrow = nyears,
-                       ncol = length(unique(loc.trend[,2]))+2)
-reg.label <- character(length(unique(loc.trend[,2])))
-cum.spec.reg[,ncol(cum.spec.reg)] <- 1753:(1753+nyears-1)
-#
-# Calculate cumulative species discovered for each region
-#
-for (reg in unique(loc.trend[,2])){
-        tmp.data <- dplyr::filter(end.data,continent_code_l1 == reg)
-        reg.label[reg] <- unique(tmp.data[,3])
-        
-        for(j in 1:nyears){
-                cum.spec.reg[j,reg] <- sum(tmp.data[,4] <= j+1752)
-        }
-        
-        rm(tmp.data)
+for (s in 1:length(loc.sum)){
+        write.csv(loc.sum[[s]],
+                  file=paste("./output/",out.name2,"_level_",s,".csv",sep =""),
+                  row.names = FALSE)
 }
-rm(end.data)
-#
-# Add non-endogenous species
-#
-nonend.data <- dplyr::filter(loc.trend, endogeny_status == "NE")
-for(j in 1:nyears){
-        cum.spec.reg[j,ncol(cum.spec.reg)-1] <- sum(nonend.data[,4] <= j+1752)
-}
-rm(nonend.data)
-#
-#
-#
-cum.spec.reg <- as.data.frame(cum.spec.reg)
-names(cum.spec.reg)[ncol(cum.spec.reg)] <- "year"
-names(cum.spec.reg)[ncol(cum.spec.reg)-1] <- "Non-Endogenous"
-names(cum.spec.reg)[1:(ncol(cum.spec.reg)-2)] <- reg.label
-rm(j,reg,nyears)
-#
-# Plot
-#
-melt.trend <- reshape::melt(cum.spec.reg, id = "year")
-#
-g <- ggplot2::ggplot(data = melt.trend,
-                     aes(x = year, y = value, colour = variable))
-g <- g + geom_line()
-g
-
-rm(g,reg.label,melt.trend)
-#
-#
+rm(s,loc.sum,out.name2)
