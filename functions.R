@@ -1,3 +1,16 @@
+################################################################################
+#                                                                              #
+# Functions created as past of the summer project "where are the missing       #
+# grasses?" undertaken during July-September 2016 at the Royal Botanic Gardens #
+# Kew                                                                          #
+#                                                                              #
+#                                                                              #
+# Jonathan Williams, 2016                                                      #
+# jonvw28@gmail.com                                                            #
+#                                                                              #
+################################################################################
+
+
 table.merge <- function(df1,df2,id=c(1,1),data.index=1,split=1){
         #
         # Function that merges selected data fields between two data frames
@@ -358,4 +371,42 @@ taxonimist.summary<-function(data,yr.col,start.year,end.year,year.interval){
                 tax.tbl[,l+2] <- as.numeric(tax.tbl[,l+2])
         }
         return(list(mat,tax.tbl))
+}
+#
+#
+#
+joppa.grad <- function(df,a,b,St){
+        #
+        # Function that calculates the gradient of the cost function for the 
+        # model of species discovery rates proposed by Joppa et al in
+        # How many species of flowering plants are there 2010
+        #
+        grad <- numeric(length = 3)
+        for (i in 1:nrow(df)){
+                est.S <- (a + b*df[i,1])*df[i,4]*(St - df[i,3])
+                diff <- log(est.S) - log(df[i,2])
+                d <- numeric(length = 3)
+                d[1] <- diff*df[i,4]*(St-df[i,3])/est.S
+                d[2] <- d[1]*df[i,1]
+                d[3] <- diff*df[i,4]*(a+b*df[i,1])/est.S
+                grad <- grad + d
+                rm(d)
+        }
+        grad
+}
+#
+#
+joppa.cost <- function(df,a,b,St){
+        #
+        # Function that calculates the cost function for the 
+        # model of species discovery rates proposed by Joppa et al in
+        # How many species of flowering plants are there 2010
+        #
+        cost <- 0
+        for (i in 1:nrow(df)){
+                est.S <- (a + b*df[i,1])*df[i,4]*(St - df[i,3])
+                tmp <- log(est.S) - log(df[i,2])
+                cost <- cost + tmp^2
+        }
+        cost
 }

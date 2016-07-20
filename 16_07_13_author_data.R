@@ -131,3 +131,4 @@ write.csv(taxon.data[[1]],
 write.csv(taxon.data[[2]],
           file=paste("./output/",out.name2,".csv",sep =""),
           row.names = FALSE)
+rm(out.name1,out.name2,taxon.data)
