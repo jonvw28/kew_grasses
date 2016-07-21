@@ -12,7 +12,7 @@
 # SET INPUT VALUES HERE
 #
 # Directory path - location of csv input file
-dir.path <- "./Output/"
+dir.path <- "./Output/Start_1755_5yr/"
 #
 # Species File name - name of csv file with species information 
 #(without .csv at end)
@@ -29,18 +29,11 @@ setwd("~/Kew Summer")
 #
 #### Algorithm
 #
-# multiple of current level to start at
-mult <- 3
+# estimates to start from
+int.param <- c(5e-3,5e-3,15)
 #
-# Guesses per round
-guess.n <- 500
-#
-# Ratio to be kept
-ratio <- 0.1
-#
-# Range Stretch to apply at each end (ie 1.25 would mean extend the
-# range in each iteration by 25%)
-stretch <- 1.5
+# Step size
+alp <- 0.01
 #
 # Max iteratations
 max.it <- 20
@@ -66,47 +59,21 @@ rm(dir.path,tax.file.name,spec.file.name)
 #
 data <- table.merge(spec.data,tax.data,data.index=2,split = 3)
 data[,1] <- data[,1] - data[1,1]
+data[,2:3] <- data[,2:3]/1000
 data <- data[1:52,]
 rm(spec.data,tax.data)
 #
 #
 ################################################################################
 #
-# employ method in Joppa Brazil paper
+# employ method in Joppa flowering plants paper
 #
-start <- data[nrow(data),2] + data[nrow(data),3]
-guesses <- seq(start+1,mult*start,length.out = guess.n)
-rm(start)
-flag <- 0
-mark <- 2
-#
-while (mark > 1 && flag < max.it){
-        results <- numeric(length(guesses))
-        #
-        for(i in 1:length(guesses)){
-                tmp.var <- data[,2]/(data[,4]*(rep(guesses[i],
-                                                   nrow(data))-data[,3]))
-                test <- lm(tmp.var ~ data[,1])
-                results[i] <- joppa.cost(data,test$coefficients[1],
-                                         test$coefficients[2],
-                                         guesses[i])
-                rm(tmp.var,test)
-        }
-        rm(i)
-        picks <- guesses[order(results)[1:(ratio*length(guesses))]]
-        rng <- range(picks)
-        extra <- (rng[2]-rng[1])*(stretch-1)/2
-        guesses <- seq(rng[1]-extra,rng[2]+extra,length.out = guess.n)
-        mark <- rng[2]-rng[1]
-        rm(rng,extra)
-        flag <- flag + 1
-        #
-        #
+param <- int.param
+i <- 0
+test <- 1
+while(i < max.it){
+        n.param <- param - alp*joppa.grad(data,param[1],param[2],param[3])
+        test <- abs(n.param[3]-param[3])
+        param <- n.param
+        i <- i + 1
 }
-#
-rm(mult,guess.n,ratio,stretch,max.it)
-
-
-tmp.var <- data[,2]/(data[,4]*(rep(picks[1],
-                                   nrow(data))-data[,3]))
-test <- lm(tmp.var ~ data[,1])

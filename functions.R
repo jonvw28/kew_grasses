@@ -410,3 +410,39 @@ joppa.cost <- function(df,a,b,St){
         }
         cost
 }
+
+conv.cost <- function(df,a,b,St){
+        #
+        # Function that calculates the cost function for the 
+        # model of species discovery rates by square residuals
+        #
+        cost <- 0
+        for (i in 1:nrow(df)){
+                est.S <- (a + b*df[i,1])*df[i,4]*(St - df[i,3])
+                tmp <- est.S - df[i,2]
+                cost <- cost + tmp^2
+        }
+        cost
+}
+#
+#
+conv.grad <- function(df,a,b,St){
+        #
+        # Function that calculates the gradient of the cost function for the 
+        # model of species discovery rates proposed by Joppa et al in
+        # How many species of flowering plants are there 2010, but using
+        # normal least squares (ie not log transformed)
+        #
+        grad <- numeric(length = 3)
+        for (i in 1:nrow(df)){
+                est.S <- (a + b*df[i,1])*df[i,4]*(St - df[i,3])
+                diff <- est.S - df[i,2]
+                d <- numeric(length = 3)
+                d[1] <- diff*df[i,4]*(St-df[i,3])
+                d[2] <- d[1]*df[i,1]
+                d[3] <- diff*df[i,4]*(a+b*df[i,1])
+                grad <- grad + d
+                rm(d)
+        }
+        grad
+}
