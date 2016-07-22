@@ -57,8 +57,9 @@ tax.file.name <- "5_year_taxon_summary_grass"
 # End year - input year at which data ends so as to enable trimming if need be
 en.yr <- 2015
 #
-# Directory where the output should go
-out.dir <- "./Output/Start_1753_5yr_only_acc/least_sqaures_regression/"
+# Directory where the output directory should go - will be created within
+# a directory created by the id string below
+out.dir <- "./Output/"
 #
 # Identifier string - include info for the file names and graph labels that 
 # describe the set of data used
@@ -90,9 +91,11 @@ max.it <- 20
 #
 # Check for directory and create if needed
 #
-if(dir.exists(out.dir)==FALSE){
-        dir.create(out.dir,recursive = T)
+tmp.dir <- paste(out.dir,id.str,"/","least_squares_regression","/",sep = "")
+if(dir.exists(tmp.dir)==FALSE){
+        dir.create(tmp.dir,recursive = T)
 }
+rm(out.dir)
 #
 # Install any dependancies and load functions
 #
@@ -201,7 +204,7 @@ if(mark > 1){
         }
         rm(i)
         #
-        png(paste(out.dir,id.str,"_error_plot.png",sep=""),width = 960,
+        png(paste(tmp.dir,id.str,"_error_plot.png",sep=""),width = 960,
             height = 960)
         plot(guesses,results,xlab = "Total Species",
              ylab = "Least Squares Score",
@@ -219,7 +222,7 @@ if(mark > 1){
         #
         # Plot species and taxons per year
         #
-        png(paste(out.dir,id.str,"_species_rat.png",sep=""),width = 960,
+        png(paste(tmp.dir,id.str,"_species_rat.png",sep=""),width = 960,
             height = 960)
         plot(data[,1],data[,2],pch = 21,col='red',ylim = c(0,700),
              xlab = "year", ylab = "Number",
@@ -236,7 +239,7 @@ if(mark > 1){
         #
         # Plot species per taxonomist
         #
-        png(paste(out.dir,id.str,"_species_per_tax.png",sep=""),width = 960, 
+        png(paste(tmp.dir,id.str,"_species_per_tax.png",sep=""),width = 960, 
             height = 960)
         plot(data[,1],data[,2]/data[,4],pch = 21,col='red', ylim = c(0,20),
              xlab = "year", ylab = "Number",
@@ -253,10 +256,10 @@ rm(mult,stretch,max.it,ratio,mark,flag,guess.n,start,guesses,results,params)
 tmp <- cbind(data,pred)
 
 write.csv(tmp,
-          file=paste(out.dir,id.str,"_model.csv",sep=""),
+          file=paste(tmp.dir,id.str,"_model.csv",sep=""),
           row.names = FALSE)
 write.csv(t(out.dat),
-          file=paste(out.dir,id.str,"_model_summary.csv",sep=""),
+          file=paste(tmp.dir,id.str,"_model_summary.csv",sep=""),
             row.names = FALSE)
 
-rm(out.dat,data,pred,tmp,out.dir,id.str)
+rm(out.dat,data,pred,tmp,tmp.dir,id.str)

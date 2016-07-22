@@ -22,7 +22,11 @@
 #                                                                              #
 ################################################################################
 #
-# SET INPUT VALUES HERE
+# SET DIRECTORY where you have downloaded repository (ie before /kew_grasses)
+#
+setwd("~/Kew Summer")
+#
+############################ SET INPUT VALUES HERE #############################
 #
 # Directory path - location of csv input file
 dir.path <- "./Data/07_05/"
@@ -36,14 +40,6 @@ yr.ind <- 15
 # Primary Authors column - index of the column containing the primary authors
 auth.ind <- 11
 #
-# Taxonomic status column - index of the column containing taxonomic status in
-# the species data
-stat.ind <- 17
-#
-# Accepted Species string - string that represents accepted species in the 
-# taxonomic status column
-acc.string <- "A"
-#
 # Start year
 st.yr <- 1753
 #
@@ -53,19 +49,25 @@ en.yr <- 2015
 # Window Interval - how many years you want aggregation to occur over
 int.yr <- 5
 #
-# Output file name for window totals (again without .csv)
-out.name1 <- "5_year_taxon_summary_grass"
+# Output directory
+out.dir <- "./Output/"
 #
-# Output file name for window author tallies (again without .csv)
-out.name2 <- "5_year_taxon_breakdown_grass"
-#
-# SET DIRECTORY where you have downloaded repository
-#
-setwd("~/Kew Summer")
-#
-# DO NOT EDIT CODE BELOW THIS LINE
+# Identifier string - include info for the file names and as subdirectory
+id.str <- "grass_1753_5y"
 #
 ################################################################################
+#                                                                              #
+#                       DO NOT EDIT CODE BELOW THIS LINE                       #            
+#                                                                              #
+################################################################################
+#
+# Check for directory and create if needed
+#
+tmp.dir <- paste(out.dir,id.str,"/",sep = "")
+if(dir.exists(tmp.dir)==FALSE){
+        dir.create(tmp.dir,recursive = T)
+}
+rm(out.dir)
 #
 # Install any dependancies and load functions
 #
@@ -97,15 +99,8 @@ data[,yr.ind] <- as.numeric(stringr::str_sub(data[,yr.ind],-4,-1))
 # Remove the NAs
 #
 data <- data[which(is.na(data[,yr.ind])==FALSE),]
-#
-# Only consider accepted species
-#
-data <- data[which(data[,stat.ind]==acc.string),]
-#
-# Pick only necessary data
-#
 names.data <- data[,c(1,yr.ind,auth.ind)]
-rm(data,yr.ind,auth.ind,acc.string,stat.ind)
+rm(data,yr.ind,auth.ind)
 #
 # Deal with exceptions where ex. is not followed by a space
 #
@@ -140,10 +135,10 @@ rm(st.yr,en.yr,int.yr,names.data)
 # Output aggregated data
 #
 write.csv(taxon.data[[1]],
-          file=paste("./output/",out.name1,".csv",sep =""),
+          file=paste(tmp.dir,id.str,"_","tax_summary",".csv",sep =""),
           row.names = FALSE)
 #
 write.csv(taxon.data[[2]],
-          file=paste("./output/",out.name2,".csv",sep =""),
+          file=paste(tmp.dir,id.str,"_","tax_breakdown",".csv",sep =""),
           row.names = FALSE)
-rm(out.name1,out.name2,taxon.data)
+rm(tmp.dir,id.str,taxon.data)

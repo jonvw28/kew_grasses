@@ -26,7 +26,11 @@
 #                                                                              #
 ################################################################################
 #
-# SET INPUT VALUES HERE
+# SET DIRECTORY where you have downloaded repository (ie before /kew_grasses)
+#
+setwd("~/Kew Summer")
+#
+############################ SET INPUT VALUES HERE #############################
 #
 # Directory path - location of csv input file
 dir.path <- "./Data/07_05/"
@@ -62,6 +66,12 @@ hyb.id <- c(4,6)
 # Hybrid markers - markers for hybrids for each column as given above
 hyb.mk <- c("×","×")
 #
+# Rank Column - column showing taxonomic rank
+rnk.id <- 23
+#
+# Rank String - string identifying species is above column
+rnk.str <- "Species"
+#
 # Location Filter IDs - any columns in location data that are to be filtered in
 # creating a valid dataset
 filt.id <- c(11,12,13,14)
@@ -82,19 +92,26 @@ en.yr <- 2015
 # Window Interval - how many years you want aggregation to occur over
 int.yr <- 5
 #
-# Output file name for window species totals (again without .csv)
-out.name1 <- "5_year_species_summary_grass"
+# Output directory
+out.dir <- "./Output/"
 #
-# Output file name for window species totals per location (again without .csv)
-out.name2 <- "5_year_loc_species_summary_grass"
-#
-# SET DIRECTORY where you have downloaded repository
-#
-setwd("~/Kew Summer")
-#
-# DO NOT EDIT CODE BELOW THIS LINE
+# Identifier string - include info for the file names and as subdirectory
+id.str <- "grass_1753_5y"
 #
 ################################################################################
+#                                                                              #
+#                       DO NOT EDIT CODE BELOW THIS LINE                       #            
+#                                                                              #
+################################################################################
+#
+# Check for directory and create if needed
+#
+tmp.dir <- paste(out.dir,id.str,"/",sep = "")
+if(dir.exists(tmp.dir)==FALSE){
+        dir.create(tmp.dir,recursive = T)
+}
+rm(out.dir)
+#
 #
 # Install any dependancies and load functions
 #
@@ -145,7 +162,7 @@ rm(loc.id)
 # publication
 #
 loc.data <- table.merge(loc.data,spec.data,id = c(id.ind[1],1),
-                        data.index = c(yr.ind,stat.ind,hyb.id),
+                        data.index = c(yr.ind,stat.ind,rnk.id,hyb.id),
                         split = tmp.l)
 # Remove the NAs
 #
@@ -156,7 +173,7 @@ loc.data <- loc.data[which(is.na(loc.data[,tmp.l+1])==FALSE),]
 #
 for(i in 1:length(hyb.id)){
         tmp <- which(spec.data[,hyb.id[i]] == hyb.mk[i])
-        tmp2 <- which(loc.data[,tmp.l+2+i] == hyb.mk[i])
+        tmp2 <- which(loc.data[,tmp.l+3+i] == hyb.mk[i])
         spec.data <- spec.data[-tmp,]
         loc.data <- loc.data[-tmp2,]
         rm(tmp,tmp2)
@@ -169,11 +186,16 @@ Acc.sp <- spec.data[which(spec.data[,stat.ind]==acc.string),]
 Acc.loc <- loc.data[which(loc.data[,tmp.l+2]==acc.string),]
 rm(loc.data,spec.data,acc.string)
 #
+# Filter for only species rank
+#
+Acc.sp <- Acc.sp[which(Acc.sp[,rnk.id]==rnk.str),]
+Acc.loc <- Acc.loc[which(Acc.loc[,tmp.l+3]==rnk.str),]
+#
 # Pick out only relevant data
 #
 Acc.sp <- Acc.sp[,c(id.ind[1],yr.ind)]
 Acc.loc <- Acc.loc[,1:(tmp.l+1)]
-rm(yr.ind,stat.ind,hyb.mk,hyb.id,tmp.l,id.ind)
+rm(yr.ind,stat.ind,hyb.mk,hyb.id,tmp.l,id.ind,rnk.id,rnk.str)
 #
 # Summarise totals in each window plus cumulative total
 #
@@ -185,6 +207,13 @@ rm(st.yr,en.yr)
 spec.sum<-matrix(data=0,ncol=3,nrow=length(yrs))
 colnames(spec.sum)<-c("Start_Year","New_species","Cumulative_species")
 spec.sum[,1]<-yrs
+tmp <- which(Acc.sp[,2] < yrs[1])
+spec.sum[1,3] <- length(tmp)
+rm(tmp)
+#
+# Check uniqueness
+#
+Acc.sp <- Acc.sp[!duplicated(Acc.sp[,1]),]
 #
 # Deal with aggregate species data
 #
@@ -192,17 +221,20 @@ for (q in 1:length(yrs)){
         tmp <- which(
                 Acc.sp[,2] >= yrs[q] & Acc.sp[,2] < yrs[q]+int.yr)
         spec.sum[q,2] <- length(tmp)
-        spec.sum[q,3] <- sum(spec.sum[,2])
+        if(q >1){
+                spec.sum[q,3] <- spec.sum[q-1,3] + spec.sum[q-1,2]
+        }
         rm(tmp)
 }
 rm(q)
+
 #
 # Output the tallies
 #
 write.csv(spec.sum,
-          file=paste("./output/",out.name1,".csv",sep =""),
+          file=paste(tmp.dir,id.str,"_","spec_summary",".csv",sep =""),
           row.names = FALSE)
-rm(spec.sum,Acc.sp,out.name1)
+rm(spec.sum,Acc.sp)
 #
 # Deal with location data
 #
@@ -249,6 +281,19 @@ for(k in 1:(ncol(Acc.loc)-2)){
         tmp.data[non.ind,ncol(tmp.data)] <- "NE"
         rm(end.ind,non.ind)
         #
+        # Deal with already existing species
+        #
+        tmp <- tmp.data[which(tmp.data[,3] < yrs[1]),]
+        non.end <- tmp[which(tmp[,4]=="NE"),]
+        loc.sum[[k]][1,2*leng+3] <- length(unique(non.end[,1]))
+        end <- tmp[which(tmp[,4]=="E"),]
+        for(s in 1:leng){
+                tmp.inf <- end[which(end[,2] == loc.code[[k]][s]),]
+                loc.sum[[k]][1,leng+2+s] <- nrow(tmp.inf)
+                rm(tmp.inf)
+        }
+        rm(tmp,non.end,end)
+        #
         # Year window summaries
         #
         for (p in 1:length(yrs)){
@@ -256,13 +301,20 @@ for(k in 1:(ncol(Acc.loc)-2)){
                         tmp.data[,3] >= yrs[p] & tmp.data[,3] < yrs[p]+int.yr),]
                 non.end <- tmp[which(tmp[,4]=="NE"),]
                 loc.sum[[k]][p,leng+2] <- length(unique(non.end[,1]))
-                loc.sum[[k]][p,2*leng+3] <- sum(loc.sum[[k]][,leng+2])
+                if (p > 1){
+                        loc.sum[[k]][p,2*leng+3] <- (loc.sum[[k]][p-1,2*leng+3] 
+                                             + loc.sum[[k]][p-1,leng+2])
+                }
                 rm(non.end)
                 end <- tmp[which(tmp[,4]=="E"),]
                 for(r in 1:leng){
                         tmp.inf <- end[which(end[,2] == loc.code[[k]][r]),]
                         loc.sum[[k]][p,r+1] <- nrow(tmp.inf)
-                        loc.sum[[k]][p,leng+2+r] <- sum(loc.sum[[k]][,r+1])
+                        if (p > 1){ 
+                                loc.sum[[k]][p,leng+2+r] <- (loc.sum[[k]][p-1,
+                                                                          leng+r+2] 
+                                                        + loc.sum[[k]][[p-1,r+1]])
+                        }
                         rm(tmp.inf)
                 }
                 rm(tmp,end,r)
@@ -275,7 +327,8 @@ rm(k,int.yr,yrs,Acc.loc,loc.code)
 #
 for (s in 1:length(loc.sum)){
         write.csv(loc.sum[[s]],
-                  file=paste("./output/",out.name2,"_level_",s,".csv",sep =""),
+                  file=paste(tmp.dir,id.str,"_","loc_summary","_level_",s,
+                             ".csv",sep =""),
                   row.names = FALSE)
 }
-rm(s,loc.sum,out.name2)
+rm(s,loc.sum,tmp.dir,id.str)
