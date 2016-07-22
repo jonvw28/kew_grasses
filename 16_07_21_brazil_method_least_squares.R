@@ -1,7 +1,35 @@
 ################################################################################           
 #                                                                              #
 #                                                                              #
-# To use simply edit the variables below and run the whole script              #
+# This script is an altered implementation of the work of Joppa et al 2010 in  #
+# their Brazil paper.It takes as inout two files, one giving aggregated        #
+# as well as cumulative species for set time windows, the other giving number  #
+# of active taxonomists. These can be easily created using the scripts in this #
+# repository.                                                                  #
+#                                                                              #
+# This script will then attempt to produce an estimate for total species yet   #
+# to be found using the model as proposed by Joppa. However, the algorithm to  #
+# do so varies from theirs. Here the least squares regression is used to       #
+# evaluate each estimate, as opposed to first log-transforming the data.       #
+#                                                                              #
+# The algorithm works by guessing a selection of of equally spaced values for  #
+# total species, where the number of guesses is set below. It then uses linear #
+# regression with appropraite weights to find the values for a and b in the    #
+# model of taxonomic efficiency that Joppa proposes. The initial guesses from  #
+# the range of the current number of species up to a multiple of this given    #
+# as a parameter below. From these guesses, the top scoring are selected, the  #
+# proportion relative to the guesses being set below, and a new range of       #
+# guesses are picked by stretching the range of of this selection by a scaling #
+# factor set below. These new guesses are then used to repeat the procedure    #
+# until either the range of guesses converges to be accurate to the nearest    #
+# integer, or the maximum number of iterations as set below is reached. Should #
+# the stretching cause the bottom value to drop below the current number of    #
+# species, then the range will be truncated to be no lower than the current    #
+# number.                                                                      #
+#                                                                              #
+# To use simply edit the variables below. The output will be three graphs,     #
+# a summary csv of the model parameters and scores and a csv of the raw data   #
+# along with the predicted values                                              #
 #                                                                              #
 #                                                                              #
 # Jonathan Williams, 2016                                                      #
