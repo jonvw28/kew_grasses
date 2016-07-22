@@ -29,6 +29,13 @@ tax.file.name <- "5_year_taxon_summary_grass"
 # End year - input year at which data ends so as to enable trimming if need be
 en.yr <- 2015
 #
+# Directory where the output should go
+out.dir <- "./Output/Start_1753_5yr_only_acc/least_sqaures_regression/"
+#
+# Identifier string - include info for the file names and graph labels that 
+# describe the set of data used
+id.str <- "grass_1753_5y_acc"
+#
 ########################### Algorithm Parameters ###############################
 #
 # multiple of current level to start at
@@ -52,6 +59,12 @@ max.it <- 20
 #                       DO NOT EDIT CODE BELOW THIS LINE                       #            
 #                                                                              #
 ################################################################################
+#
+# Check for directory and create if needed
+#
+if(dir.exists(out.dir)==FALSE){
+        dir.create(out.dir,recursive = T)
+}
 #
 # Install any dependancies and load functions
 #
@@ -160,11 +173,12 @@ if(mark > 1){
         }
         rm(i)
         #
-        png("./output/error_plot_1753_5yr_acc.png",width = 960, 
+        png(paste(out.dir,id.str,"_error_plot.png",sep=""),width = 960,
             height = 960)
         plot(guesses,results,xlab = "Total Species",
              ylab = "Least Squares Score",
-             main = "Least Squares Error vs Total Species - 1753, 5yr, accepted",
+             main = paste("Least Squares Error vs Total Species ",
+                          id.str,sep=""),
              col = "blue",
              type = 'l')
         dev.off()
@@ -177,10 +191,12 @@ if(mark > 1){
         #
         # Plot species and taxons per year
         #
-        png("./output/species_rate_1753_5yr_acc.png",width = 960, 
+        png(paste(out.dir,id.str,"_species_rat.png",sep=""),width = 960,
             height = 960)
         plot(data[,1],data[,2],pch = 21,col='red',ylim = c(0,700),
-             xlab = "year", ylab = "Number")
+             xlab = "year", ylab = "Number",
+             main = paste("Discovery rates and number of taxonomists ",
+                          id.str,sep=""))
         lines(data[,1],data[,2],pch = 21,col='red')
         lines(data[,1],data[,4],col = 'blue')
         lines(data[,1],pred,col = 'green')
@@ -192,15 +208,27 @@ if(mark > 1){
         #
         # Plot species per taxonomist
         #
-        png("./output/species_per_tax_1753_5yr_acc.png",width = 960, 
+        png(paste(out.dir,id.str,"_species_per_tax.png",sep=""),width = 960, 
             height = 960)
         plot(data[,1],data[,2]/data[,4],pch = 21,col='red', ylim = c(0,20),
-             xlab = "year", ylab = "Number")
+             xlab = "year", ylab = "Number",
+             main = paste("Species per taxonomist ",
+                          id.str,sep=""))
         lines(data[,1],data[,2]/data[,4],pch = 21,col='red')
         lines(data[,1],pred/data[,4],col = 'green')
         dev.off()
 }
-rm(mult,stretch,max.it,ratio,mark,flag,guess.n,start)
+rm(mult,stretch,max.it,ratio,mark,flag,guess.n,start,guesses,results,params)
+#
+# Save output of model
+#
+tmp <- cbind(data,pred)
 
+write.csv(tmp,
+          file=paste(out.dir,id.str,"_model.csv",sep=""),
+          row.names = FALSE)
+write.csv(t(out.dat),
+          file=paste(out.dir,id.str,"_model_summary.csv",sep=""),
+            row.names = FALSE)
 
-rm(params,out.dat,data)
+rm(out.dat,data,pred,tmp,out.dir,id.str)
