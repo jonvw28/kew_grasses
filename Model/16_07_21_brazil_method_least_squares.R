@@ -44,15 +44,15 @@ setwd("~/Kew Summer")
 ############################ SET INPUT VALUES HERE #############################
 #
 # Directory path - location of csv input file
-dir.path <- "./Output/Start_1753_5yr_only_acc/"
+dir.path <- "./Output/grass_1755_5y/"
 #
 # Species File name - name of csv file with species information 
 #(without .csv at end)
-spec.file.name <- "5_year_species_summary_grass"
+spec.file.name <- "grass_1755_5y_spec_summary"
 #
 # Location File name - name of csv file with location information 
 #(without .csv at end)
-tax.file.name <- "5_year_taxon_summary_grass"
+tax.file.name <- "grass_1755_5y_tax_summary"
 #
 # End year - input year at which data ends so as to enable trimming if need be
 en.yr <- 2015
@@ -63,7 +63,7 @@ out.dir <- "./Output/"
 #
 # Identifier string - include info for the file names and graph labels that 
 # describe the set of data used
-id.str <- "grass_1753_5y_acc"
+id.str <- "grass_1755_5y"
 #
 ########################### Algorithm Parameters ###############################
 #
@@ -115,10 +115,10 @@ rm(dir.path,tax.file.name,spec.file.name)
 data <- table.merge(spec.data,tax.data,data.index=2,split = 3)
 rm(spec.data,tax.data)
 #
-# Tidy data and remove any partial end year
+# Tidy data and remove any partial end year - not years in data are start years
 #
 yr.int <- data[2,1] - data[1,1]
-if((en.yr-data[1,1]) %% yr.int != 0){
+if((en.yr-data[1,1]+1) %% yr.int != 0){
         data <- data[1:(nrow(data)-1),]
 }
 rm(en.yr,yr.int)
@@ -224,7 +224,8 @@ if(mark > 1){
         #
         png(paste(tmp.dir,id.str,"_species_rat.png",sep=""),width = 960,
             height = 960)
-        plot(data[,1],data[,2],pch = 21,col='red',ylim = c(0,700),
+        plot(data[,1],data[,2],pch = 21,col='red',
+             ylim = c(0,1.25*max(data[,2])),
              xlab = "year", ylab = "Number",
              main = paste("Discovery rates and number of taxonomists ",
                           id.str,sep=""))
@@ -248,18 +249,17 @@ if(mark > 1){
         lines(data[,1],data[,2]/data[,4],pch = 21,col='red')
         lines(data[,1],pred/data[,4],col = 'green')
         dev.off()
+        #
+        # Save output of model
+        #
+        tmp <- cbind(data,pred)
+        
+        write.csv(tmp,
+                  file=paste(tmp.dir,id.str,"_model.csv",sep=""),
+                  row.names = FALSE)
+        write.csv(t(out.dat),
+                  file=paste(tmp.dir,id.str,"_model_summary.csv",sep=""),
+                  row.names = FALSE)
 }
 rm(mult,stretch,max.it,ratio,mark,flag,guess.n,start,guesses,results,params)
-#
-# Save output of model
-#
-tmp <- cbind(data,pred)
-
-write.csv(tmp,
-          file=paste(tmp.dir,id.str,"_model.csv",sep=""),
-          row.names = FALSE)
-write.csv(t(out.dat),
-          file=paste(tmp.dir,id.str,"_model_summary.csv",sep=""),
-            row.names = FALSE)
-
 rm(out.dat,data,pred,tmp,tmp.dir,id.str)
