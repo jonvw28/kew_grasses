@@ -115,7 +115,7 @@ rm(dir.path,tax.file.name,spec.file.name)
 data <- table.merge(spec.data,tax.data,data.index=2,split = 3)
 rm(spec.data,tax.data)
 #
-# Tidy data and remove any partial end year - not years in data are start years
+# Tidy data and remove any partial end year - note years in data are start years
 #
 yr.int <- data[2,1] - data[1,1]
 if((en.yr-data[1,1]+1) %% yr.int != 0){
