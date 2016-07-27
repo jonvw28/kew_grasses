@@ -375,74 +375,129 @@ taxonimist.summary<-function(data,yr.col,start.year,end.year,year.interval){
 #
 #
 #
-joppa.grad <- function(df,a,b,St){
+joppa.grad <- function(df,a,b,St,St.fixed = FALSE,cache = NULL){
         #
         # Function that calculates the gradient of the cost function for the 
         # model of species discovery rates proposed by Joppa et al in
         # How many species of flowering plants are there 2010
         #
-        grad <- numeric(length = 3)
-        for (i in 1:nrow(df)){
-                est.S <- (a + b*df[i,1])*df[i,4]*(St - df[i,3])
-                diff <- log(est.S) - log(df[i,2])
-                d <- numeric(length = 3)
-                d[1] <- diff*df[i,4]*(St-df[i,3])/est.S
-                d[2] <- d[1]*df[i,1]
-                d[3] <- diff*df[i,4]*(a+b*df[i,1])/est.S
-                grad <- grad + d
-                rm(d)
+        # St.fixed is used to indicate the gradient is desired for St fixed.
+        # In this case, only the partial derivatives wrt a and b are calculated.
+        # Additionally, in such a case the speed of programs is vastly increased
+        # by using precalculated variables. Here there need to be extra 
+        # variables given to the input cache where repeated computation can be
+        # avoided. This needs to be in the form of a dataframe or matrix with a
+        # row for each row in df and the columns containing in order: 
+        #
+        # (St - cumulative species) multiplied by number of taxnomonists
+        # the above multipled additionally by year
+        #
+        #
+        if(St.fixed){
+                grad <- numeric(length = 2)
+                diff <- (a + b*df[,1])*cache[,1] - df[,2]
+                grad[1] = sum(diff*cache[,1])
+                grad[2] = sum(diff*cache[,2])
+                
+        } else {
+                grad <- numeric(length = 3)
+                tmp1 <- a + b*df[,1]
+                tmp2 <- (St - df[,3])
+                tmp3 <- tmp1*tmp2*df[,4] 
+                tmp4 <- ((log(tmp3)-log(df[,2]))*df[,4])/tmp3
+                g.1 <- tmp4*tmp2
+                grad[1] <- sum(g.1)
+                grad[2] <- sum(g.1*df[,1])
+                grad[3] <- sum(tmp4*tmp1)
         }
         grad
 }
 #
 #
-joppa.cost <- function(df,a,b,St){
+joppa.cost <- function(df,a,b,St,St.fixed = FALSE,cache = NULL){
         #
         # Function that calculates the cost function for the 
         # model of species discovery rates proposed by Joppa et al in
-        # How many species of flowering plants are there 2010
+        # How many species of flowering plants are there 2010.
         #
-        cost <- 0
-        for (i in 1:nrow(df)){
-                est.S <- (a + b*df[i,1])*df[i,4]*(St - df[i,3])
-                tmp <- log(est.S) - log(df[i,2])
-                cost <- cost + tmp^2
+        # St.fixed is used to indicate the cost is desired for St fixed.
+        # In such a case the speed of programs is vastly increased
+        # by using precalculated variables. Here there needs to be an extra 
+        # variable given to the input cache where repeated computation can be
+        # avoided. This needs to be in the form of a vector with a
+        # as many elements as there are rows in df and containing: 
+        #
+        # (St - cumulative species) multiplied by number of taxnomonists
+        #
+        #
+        if(St.fixed){
+                cost <- sum((log((a+b*df[,1])*cache)-log(df[,2]))^2)
+        }else{
+                cost <- sum((log((a+b*df[,1])*df[,4]*(St-df[,3]))-log(df[,2]))^2)
         }
         cost
 }
 
-conv.cost <- function(df,a,b,St){
+conv.cost <- function(df,a,b,St,St.fixed = FALSE,cache = NULL){
         #
         # Function that calculates the cost function for the 
-        # model of species discovery rates by square residuals
+        # model of species discovery rates proposed by Joppa et al in
+        # How many species of flowering plants are there 2010, but using
+        # normal least squares (ie not log transformed)
         #
-        cost <- 0
-        for (i in 1:nrow(df)){
-                est.S <- (a + b*df[i,1])*df[i,4]*(St - df[i,3])
-                tmp <- est.S - df[i,2]
-                cost <- cost + tmp^2
+        # St.fixed is used to indicate the cost is desired for St fixed.
+        # In such a case the speed of programs is vastly increased
+        # by using precalculated variables. Here there needs to be an extra 
+        # variable given to the input cache where repeated computation can be
+        # avoided. This needs to be in the form of a vector with a
+        # as many elements as there are rows in df and containing: 
+        #
+        # (St - cumulative species) multiplied by number of taxnomonists
+        #
+        #
+        if(St.fixed){
+                cost <- sum(((a+b*df[,1])*cache-df[,2])^2)
+        }else{
+                cost <- sum(((a+b*df[,1])*df[,4]*(St-df[,3])-df[,2])^2)
         }
         cost
 }
 #
 #
-conv.grad <- function(df,a,b,St){
+conv.grad <- function(df,a,b,St,St.fixed = FALSE,cache = NULL){
         #
         # Function that calculates the gradient of the cost function for the 
         # model of species discovery rates proposed by Joppa et al in
         # How many species of flowering plants are there 2010, but using
         # normal least squares (ie not log transformed)
         #
-        grad <- numeric(length = 3)
-        for (i in 1:nrow(df)){
-                est.S <- (a + b*df[i,1])*df[i,4]*(St - df[i,3])
-                diff <- est.S - df[i,2]
-                d <- numeric(length = 3)
-                d[1] <- diff*df[i,4]*(St-df[i,3])
-                d[2] <- d[1]*df[i,1]
-                d[3] <- diff*df[i,4]*(a+b*df[i,1])
-                grad <- grad + d
-                rm(d)
+        # St.fixed is used to indicate the gradient is desired for St fixed.
+        # In this case, only the partial derivatives wrt a and b are calculated.
+        # Additionally, in such a case the speed of programs is vastly increased
+        # by using precalculated variables. Here there need to be extra 
+        # variables given to the input cache where repeated computation can be
+        # avoided. This needs to be in the form of a dataframe or matrix with a
+        # row for each row in df and the columns containing in order: 
+        #
+        # (St - cumulative species) multiplied by number of taxnomonists
+        # the above multipled additionally by year
+        #
+        #
+        if(St.fixed){
+                grad <- numeric(length = 2)
+                diff <- (a + b*df[,1])*cache[,1] - df[,2]
+                grad[1] = sum(diff*cache[,1])
+                grad[2] = sum(diff*cache[,2])
+                
+        } else {
+                grad <- numeric(length = 3)
+                tmp1 <- a + b*df[,1]
+                tmp2 <- (St - df[,3])*df[,4]
+                diff <- tmp1*tmp2 - df[,2]
+                tmp3 <- diff*tmp2
+                grad[1] <- sum(tmp3)
+                grad[2] <- sum(tmp3*df[,1])
+                grad[3] <- sum(diff*tmp1*df[,4])
         }
         grad
 }
