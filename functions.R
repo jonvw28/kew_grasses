@@ -374,7 +374,6 @@ taxonimist.summary<-function(data,yr.col,start.year,end.year,year.interval){
 }
 #
 #
-#
 joppa.grad <- function(df,a,b,St,St.fixed = FALSE,cache = NULL){
         #
         # Function that calculates the gradient of the cost function for the 
@@ -390,14 +389,16 @@ joppa.grad <- function(df,a,b,St,St.fixed = FALSE,cache = NULL){
         # row for each row in df and the columns containing in order: 
         #
         # (St - cumulative species) multiplied by number of taxnomonists
-        # the above multipled additionally by year
+        # natural log of actual number of new species
         #
         #
         if(St.fixed){
                 grad <- numeric(length = 2)
-                diff <- (a + b*df[,1])*cache[,1] - df[,2]
-                grad[1] = sum(diff*cache[,1])
-                grad[2] = sum(diff*cache[,2])
+                tmp <- (a + b*df[,1])*cache[,1]
+                diff <- log(tmp) - cache[,2]
+                out <- diff*cache[,1]/tmp
+                grad[1] = sum(out)
+                grad[2] = sum(out*df[,1])
                 
         } else {
                 grad <- numeric(length = 3)
@@ -412,7 +413,6 @@ joppa.grad <- function(df,a,b,St,St.fixed = FALSE,cache = NULL){
         }
         grad
 }
-#
 #
 joppa.cost <- function(df,a,b,St,St.fixed = FALSE,cache = NULL){
         #
