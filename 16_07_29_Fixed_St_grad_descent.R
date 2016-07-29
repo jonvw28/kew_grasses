@@ -142,7 +142,6 @@ rm(yr.int)
 #
 a.guess <- seq(rng.a[1],rng.a[2],length = ab.guesses[1])
 b.guess <- seq(rng.b[1],rng.b[2],length = ab.guesses[2])
-rm(rng.a,rng.b)
 #
 # Calculate the current level of total species
 #
@@ -334,7 +333,7 @@ while (mark > 0.5 && flag < max.it){
                         #
                         test <- abs(grad/cur.par[1:2])
                         if(test[1]< grd.rat && test[2] < grd.rat){
-        
+                                rm(test)
                                 break
                         }
                         rm(test)
@@ -363,8 +362,8 @@ while (mark > 0.5 && flag < max.it){
                 results[i,1] <- conv.cost(data,cur.par[1],cur.par[2],guesses[i],T,
                                           grad.cache[,1])
                 results[i,2:4] <- cur.par
-                results[1,5] <- grad.flag
-                rm(cur.par)
+                results[i,5] <- grad.flag
+                rm(cur.par,grad.flag)
                 #
                 # Counter for human to see progress
                 #
@@ -418,9 +417,10 @@ while (mark > 0.5 && flag < max.it){
 #
 # Pull out best fitted parameters
 #
-best.id <- order(results[,1])[1]
+best.id <- which.min(results[,1])
 params <- c(results[best.id,2],results[best.id,3],picks[1])
 names(params) <- c("a","b","St")
+rm(picks)
 #
 # Transform all of data back into more meaningful form
 #
@@ -453,7 +453,7 @@ if(mark > 0.5){
         # output data
         #
         out.dat <- c(params,
-                     "cost_fn" = conv.coast(data,params[1],params[2],params[3]),
+                     "cost_fn" = conv.cost(data,params[1],params[2],params[3]),
                      "iterations_taken" = flag,
                      "guesses_per_it" = guess.n,
                      "ratio_kept" = ratio,
@@ -534,5 +534,5 @@ if(mark > 0.5){
                   row.names = FALSE)
 }
 rm(mult,stretch,max.it,ratio,mark,flag,guess.n,start,guesses,results,params)
-rm(out.dat,data,pred,tmp,tmp.dir,id.str)
-rm(a.guess,b.guess,ab.guesses,min.alp,grd.rat,alpha,max.grad,scale)
+rm(out.dat,data,pred,tmp,tmp.dir,id.str,best.id)
+rm(a.guess,b.guess,ab.guesses,min.alp,grd.rat,alpha,max.grad,rng.a,rng.b)
