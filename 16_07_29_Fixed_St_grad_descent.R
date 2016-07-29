@@ -23,26 +23,26 @@ en.yr <- 2015
 ########################### Algorithm Parameters ###############################
 #
 # Scaling to apply to taxonomist numbers and species numbers respectively
-# (years are dealt with automatically)
+# (years are dealt with automatically) - This is to help gradient descent
+#nefficiency
 scale <- c(100,1000)
 #
-
 ########## Iteration of St Search parameters
 #
-# multiple of current level to start at
+# multiple of current level to start at as maxmimum guess
 mult <- 3
 #
-# Guesses per round
+# Guesses per round for St values
 guess.n <- 100
 #
-# Ratio to be kept
+# Ratio of top scoring guesses to keep from all guesses per round
 ratio <- 0.2
 #
 # Range Stretch to apply at each end (ie 1.25 would mean extend the
 # range in each iteration by 25%)
 stretch <- 1.5
 #
-# Max iteratations
+# Max iteratations of guessing St
 max.it <- 20
 #
 #
@@ -60,55 +60,29 @@ ab.guesses <- c(100,100)
 # Max repetitions of grad descent to get a,b for each St value
 max.grad <- 500
 #
-# Step size
+# Step size for each gradient descent step
 alpha <- 0.01
 #
-# Minimum step size
+# Minimum step size - program quits if a step smaller than this is required
 min.alp <- 2e-14
 #
 # Ratio for gradient/parameter value where gradient descent should be 
-# terminated
+# terminated - ie once this ratio is reached, gradient descent ends
 grd.rat <- 1e-4
 #
-#
-#
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+################################################################################
+#                                                                              #
+#                       DO NOT EDIT CODE BELOW THIS LINE                       #            
+#                                                                              #
+################################################################################
 #
 # Install any dependancies and load functions
 #
 source("./kew_grasses/packages.R")
 source("./kew_grasses/functions.R")
+#
+#
+########################### DATA PROCESSING ####################################
 #
 # Import data
 #
@@ -123,15 +97,18 @@ rm(dir.path,tax.file.name,spec.file.name)
 data <- table.merge(spec.data,tax.data,data.index=2,split = 3)
 rm(spec.data,tax.data)
 #
-# Tidy data and remove any partial end year - note years in data are start years
+# Tidy data and remove any partial end year (ie if the final window is shorter 
+# than the other windows then it is excluded)
+# note: years in data are start years
 #
 yr.int <- data[2,1] - data[1,1]
 if((en.yr-data[1,1]+1) %% yr.int != 0){
         data <- data[1:(nrow(data)-1),]
 }
 rm(en.yr)
-
+#
 # Scale data so as to make convergence of gradient descent better
+# Years are scaled so the first year is 0 and the final year is 1
 #
 scale <- c(scale,yr.int,data[1,1])
 names(scale) <- c("taxon","species","year_gap","start_year")
@@ -141,23 +118,21 @@ data[,1] <- (data[,1]-data[1,1])/(yr.int*(nrow(data)-1))
 rm(yr.int)
 #
 #
+########################## Optimization Algorithm ##############################
 #
-################################################################################
-#
-#
-
-
-
-
-
-#
-# Calculate initial guesses for a and b for gradient descent
+# Calculate initial guesses for a and b for each gradient descent
 #
 a.guess <- seq(rng.a[1],rng.a[2],length = ab.guesses[1])
 b.guess <- seq(rng.b[1],rng.b[2],length = ab.guesses[2])
 rm(rng.a,rng.b)
-
+#
+# Calculate the current level of total species
+#
 start <- data[nrow(data),2] + data[nrow(data),3]
+#
+# Pick initial guesses as starting with the above and ending with the multiple
+# of this as given in the parameters, using equally spaced guesses as set
+#
 guesses <- seq(start+0.001,mult*start,length.out = guess.n)
 
 

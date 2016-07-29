@@ -15,16 +15,19 @@
 # The algorithm works by guessing a selection of of equally spaced values for  #
 # total species, where the number of guesses is set below. It then uses linear #
 # regression with appropraite weights to find the values for a and b in the    #
-# model of taxonomic efficiency that Joppa proposes. The initial guesses from  #
-# the range of the current number of species up to a multiple of this given    #
-# as a parameter below. From these guesses, the top scoring are selected, the  #
-# proportion relative to the guesses being set below, and a new range of       #
-# guesses are picked by stretching the range of of this selection by a scaling #
-# factor set below. These new guesses are then used to repeat the procedure    #
-# until either the range of guesses converges to be accurate to the nearest    #
-# integer, or the maximum number of iterations as set below is reached. Should #
-# the stretching cause the bottom value to drop below the current number of    #
-# species, then the range will be truncated to be no lower than the current    #
+# model of taxonomic efficiency that Joppa proposes. The initial guesses come  #
+# from the range of the current total number of species up to a multiple of    #
+# this given as a parameter below. From these guesses, the top scoring are     #
+# selected, the proportion of these relative to the total mumber of guesses    #
+# being set below. A new range of guesses are picked by stretching the range   #
+# of this selection by a scaling factor set below.                             #
+#                                                                              #
+# These new guesses are then used to repeat the procedure until either the     #
+# range of guesses converges to be accurate to the nearest integer,or the      #
+# maximum number of iterations as set below is reached.                        #
+#                                                                              #
+# Should the stretching cause the bottom value to drop below the current total #
+# number of species, then the range will be truncated to be no lower than this #
 # number.                                                                      #
 #                                                                              #
 # To use simply edit the variables below. The output will be three graphs,     #
@@ -62,25 +65,25 @@ en.yr <- 2015
 out.dir <- "./Output/"
 #
 # Identifier string - include info for the file names and graph labels that 
-# describe the set of data used
+# describe the set of data used for clarity in naming output
 id.str <- "grass_1755_5y"
 #
 ########################### Algorithm Parameters ###############################
 #
-# multiple of current level to start at
+# multiple of current level to start at as maxmimum guess
 mult <- 3
 #
-# Guesses per round
+# Guesses per round for St values
 guess.n <- 500
 #
-# Ratio to be kept
+# Ratio of top scoring guesses to keep from all guesses per round
 ratio <- 0.2
 #
 # Range Stretch to apply at each end (ie 1.25 would mean extend the
 # range in each iteration by 25%)
 stretch <- 1.5
 #
-# Max iteratations
+# Max iteratations of guessing St
 max.it <- 20
 #
 ################################################################################
@@ -102,6 +105,9 @@ rm(out.dir)
 source("./kew_grasses/packages.R")
 source("./kew_grasses/functions.R")
 #
+#
+########################### DATA PROCESSING ####################################
+#
 # Import data
 #
 spec.data <- read.csv(paste(dir.path,spec.file.name,".csv",sep=""),
@@ -115,7 +121,9 @@ rm(dir.path,tax.file.name,spec.file.name)
 data <- table.merge(spec.data,tax.data,data.index=2,split = 3)
 rm(spec.data,tax.data)
 #
-# Tidy data and remove any partial end year - note years in data are start years
+# Tidy data and remove any partial end year (ie if the final window is shorter 
+# than the other windows then it is excluded)
+# note: years in data are start years
 #
 yr.int <- data[2,1] - data[1,1]
 if((en.yr-data[1,1]+1) %% yr.int != 0){
@@ -124,36 +132,84 @@ if((en.yr-data[1,1]+1) %% yr.int != 0){
 rm(en.yr,yr.int)
 #
 #
-################################################################################
+########################## Optimization Algorithm ##############################
 #
-# employ method in Joppa Brazil paper
+# employ method in Joppa Brazil paper - without using log transform
+#
+# Calculate the current level of total species
 #
 start <- data[nrow(data),2] + data[nrow(data),3]
+#
+# Pick initial guesses as starting with the above and ending with the multiple
+# of this as given in the parameters, using equally spaced guesses as set
+#
 guesses <- seq(start+1,mult*start,length.out = guess.n)
+#
+# Set flag as counter for number of iterations
+# Set mark as a score for how big the range of candidate values for St is. 
+#       Once this is below 0.5 we know we have convergence to the precision
+#       of 1 integer.
+#
 flag <- 0
 mark <- 2
 #
+# Iteration over each set of guesses starts here and ends when maximum 
+# iterations are reached, or convergence as defined abpove is reached
+#
 while (mark > 0.5 && flag < max.it){
+        #
+        # Create placeholder for error score of each guess for St
+        #
         results <- numeric(length(guesses))
         #
+        # Find best choice of a, b for each guess of St using linear regression
+        #
         for(i in 1:length(guesses)){
+                #
+                # Weights are needed to ensure the residuals being considered
+                # for optimisation in calculating a, b are the same as those
+                # used in calculating the global best fit for a, b & St
+                #
+                # This means that we can ensure the a, b choice for each St
+                # minimises our overall error score for given St
+                #
                 weight <- (data[,4]*(rep(guesses[i],nrow(data))-data[,3]))
                 test <- lm(data[,2]/weight ~ data[,1],weights = weight^2)
+                #
+                # Produce error score for each St guess
+                #
                 results[i] <- conv.cost(data,test$coefficients[1],
                                         test$coefficients[2],
                                        guesses[i])
                 rm(weight,test)
         }
         rm(i)
+        #
+        # Order the scores for each round of guesses and select only the top
+        # proportion, as set by the ratio parameter
+        #
         picks <- guesses[order(results)[1:(ratio*length(guesses))]]
+        #
+        # Calculate the range of these selected values and extend it by the
+        # stretch factor set in the parameters
+        #
         rng <- range(picks)
         extra <- (rng[2]-rng[1])*(stretch-1)/2
         rng[1] <- rng[1] - extra
         rng[2] <- rng[2] + extra
+        #
+        # Enusre the range never drops below the current total number of species
+        #
         if(rng[1] <= start){
                 rng[1] <- start + 1
         }
+        #
+        # Use this range to pick the new guesses for the next iteration
+        #
         guesses <- seq(rng[1],rng[2],length.out = guess.n)
+        #
+        # Score current convergence
+        #
         mark <- rng[2]-rng[1]
         rm(rng,extra)
         flag <- flag + 1
@@ -162,11 +218,16 @@ while (mark > 0.5 && flag < max.it){
 }
 rm(results,guesses)
 #
+# Calculate a and b for the best choice of St output and store these in the
+# variable 'param'
+#
 weight <- (data[,4]*(rep(picks[1],nrow(data))-data[,3]))
 test <- lm(data[,2]/weight ~ data[,1],weights = weight^2)
 params <- c(test$coefficients[1],test$coefficients[2],picks[1])
 names(params) <- c("a","b","St")
 rm(test,weight,picks)
+#
+# Process results depending on whether convergence was reached
 #
 if(mark > 1){
         cat("Algorithm failed to converge to a value of total species accurate to the nearest integer after",
@@ -190,7 +251,7 @@ if(mark > 1){
                      "expansion_per_it" = stretch,
                      "initial_multiple" = mult)
         #
-        # plot of optimisation lanscape
+        # plot of error score against St for the initial range of guesses
         #
         guesses <- seq(start+1,mult*start,length.out = guess.n)
         results <- numeric(length(guesses))
@@ -214,13 +275,13 @@ if(mark > 1){
              type = 'l')
         dev.off()
         #
-        # Predicted fit
+        # Calculate predicted fit
         #
         tmp <- (rep(params[3],nrow(data))-data[,3])
         pred <- (params[1] + params[2]*data[,1])*data[,4]*tmp
         rm(tmp)
         #
-        # Plot species and taxons per year
+        # Plot species and taxonomists per year
         #
         png(paste(tmp.dir,id.str,"_species_rat.png",sep=""),width = 960,
             height = 960)
