@@ -413,14 +413,27 @@ while (mark > 0.5 && flag < max.it){
                 res.cache <- results
         }
         #
-        #
         flag <- flag + 1
-        #
-        #
 }
-best.id <- order(results)[,1][1]
+#
+# Pull out best fitted parameters
+#
+best.id <- order(results[,1])[1]
 params <- c(results[best.id,2],results[best.id,3],picks[1])
 names(params) <- c("a","b","St")
+#
+# Transform all of data back into more meaningful form
+#
+data[,4] <- data[,4]*scale[1]
+data[,2:3] <- data[,2:3]*scale[2]
+data[,1] <- data[,1]*scale[3]*(nrow(data)-1) + scale[4]
+#
+# Transform parameters back into corrected form
+#
+params[3] <- params[3]*scale[2]
+params[1] = (params[1]-params[2]*scale[4]/(scale[3]*(nrow(data)-1)))/scale[1]
+params[2] = params[2]/(scale[1]*scale[3]*(nrow(data)-1))
+rm(scale)
 #
 # Process results depending on whether convergence was reached
 #
@@ -440,7 +453,7 @@ if(mark > 0.5){
         # output data
         #
         out.dat <- c(params,
-                     "cost_fn" = results[best.id,1],
+                     "cost_fn" = conv.coast(data,params[1],params[2],params[3]),
                      "iterations_taken" = flag,
                      "guesses_per_it" = guess.n,
                      "ratio_kept" = ratio,
@@ -464,13 +477,14 @@ if(mark > 0.5){
         #
         png(paste(tmp.dir,id.str,"_error_plot.png",sep=""),width = 960,
             height = 960)
-        plot(guesses,results,xlab = "Total Species",
-             ylab = "Least Squares Score",
+        plot(guesses,res.cahce,xlab = "Total Species",
+             ylab = "Representative Least Squares Score",
              main = paste("Least Squares Error vs Total Species ",
                           id.str,sep=""),
              col = "blue",
              type = 'l')
         dev.off()
+        rm(res.cache)
         #
         # Calculate predicted fit
         #
@@ -519,13 +533,6 @@ if(mark > 0.5){
                   file=paste(tmp.dir,id.str,"_model_summary.csv",sep=""),
                   row.names = FALSE)
 }
-
-
-
-
 rm(mult,stretch,max.it,ratio,mark,flag,guess.n,start,guesses,results,params)
 rm(out.dat,data,pred,tmp,tmp.dir,id.str)
-
-
-
-rm(a.guess,b.guess,ab.guesses,min.alp,grd.rat,alpha,max.grad,mult,stretch,guess.n,ratio,max.it,scale,start,data,tmp.dir)
+rm(a.guess,b.guess,ab.guesses,min.alp,grd.rat,alpha,max.grad,scale)
