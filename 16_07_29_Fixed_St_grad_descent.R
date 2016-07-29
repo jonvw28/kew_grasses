@@ -433,7 +433,6 @@ data[,1] <- data[,1]*scale[3]*(nrow(data)-1) + scale[4]
 params[3] <- params[3]*scale[2]
 params[1] = (params[1]-params[2]*scale[4]/(scale[3]*(nrow(data)-1)))/scale[1]
 params[2] = params[2]/(scale[1]*scale[3]*(nrow(data)-1))
-rm(scale)
 #
 # Process results depending on whether convergence was reached
 #
@@ -535,4 +534,4 @@ if(mark > 0.5){
 }
 rm(mult,stretch,max.it,ratio,mark,flag,guess.n,start,guesses,results,params)
 rm(out.dat,data,pred,tmp,tmp.dir,id.str,best.id)
-rm(a.guess,b.guess,ab.guesses,min.alp,grd.rat,alpha,max.grad,rng.a,rng.b)
+rm(a.guess,b.guess,ab.guesses,min.alp,grd.rat,alpha,max.grad,rng.a,rng.b,scale)
