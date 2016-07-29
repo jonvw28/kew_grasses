@@ -198,7 +198,7 @@ while (mark > 0.5 && flag < max.it){
         rng[1] <- rng[1] - extra
         rng[2] <- rng[2] + extra
         #
-        # Enusre the range never drops below the current total number of species
+        # Ensure the range never drops below the current total number of species
         #
         if(rng[1] <= start){
                 rng[1] <- start + 1
@@ -229,7 +229,7 @@ rm(test,weight,picks)
 #
 # Process results depending on whether convergence was reached
 #
-if(mark > 1){
+if(mark > 0.5){
         cat("Algorithm failed to converge to a value of total species accurate to the nearest integer after",
             max.it,
             "iterations. Try using more iterations or reducing the ratio of values passed on after each round")

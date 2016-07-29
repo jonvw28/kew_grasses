@@ -20,14 +20,23 @@ tax.file.name <- "grass_1755_5y_tax_summary"
 # End year - input year at which data ends so as to enable trimming if need be
 en.yr <- 2015
 #
+# Directory where the output directory should go - will be created within
+# a directory created by the id string below
+out.dir <- "./Output/"
+#
+# Identifier string - include info for the file names and graph labels that 
+# describe the set of data used for clarity in naming output
+id.str <- "grass_1755_5y"
+#
+#
 ########################### Algorithm Parameters ###############################
 #
 # Scaling to apply to taxonomist numbers and species numbers respectively
 # (years are dealt with automatically) - This is to help gradient descent
-#nefficiency
+# efficiency
 scale <- c(100,1000)
 #
-########## Iteration of St Search parameters
+#################### Iteration of St Search parameters #########################
 #
 # multiple of current level to start at as maxmimum guess
 mult <- 3
@@ -46,7 +55,7 @@ stretch <- 1.5
 max.it <- 20
 #
 #
-######### Gradient Descent Paramters
+######################## Gradient Descent Paramters ############################
 #
 # Range to test for a starting point in each gradient descent
 rng.a <- c(-0.1,0.1)
@@ -75,6 +84,14 @@ grd.rat <- 1e-4
 #                       DO NOT EDIT CODE BELOW THIS LINE                       #            
 #                                                                              #
 ################################################################################
+#
+# Check for directory and create if needed
+#
+tmp.dir <- paste(out.dir,id.str,"/","least_squares_grad_descent","/",sep = "")
+if(dir.exists(tmp.dir)==FALSE){
+        dir.create(tmp.dir,recursive = T)
+}
+rm(out.dir)
 #
 # Install any dependancies and load functions
 #
@@ -120,7 +137,8 @@ rm(yr.int)
 #
 ########################## Optimization Algorithm ##############################
 #
-# Calculate initial guesses for a and b for each gradient descent
+# Calculate initial guesses for a and b for each grid search - these remain the 
+# same across all guesses of St
 #
 a.guess <- seq(rng.a[1],rng.a[2],length = ab.guesses[1])
 b.guess <- seq(rng.b[1],rng.b[2],length = ab.guesses[2])
@@ -135,108 +153,379 @@ start <- data[nrow(data),2] + data[nrow(data),3]
 #
 guesses <- seq(start+0.001,mult*start,length.out = guess.n)
 
-
-### Loop for each round of guesses
-
-results <- matrix(0,length(guesses),ncol = 5)
-
-for(i in 1:length(guesses)){
+###########################################################################
+#
+# Set flag as counter for number of iterations
+# Set mark as a score for how big the range of candidate values for St is. 
+#       Once this is below 0.5 we know we have convergence to the precision
+#       of 1 integer.
+#
+flag <- 0
+mark <- 2
+#
+# Iteration over each set of guesses starts here and ends when maximum 
+# iterations are reached, or convergence as defined abpove is reached
+#
+while (mark > 0.5 && flag < max.it){
         #
-        # Create cached variable for faster computation
+        # Counter for human convenience
         #
-        grad.cache <- matrix(0,nrow(data),2)
-        grad.cache[,1] <- (guesses[i]-data[,3])*data[,4]
-        grad.cache[,2] <- grad.cache[,1]*data[,1]
+        cat("Iteration ",flag+1,"\n")
         #
-        # Calculate best place to start a and b
+        # Create placeholder for error score of each guess for St, along with
+        # the best fitting values of a and b and the number of gradient descent
+        # steps taken
         #
-        init.score <- matrix(0,nrow = ab.guesses[1],ncol=ab.guesses[2])
-        for(a in 1:length(a.guess)){
-                for(b in 1:length(b.guess)){
-                        init.score[a,b] <- conv.cost(data,a.guess[a],b.guess[b],
-                                                     guesses[i],T,grad.cache[,1])
-                        
+        results <- matrix(0,length(guesses),ncol = 5)
+        #
+        # Find best choice of a, b for each guess of St via grid search and
+        # steepest descent
+        #
+        for(i in 1:length(guesses)){
+                #
+                # Create cached variable for faster computation
+                #
+                grad.cache <- matrix(0,nrow(data),2)
+                grad.cache[,1] <- (guesses[i]-data[,3])*data[,4]
+                grad.cache[,2] <- grad.cache[,1]*data[,1]
+                #
+                # Calculate best place to start gradient descent via grid 
+                # search
+                #
+                init.score <- matrix(0,nrow = ab.guesses[1],ncol=ab.guesses[2])
+                for(a in 1:length(a.guess)){
+                        for(b in 1:length(b.guess)){
+                                init.score[a,b] <- conv.cost(data,a.guess[a],
+                                                             b.guess[b],
+                                                             guesses[i],
+                                                             T,grad.cache[,1])
+                        }
                 }
-        }
-        rm(a,b)
-        #
-        # Pick best fitting a and b as initial guesses
-        #
-        st.ind <- which(init.score[,]==min(init.score[,]),arr.ind = T)
-        rm(init.score)
-        #
-        # Apply gradient descent with fixed St - ie for a,b
-        #
-        cur.par <- c(a.guess[st.ind[1,1]],b.guess[st.ind[1,2]],guesses[i])
-        rm(st.ind)
-        grad <- conv.grad(data,cur.par[1],cur.par[2],cur.par[3],T,grad.cache)
-        #
-        flag <- 0
-        while (flag < max.grad){
-                alp.flag <-0
-                nxt.par <- cur.par
-                nxt.par[1] <- cur.par[1] - grad[1]*alpha
-                nxt.par[2] <- cur.par[2] - grad[2]*alpha
-                nxt.grad <- conv.grad(data,nxt.par[1],nxt.par[2],nxt.par[3],
-                                      T,grad.cache)
-                tmp.a <- alpha
-                while(nxt.grad[1]*grad[1] < 0 || nxt.grad[2]*grad[2] < 0){
-                        tmp.a = tmp.a/2
-                        if(tmp.a < min.alp){
-                                alp.flag <- 2
+                rm(a,b)
+                #
+                # Pick best fitting a and b as initial guesses for grad descent
+                #
+                st.ind <- which(init.score[,]==min(init.score[,]),arr.ind = T)
+                rm(init.score)
+                #
+                # Apply gradient descent with fixed St - ie for a,b
+                #
+                cur.par <- c(a.guess[st.ind[1,1]],b.guess[st.ind[1,2]],
+                             guesses[i])
+                rm(st.ind)
+                grad <- conv.grad(data,cur.par[1],cur.par[2],cur.par[3],T,
+                                  grad.cache)
+                #
+                # Create a flag to count iterations of gradient descent
+                #
+                grad.flag <- 0
+                while (grad.flag < max.grad){
+                        #
+                        # Create flag for whether adaptive step size has been 
+                        # used
+                        #
+                        alp.flag <- 0
+                        nxt.par <- cur.par
+                        #
+                        # Calculate next paramter choice using gradient descent
+                        # step and calculate gradient here
+                        #
+                        nxt.par[1] <- cur.par[1] - grad[1]*alpha
+                        nxt.par[2] <- cur.par[2] - grad[2]*alpha
+                        nxt.grad <- conv.grad(data,nxt.par[1],nxt.par[2],nxt.par[3],
+                                              T,grad.cache)
+                        #
+                        # Now consider if adaptive step size is needed:
+                        #
+                        #       If the signs of the gradient are the same for 
+                        #       the current, and next, parameters then the step
+                        #       is taken. (This assumes the step does not cross
+                        #       the minimum)
+                        #
+                        #       If the signs differ for any of the paramters
+                        #       then an alternative step size is considered 
+                        #       which is half of the current step size. Here the
+                        #       sign changing shows the step has crossed a 
+                        #       stationary point of the cost function. 
+                        #
+                        #       This process of halving the step size
+                        #       is repeatedly applied until a step size is found
+                        #       where the sign does not change. At this point 
+                        #       the step is taken with a step size that is twice
+                        #       the step size that first preserves the sign of
+                        #       the gradient.
+                        #
+                        #       This process ensures that the crossing of a 
+                        #       stationary point is always in the second half of
+                        #       a step taken across such a point. The step also
+                        #       intentially overshoots the stationary point.
+                        #       The purpose of this is to facilitate quicker 
+                        #       convergence on the fixed point, as to pick the
+                        #       alternative, smaller step size will constrain 
+                        #       the algorithm to only be able to approach a
+                        #       minimum from only one side.
+                        #
+                        #
+                        #       The only exception to the above is when a step 
+                        #       size is suggested which is smaller than the 
+                        #       minimum user-defined step size. In such a case
+                        #       the algorithm terminates, outputting a warning
+                        #       and the values for the parameters are set as per
+                        #       the output from the last succesful iteration of 
+                        #       the algorithm
+                        #
+                        tmp.a <- alpha
+                        while(nxt.grad[1]*grad[1] < 0 || nxt.grad[2]*grad[2] < 0){
+                                if(tmp.a < min.alp){
+                                        alp.flag <- 2
+                                        break
+                                }
+                                #
+                                # Comes before halving as the eventual step size 
+                                # is double the one that ends this loop. Hence
+                                # can try a step smaller than minimum step size
+                                # as long as the resulting doubled step would
+                                # still be big enough
+                                #
+                                tmp.a = tmp.a/2
+                                tmp.grad <- nxt.grad
+                                tmp.par <- cur.par
+                                tmp.par[1] <- cur.par[1] - grad[1]*tmp.a
+                                tmp.par[2] <- cur.par[2] - grad[2]*tmp.a
+                                nxt.grad <- conv.grad(data,tmp.par[1],tmp.par[2],
+                                                      tmp.par[3],T,grad.cache)
+                                alp.flag <- 1
+                        }
+                        #
+                        # In case that step size is too small, revert to most 
+                        # recent accepted parameters and break the loop
+                        #
+                        if(alp.flag == 2){
+                                warning(paste("Gradient descent terminated in ",
+                                              "iteration ",flag + 1,
+                                              " during step ",
+                                              i," where St was ",guesses[i],
+                                              " as alpha to be used was smaller 
+                                              than the minimum step size",
+                                              sep = ""))
                                 break
                         }
-                        tmp.grad <- nxt.grad
-                        tmp.par <- cur.par
-                        tmp.par[1] <- cur.par[1] - grad[1]*tmp.a
-                        tmp.par[2] <- cur.par[2] - grad[2]*tmp.a
-                        nxt.grad <- conv.grad(data,tmp.par[1],tmp.par[2],
-                                              tmp.par[3],T,grad.cache)
-                        alp.flag <- 1
+                        #
+                        # If alpha modified in a permissible way then take the
+                        # related step
+                        #
+                        if(alp.flag == 1){
+                                tmp.a = 2*tmp.a
+                                nxt.par <- cur.par
+                                nxt.par[1] <- cur.par[1] - grad[1]*tmp.a
+                                nxt.par[2] <- cur.par[2] - grad[2]*tmp.a
+                                nxt.grad <- tmp.grad
+                                rm(tmp.par,tmp.grad)
+                        }
+                        #
+                        # Pass on the parameters for the next iteration
+                        #
+                        grad <- nxt.grad
+                        cur.par <- nxt.par
+                        rm(nxt.par,nxt.grad,tmp.a)
+                        #
+                        # Test if gradient is now sufficiently small relative to
+                        # the parameters and if so end the gradient descent
+                        #
+                        test <- abs(grad/cur.par[1:2])
+                        if(test[1]< grd.rat && test[2] < grd.rat){
+        
+                                break
+                        }
+                        rm(test)
+                        grad.flag <- grad.flag + 1
+                        #
+                        # Output warning if the maximum number of gradient 
+                        # descent steps are taken
+                        #
+                        if(grad.flag == max.grad){
+                                warning(paste("Gradient descent failed to ", 
+                                              " fully converge in ",max.grad,
+                                              " steps for a,b for St = ",
+                                              guesses[i],"during iteration ",
+                                              flag + 1,
+                                              ". Try using a greater ",
+                                              "number of maximum steps for ",
+                                              "gradient descent, or allowing ",
+                                              "larger ratio to define ",
+                                              "convergence\n"))
+                        }
                 }
-                if(alp.flag == 2){
-                        print("Algorithm terminated on run",i,"where St was",
-                              guesses[i],
-                              "as alpha was smaller than minimum step size")
-                        break
+                rm(alp.flag,grad)
+                #
+                # Calculate cost function at the paramter values determined
+                #
+                results[i,1] <- conv.cost(data,cur.par[1],cur.par[2],guesses[i],T,
+                                          grad.cache[,1])
+                results[i,2:4] <- cur.par
+                results[1,5] <- grad.flag
+                rm(cur.par)
+                #
+                # Counter for human to see progress
+                #
+                if((i*100/guess.n)%%10==0){
+                        if(i/guess.n == 1){
+                                cat(i*100/guess.n,"% complete...\n")   
+                        }else{
+                                cat(i*100/guess.n,"% complete...") 
+                        }
                 }
-                if(alp.flag == 1){
-                        tmp.a = 2*tmp.a
-                        nxt.par <- cur.par
-                        nxt.par[1] <- cur.par[1] - grad[1]*tmp.a
-                        nxt.par[2] <- cur.par[2] - grad[2]*tmp.a
-                        nxt.grad <- tmp.grad
-                        rm(tmp.par,tmp.grad)
-                }
-                grad <- nxt.grad
-                cur.par <- nxt.par
-                rm(nxt.par,nxt.grad,tmp.a)
-                test <- abs(grad/cur.par[1:2])
-                if(test[1]< grd.rat && test[2] < grd.rat){
-
-                        break
-                }
-                rm(test)
-                flag <- flag + 1
-                if(flag == max.grad){
-                        cat("Algorithm failed to fully converge for a,b for St = ",
-                            guesses[i]," try using a greater number of maximum steps for gradient descent, or allowing larger ratio to define convergence\n")
-                }
+                rm(grad.cache)
         }
-        rm(alp.flag,grad)
-        results[i,1] <- conv.cost(data,cur.par[1],cur.par[2],guesses[i],T,
-                                  grad.cache[,1])
-        results[i,2:4] <- cur.par
-        results[1,5] <- flag
-        rm(cur.par)
-        cat("run",i,"complete\n")
-        rm(grad.cache)
+        rm(i)
+        #
+        # Order the scores for each round of guesses and select only the top
+        # proportion, as set by the ratio parameter
+        #
+        picks <- guesses[order(results[,1])[1:(ratio*length(guesses))]]
+        #
+        # Calculate the range of these selected values and extend it by the
+        # stretch factor set in the parameters
+        #
+        rng <- range(picks)
+        extra <- (rng[2]-rng[1])*(stretch-1)/2
+        rng[1] <- rng[1] - extra
+        rng[2] <- rng[2] + extra
+        #
+        # Ensure the range never drops below the current total number of species
+        #
+        if(rng[1] <= start){
+                rng[1] <- start + 1
+        }
+        #
+        # Use this range to pick the new guesses for the next iteration
+        #
+        guesses <- seq(rng[1],rng[2],length.out = guess.n)
+        #
+        # Score current convergence
+        #
+        mark <- rng[2]-rng[1]
+        rm(rng,extra)
+        #
+        # Cache initial guesses and their costs 
+        #
+        if(flag == 0){
+                res.cache <- results
+        }
+        #
+        #
+        flag <- flag + 1
+        #
+        #
 }
-rm(i)
+best.id <- order(results)[,1][1]
+params <- c(results[best.id,2],results[best.id,3],picks[1])
+names(params) <- c("a","b","St")
+#
+# Process results depending on whether convergence was reached
+#
+if(mark > 0.5){
+        cat("Algorithm failed to converge to a value of total species accurate",
+            "to the nearest integer after",max.it,"iterations. Try using more",
+            "iterations or reducing the ratio of values passed on after each",
+            "round")
+} else {
+        cat("Algorithm reported the best-fitting number of species to be",
+            params[3],"after completing",flag,"iterations, each comprising",
+            guess.n,"guesses derived by taking the range of the top",
+            100*ratio,"% best-fitting guesses in the previous iteration and",
+            " expanding it about its mid-point to",100*stretch,
+            "% of its size and spacing guesses equally amongst this")
+        #
+        # output data
+        #
+        out.dat <- c(params,
+                     "cost_fn" = results[best.id,1],
+                     "iterations_taken" = flag,
+                     "guesses_per_it" = guess.n,
+                     "ratio_kept" = ratio,
+                     "expansion_per_it" = stretch,
+                     "initial_multiple" = mult,
+                     "grad_descent_steps_taken" = results[best.id,5],
+                     "a_grid_guesses" = ab.guesses[1],
+                     "min_a_grid" = rng.a[1],
+                     "max_a_grid" = rng.a[2],
+                     "b_grid_guesses" = ab.guesses[2],
+                     "min_b_grid" = rng.b[1],
+                     "max_b_grid" = rng.b[2],
+                     "alpha" = alpha,
+                     "minimum_step" = min.alp,
+                     "gradient_cutoff_ratio" = grd.rat)
+        #
+        # plot of error score against St for the initial range of guesses
+        #
+        guesses <- seq(scale[2]*start+0.001,mult*scale[2]*start,
+                       length.out = guess.n)
+        #
+        png(paste(tmp.dir,id.str,"_error_plot.png",sep=""),width = 960,
+            height = 960)
+        plot(guesses,results,xlab = "Total Species",
+             ylab = "Least Squares Score",
+             main = paste("Least Squares Error vs Total Species ",
+                          id.str,sep=""),
+             col = "blue",
+             type = 'l')
+        dev.off()
+        #
+        # Calculate predicted fit
+        #
+        tmp <- (rep(params[3],nrow(data))-data[,3])
+        pred <- (params[1] + params[2]*data[,1])*data[,4]*tmp
+        rm(tmp)
+        #
+        # Plot species and taxonomists per year
+        #
+        png(paste(tmp.dir,id.str,"_species_rat.png",sep=""),width = 960,
+            height = 960)
+        plot(data[,1],data[,2],pch = 21,col='red',
+             ylim = c(0,1.25*max(data[,2])),
+             xlab = "year", ylab = "Number",
+             main = paste("Discovery rates and number of taxonomists ",
+                          id.str,sep=""))
+        lines(data[,1],data[,2],pch = 21,col='red')
+        lines(data[,1],data[,4],col = 'blue')
+        lines(data[,1],pred,col = 'green')
+        legend("topleft", legend = c("New Species - Actual",
+                                     "New Species - Predicted",
+                                     "Active Taxnomists"),
+               col = c("red","green","blue"),lty = c(1,1,1))
+        dev.off()
+        #
+        # Plot species per taxonomist
+        #
+        png(paste(tmp.dir,id.str,"_species_per_tax.png",sep=""),width = 960, 
+            height = 960)
+        plot(data[,1],data[,2]/data[,4],pch = 21,col='red', ylim = c(0,20),
+             xlab = "year", ylab = "Number",
+             main = paste("Species per taxonomist ",
+                          id.str,sep=""))
+        lines(data[,1],data[,2]/data[,4],pch = 21,col='red')
+        lines(data[,1],pred/data[,4],col = 'green')
+        dev.off()
+        #
+        # Save output of model
+        #
+        tmp <- cbind(data,pred)
+        
+        write.csv(tmp,
+                  file=paste(tmp.dir,id.str,"_model.csv",sep=""),
+                  row.names = FALSE)
+        write.csv(t(out.dat),
+                  file=paste(tmp.dir,id.str,"_model_summary.csv",sep=""),
+                  row.names = FALSE)
+}
 
 
 
 
+rm(mult,stretch,max.it,ratio,mark,flag,guess.n,start,guesses,results,params)
+rm(out.dat,data,pred,tmp,tmp.dir,id.str)
 
 
-rm(a.guess,b.guess,ab.guesses,min.alp,grd.rat,alpha,max.grad,mult,stretch,guess.n,ratio,max.it,scale,start,data)
+
+rm(a.guess,b.guess,ab.guesses,min.alp,grd.rat,alpha,max.grad,mult,stretch,guess.n,ratio,max.it,scale,start,data,tmp.dir)
