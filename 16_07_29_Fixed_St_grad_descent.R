@@ -369,7 +369,7 @@ while (mark > 0.5 && flag < max.it){
                 #
                 if((i*100/guess.n)%%10==0){
                         if(i/guess.n == 1){
-                                cat(i*100/guess.n,"% complete...\n")   
+                                cat(i*100/guess.n,"% complete!\n")   
                         }else{
                                 cat(i*100/guess.n,"% complete...") 
                         }
@@ -476,7 +476,7 @@ if(mark > 0.5){
         #
         png(paste(tmp.dir,id.str,"_error_plot.png",sep=""),width = 960,
             height = 960)
-        plot(guesses,res.cahce,xlab = "Total Species",
+        plot(guesses,res.cache,xlab = "Total Species",                          ### LAST KNOWN ERROR
              ylab = "Representative Least Squares Score",
              main = paste("Least Squares Error vs Total Species ",
                           id.str,sep=""),
