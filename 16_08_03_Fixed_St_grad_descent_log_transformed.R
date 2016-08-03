@@ -9,14 +9,13 @@
 #                                                                              #
 # This script will then attempt to produce an estimate for total species yet   #
 # to be found using the model as proposed by Joppa. However, the algorithm to  #
-# do so varies from theirs. Here the least squares regression is used to       #
-# evaluate each estimate, as opposed to first log-transforming the data.       #
+# do so varies from theirs.                                                    #
 #                                                                              #
 # The algorithm works by guessing a selection of of equally spaced values for  #
 # total species, where the number of guesses is set below. It then uses a grid #
-# search to pick an inital guess for a and b which minimises the squared       #
+# search to pick an inital guess for a and b which minimises the squared log   #
 # residuals. It then applies steepest descent to this starting point until it  #
-# converges to a minimum of the square residuals for the given value of St.    #
+# converges to a minimum of the square log residuals for the given value of St.#
 # This is either when the gradient is below a certain proportion of the        #
 # parameter value, or when a maximum number of steps have been taken.          #
 #                                                                              #
@@ -164,7 +163,8 @@ grd.rat <- 1e-4
 #
 # Check for directory and create if needed
 #
-tmp.dir <- paste(out.dir,id.str,"/","least_squares_grad_descent","/",sep = "")
+tmp.dir <- paste(out.dir,id.str,"/","least_squares_grad_descent_log_residuals",
+                 "/",sep = "")
 if(dir.exists(tmp.dir)==FALSE){
         dir.create(tmp.dir,recursive = T)
 }
@@ -237,12 +237,12 @@ guesses <- seq(start+0.001,mult*start,length.out = guess.n)
 #       of 1 integer.
 #
 flag <- 0
-mark <- 2
+mark <- 2/scale[2]
 #
 # Iteration over each set of guesses starts here and ends when maximum 
 # iterations are reached, or convergence as defined abpove is reached
 #
-while (mark > 0.0005 && flag < max.it){
+while (mark > 0.5/scale[2] && flag < max.it){
         #
         # Counter for human convenience
         #
@@ -263,7 +263,7 @@ while (mark > 0.0005 && flag < max.it){
                 #
                 grad.cache <- matrix(0,nrow(data),2)
                 grad.cache[,1] <- (guesses[i]-data[,3])*data[,4]
-                grad.cache[,2] <- grad.cache[,1]*data[,1]
+                grad.cache[,2] <- log(data[,2])
                 #
                 # Calculate best place to start gradient descent via grid 
                 # search
@@ -271,7 +271,7 @@ while (mark > 0.0005 && flag < max.it){
                 init.score <- matrix(0,nrow = ab.guesses[1],ncol=ab.guesses[2])
                 for(a in 1:length(a.guess)){
                         for(b in 1:length(b.guess)){
-                                init.score[a,b] <- conv.cost(data,a.guess[a],
+                                init.score[a,b] <- joppa.cost(data,a.guess[a],
                                                              b.guess[b],
                                                              guesses[i],
                                                              T,grad.cache[,1])
@@ -281,7 +281,8 @@ while (mark > 0.0005 && flag < max.it){
                 #
                 # Pick best fitting a and b as initial guesses for grad descent
                 #
-                st.ind <- which(init.score[,]==min(init.score[,]),arr.ind = T)
+                st.ind <- which(init.score[,]==min(init.score[,],na.rm = T)
+                                ,arr.ind = T)
                 rm(init.score)
                 #
                 # Apply gradient descent with fixed St - ie for a,b
@@ -289,7 +290,7 @@ while (mark > 0.0005 && flag < max.it){
                 cur.par <- c(a.guess[st.ind[1,1]],b.guess[st.ind[1,2]],
                              guesses[i])
                 rm(st.ind)
-                grad <- conv.grad(data,cur.par[1],cur.par[2],cur.par[3],T,
+                grad <- joppa.grad(data,cur.par[1],cur.par[2],cur.par[3],T,
                                   grad.cache)
                 #
                 # Create a flag to count iterations of gradient descent
@@ -301,6 +302,7 @@ while (mark > 0.0005 && flag < max.it){
                         # used
                         #
                         alp.flag <- 0
+                        grd.sze.flag <- 0
                         nxt.par <- cur.par
                         #
                         # Calculate next paramter choice using gradient descent
@@ -308,13 +310,39 @@ while (mark > 0.0005 && flag < max.it){
                         #
                         nxt.par[1] <- cur.par[1] - grad[1]*alpha
                         nxt.par[2] <- cur.par[2] - grad[2]*alpha
-                        nxt.grad <- conv.grad(data,nxt.par[1],nxt.par[2],nxt.par[3],
+                        nxt.grad <- joppa.grad(data,nxt.par[1],nxt.par[2],nxt.par[3],
                                               T,grad.cache)
                         #
                         # Now consider if adaptive step size is needed:
                         #
                         tmp.a <- alpha
-                        while(nxt.grad[1]*grad[1] < 0 || nxt.grad[2]*grad[2] < 0){
+                        small.grad <- grad
+                        #
+                        # First ensure step taken doesn't cause issue with 
+                        # non-defined logs
+                        # If the step will cause predictions of negative species
+                        # discovery (causing issues for taking logs) then the 
+                        # effective gradient will be halved until this issue is
+                        # resolved
+                        #
+                        while(is.na(nxt.grad[1]) || is.na(nxt.grad[2])){
+                                if(min(abs(small.grad)) < min.alp) {
+                                        grd.sze.flag <- 2
+                                        break
+                                }
+                                small.grad = small.grad/2
+                                tmp.grad <- nxt.grad
+                                tmp.par <- cur.par
+                                tmp.par[1] <- cur.par[1] - small.grad[1]*tmp.a
+                                tmp.par[2] <- cur.par[2] - small.grad[2]*tmp.a
+                                nxt.grad <- joppa.grad(data,tmp.par[1],tmp.par[2],
+                                                       tmp.par[3],T,grad.cache)
+                        }
+                        
+                        
+                        
+                        
+                        while(min(nxt.grad*grad) < 0 && grd.sze.flag != 2){
                                 if(tmp.a < min.alp){
                                         alp.flag <- 2
                                         break
@@ -329,9 +357,9 @@ while (mark > 0.0005 && flag < max.it){
                                 tmp.a = tmp.a/2
                                 tmp.grad <- nxt.grad
                                 tmp.par <- cur.par
-                                tmp.par[1] <- cur.par[1] - grad[1]*tmp.a
-                                tmp.par[2] <- cur.par[2] - grad[2]*tmp.a
-                                nxt.grad <- conv.grad(data,tmp.par[1],tmp.par[2],
+                                tmp.par[1] <- cur.par[1] - small.grad[1]*tmp.a
+                                tmp.par[2] <- cur.par[2] - small.grad[2]*tmp.a
+                                nxt.grad <- joppa.grad(data,tmp.par[1],tmp.par[2],
                                                       tmp.par[3],T,grad.cache)
                                 alp.flag <- 1
                         }
@@ -349,6 +377,16 @@ while (mark > 0.0005 && flag < max.it){
                                               sep = ""))
                                 break
                         }
+                        if(grd.sze.flag == 2){
+                                warning(paste("Gradient descent terminated in ",
+                                              "iteration ",flag + 1,
+                                              " during step ",
+                                              i," where St was ",guesses[i],
+                                              " as gradient to be used was ",
+                                              "smaller than the minimum step ",
+                                              "size",sep = ""))
+                                break
+                        }
                         #
                         # If alpha modified in a permissible way then take the
                         # related step
@@ -356,8 +394,8 @@ while (mark > 0.0005 && flag < max.it){
                         if(alp.flag == 1){
                                 tmp.a = 2*tmp.a
                                 nxt.par <- cur.par
-                                nxt.par[1] <- cur.par[1] - grad[1]*tmp.a
-                                nxt.par[2] <- cur.par[2] - grad[2]*tmp.a
+                                nxt.par[1] <- cur.par[1] - small.grad[1]*tmp.a
+                                nxt.par[2] <- cur.par[2] - small.grad[2]*tmp.a
                                 nxt.grad <- tmp.grad
                                 rm(tmp.par,tmp.grad)
                         }
@@ -366,7 +404,7 @@ while (mark > 0.0005 && flag < max.it){
                         #
                         grad <- nxt.grad
                         cur.par <- nxt.par
-                        rm(nxt.par,nxt.grad,tmp.a)
+                        rm(nxt.par,nxt.grad,tmp.a,small.grad)
                         #
                         # Test if gradient is now sufficiently small relative to
                         # the parameters and if so end the gradient descent
@@ -399,7 +437,7 @@ while (mark > 0.0005 && flag < max.it){
                 #
                 # Calculate cost function at the paramter values determined
                 #
-                results[i,1] <- conv.cost(data,cur.par[1],cur.par[2],guesses[i],T,
+                results[i,1] <- joppa.cost(data,cur.par[1],cur.par[2],guesses[i],T,
                                           grad.cache[,1])
                 results[i,2:4] <- cur.par
                 results[i,5] <- grad.flag
@@ -454,7 +492,7 @@ while (mark > 0.0005 && flag < max.it){
         #
         flag <- flag + 1
         cat("Current Spread of top values is",mark,"\n")
-}
+        }
 #
 # Pull out best fitted parameters
 #
@@ -493,7 +531,7 @@ if(mark > 0.5){
         # output data
         #
         out.dat <- c(params,
-                     "cost_fn" = conv.cost(data,params[1],params[2],params[3]),
+                     "cost_fn" = joppa.cost(data,params[1],params[2],params[3]),
                      "iterations_taken" = flag,
                      "guesses_per_it" = guess.n,
                      "ratio_kept" = ratio,
@@ -518,7 +556,7 @@ if(mark > 0.5){
         png(paste(tmp.dir,id.str,"_error_plot.png",sep=""),width = 960,
             height = 960)
         plot(guesses,res.cache[,1],xlab = "Total Species",
-             ylab = "Representative Least Squares Score",
+             ylab = "Representative Least Squares Score - Log Residuals",
              main = paste("Least Squares Error vs Total Species ",
                           id.str,sep=""),
              col = "blue",
@@ -539,7 +577,8 @@ if(mark > 0.5){
         plot(data[,1],data[,2],pch = 21,col='red',
              ylim = c(0,1.25*max(data[,2])),
              xlab = "year", ylab = "Number",
-             main = paste("Discovery rates and number of taxonomists ",
+             main = paste("Discovery rates and number of taxonomists",
+                          " - Log Residuals",
                           id.str,sep=""))
         lines(data[,1],data[,2],pch = 21,col='red')
         lines(data[,1],data[,4],col = 'blue')
@@ -556,7 +595,7 @@ if(mark > 0.5){
             height = 960)
         plot(data[,1],data[,2]/data[,4],pch = 21,col='red', ylim = c(0,20),
              xlab = "year", ylab = "Number",
-             main = paste("Species per taxonomist ",
+             main = paste("Species per taxonomist - Log Residuals",
                           id.str,sep=""))
         lines(data[,1],data[,2]/data[,4],pch = 21,col='red')
         lines(data[,1],pred/data[,4],col = 'green')
