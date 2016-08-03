@@ -433,7 +433,7 @@ while (mark > 0.5/scale[2] && flag < max.it){
                                               "convergence\n"))
                         }
                 }
-                rm(alp.flag,grad)
+                rm(alp.flag,grad,grad.sze.flag)
                 #
                 # Calculate cost function at the paramter values determined
                 #
