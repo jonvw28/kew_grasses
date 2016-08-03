@@ -24,6 +24,13 @@
 # giving results, including appropriate adjusting the model coefficients. In   #
 # addition, during the gradient descent an adaptive step size is used:         #
 #                                                                              #
+#       Initially, if the step would move the parameters to a point where      #
+#       negative predicted values occur (causing issues for log                #
+#       transformation), then the effective gradient is halved in magnitude    #
+#       until the step is within a range where computation of the new          #
+#       gradient is possible. The step is then adjusted to attempt to move     #
+#       closer to a minimum:                                                   #
+#                                                                              #
 #       If the signs of the gradient are the same for the current, and next    #
 #       parameters then the step is taken. (This assumes the step does not     #
 #       cross the minimum)                                                     #
@@ -83,15 +90,15 @@ setwd("~/Kew Summer")
 ############################ SET INPUT VALUES HERE #############################
 #
 # Directory path - location of csv input file
-dir.path <- "./Output/grass_1755_5y/"
+dir.path <- "./Output/grass_1755_5y_acc/"
 #
 # Species File name - name of csv file with species information 
 #(without .csv at end)
-spec.file.name <- "grass_1755_5y_spec_summary"
+spec.file.name <- "grass_1755_5y_acc_spec_summary"
 #
 # Location File name - name of csv file with location information 
 #(without .csv at end)
-tax.file.name <- "grass_1755_5y_tax_summary"
+tax.file.name <- "grass_1755_5y_acc_tax_summary"
 #
 # End year - input year at which data ends so as to enable trimming if need be
 en.yr <- 2015
@@ -102,7 +109,7 @@ out.dir <- "./Output/"
 #
 # Identifier string - include info for the file names and graph labels that 
 # describe the set of data used for clarity in naming output
-id.str <- "grass_1755_5y"
+id.str <- "grass_1755_5y_acc"
 #
 #
 ########################### Algorithm Parameters ###############################
@@ -491,7 +498,7 @@ while (mark > 0.5/scale[2] && flag < max.it){
         }
         #
         flag <- flag + 1
-        cat("Current Spread of top values is",mark,"\n")
+        cat("Current Spread of top values is",mark*1000,"\n")
         }
 #
 # Pull out best fitted parameters
