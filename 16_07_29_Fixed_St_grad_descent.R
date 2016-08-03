@@ -1,3 +1,80 @@
+################################################################################           
+#                                                                              #
+#                                                                              #
+# This script is an altered implementation of the work of Joppa et al 2010 in  #
+# their How many flowering species paper.It takes as input two files, one      #
+# giving aggregated as well as cumulative species for set time windows, the    #
+# other giving number of active taxonomists. These can be easily created using #
+# the scripts in this repository.                                              #
+#                                                                              #
+# This script will then attempt to produce an estimate for total species yet   #
+# to be found using the model as proposed by Joppa. However, the algorithm to  #
+# do so varies from theirs. Here the least squares regression is used to       #
+# evaluate each estimate, as opposed to first log-transforming the data.       #
+#                                                                              #
+# The algorithm works by guessing a selection of of equally spaced values for  #
+# total species, where the number of guesses is set below. It then uses a grid #
+# search to pick an inital guess for a and b which minimises the squared       #
+# residuals. It then applies steepest descent to this starting point until it  #
+# converges to a minimum of the square residuals for the given value of St.    #
+# This is either when the gradient is below a certain proportion of the        #
+# parameter value, or when a maximum number of steps have been taken.          #
+#                                                                              #
+# In the gradient descent, the variables are re-scaled as set by the user to   #
+# facilitate more efficient convergence. This scaling is then un-done before   #
+# giving results, including appropriate adjusting the model coefficients. In   #
+# addition, during the gradient descent an adaptive step size is used:         #
+#                                                                              #
+#       If the signs of the gradient are the same for the current, and next    #
+#       parameters then the step is taken. (This assumes the step does not     #
+#       cross the minimum)                                                     #
+#                                                                              #
+#       If the signs differ for any of the paramters then an alternative step  #
+#       size is considered which is half of the current step size. Here the    #
+#       sign changing shows the step has crossed a stationary point of the     #
+#       cost function.                                                         #
+#                                                                              #
+#       This process of halving the step size is repeatedly applied until a    #
+#       step size is found where the sign does not change. At this point the   #
+#       step is taken with a step size that is twice the step size that first  #
+#       preserves the sign of the gradient.                                    #
+#                                                                              #
+#       This process ensures that the crossing of a stationary point is always #
+#       in the second half of a step taken across such a point. The step also  #
+#       intentially overshoots the stationary point. The purpose of this is to #
+#       facilitate faster convergence on the fixed point, as to pick the       #
+#       alternative, smaller step size will constrain the algorithm to only be #
+#       able to approach a minimum from only one side.                         #
+#                                                                              #
+#       The only exception to the above is when a step size is suggested which #
+#       is smaller than the minimum user-defined step size. In such a case the #
+#       algorithm terminates, outputting a warning and the values for the      #
+#       parameters are set as per the output from the last succesful iteration #
+#       of gradient descent                                                    #
+#                                                                              #
+# The initial guesses for St come from the range of the current total number   #
+# of species up to a multiple of this given as a parameter below. From these   #
+# guesses, the top scoring are selected, the proportion of these relative to   #
+# the total mumber of guesses being set below. A new range of guesses are      #
+# picked by stretching the range of this selection by a scaling factor set     #
+# below.                                                                       #
+#                                                                              #
+# These new guesses are then used to repeat the procedure until either the     #
+# range of guesses converges to be accurate to the nearest integer,or the      #
+# maximum number of iterations as set below is reached.                        #
+#                                                                              #
+# Should the stretching cause the bottom value to drop below the current total #
+# number of species, then the range will be truncated to be no lower than this #
+# number.                                                                      #
+#                                                                              #
+# To use simply edit the variables below. The output will be three graphs,     #
+# a summary csv of the model parameters and scores and a csv of the raw data   #
+# along with the predicted values                                              #
+#                                                                              #
+#                                                                              #
+# Jonathan Williams, 2016                                                      #
+# jonvw28@gmail.com                                                            #
+#                                                                              #
 ################################################################################
 #
 # SET DIRECTORY where you have downloaded repository (ie before /kew_grasses)
@@ -42,7 +119,7 @@ scale <- c(100,1000)
 mult <- 3
 #
 # Guesses per round for St values
-guess.n <- 100
+guess.n <- 500
 #
 # Ratio of top scoring guesses to keep from all guesses per round
 ratio <- 0.2
@@ -236,43 +313,6 @@ while (mark > 0.5 && flag < max.it){
                         #
                         # Now consider if adaptive step size is needed:
                         #
-                        #       If the signs of the gradient are the same for 
-                        #       the current, and next, parameters then the step
-                        #       is taken. (This assumes the step does not cross
-                        #       the minimum)
-                        #
-                        #       If the signs differ for any of the paramters
-                        #       then an alternative step size is considered 
-                        #       which is half of the current step size. Here the
-                        #       sign changing shows the step has crossed a 
-                        #       stationary point of the cost function. 
-                        #
-                        #       This process of halving the step size
-                        #       is repeatedly applied until a step size is found
-                        #       where the sign does not change. At this point 
-                        #       the step is taken with a step size that is twice
-                        #       the step size that first preserves the sign of
-                        #       the gradient.
-                        #
-                        #       This process ensures that the crossing of a 
-                        #       stationary point is always in the second half of
-                        #       a step taken across such a point. The step also
-                        #       intentially overshoots the stationary point.
-                        #       The purpose of this is to facilitate quicker 
-                        #       convergence on the fixed point, as to pick the
-                        #       alternative, smaller step size will constrain 
-                        #       the algorithm to only be able to approach a
-                        #       minimum from only one side.
-                        #
-                        #
-                        #       The only exception to the above is when a step 
-                        #       size is suggested which is smaller than the 
-                        #       minimum user-defined step size. In such a case
-                        #       the algorithm terminates, outputting a warning
-                        #       and the values for the parameters are set as per
-                        #       the output from the last succesful iteration of 
-                        #       the algorithm
-                        #
                         tmp.a <- alpha
                         while(nxt.grad[1]*grad[1] < 0 || nxt.grad[2]*grad[2] < 0){
                                 if(tmp.a < min.alp){
@@ -406,7 +446,7 @@ while (mark > 0.5 && flag < max.it){
         mark <- rng[2]-rng[1]
         rm(rng,extra)
         #
-        # Cache initial guesses and their costs 
+        # Cache initial guesses and their costs for later graphing
         #
         if(flag == 0){
                 res.cache <- results
@@ -476,7 +516,7 @@ if(mark > 0.5){
         #
         png(paste(tmp.dir,id.str,"_error_plot.png",sep=""),width = 960,
             height = 960)
-        plot(guesses,res.cache,xlab = "Total Species",                          ### LAST KNOWN ERROR
+        plot(guesses,res.cache[,1],xlab = "Total Species",
              ylab = "Representative Least Squares Score",
              main = paste("Least Squares Error vs Total Species ",
                           id.str,sep=""),

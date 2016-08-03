@@ -2,7 +2,7 @@
 #                                                                              #
 #                                                                              #
 # This script is an altered implementation of the work of Joppa et al 2010 in  #
-# their Brazil paper.It takes as inout two files, one giving aggregated        #
+# their Brazil paper.It takes as input two files, one giving aggregated        #
 # as well as cumulative species for set time windows, the other giving number  #
 # of active taxonomists. These can be easily created using the scripts in this #
 # repository.                                                                  #
