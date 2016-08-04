@@ -94,7 +94,7 @@ max.it <- 20
 #
 # Check for directory and create if needed
 #
-tmp.dir <- paste(out.dir,id.str,"/","least_squares_regression","/",sep = "")
+tmp.dir <- paste(out.dir,id.str,"/regression_search/",sep = "")
 if(dir.exists(tmp.dir)==FALSE){
         dir.create(tmp.dir,recursive = T)
 }

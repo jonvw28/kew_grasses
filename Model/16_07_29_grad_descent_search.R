@@ -164,7 +164,7 @@ grd.rat <- 1e-4
 #
 # Check for directory and create if needed
 #
-tmp.dir <- paste(out.dir,id.str,"/","least_squares_grad_descent","/",sep = "")
+tmp.dir <- paste(out.dir,id.str,"/grad_descent_search/",sep = "")
 if(dir.exists(tmp.dir)==FALSE){
         dir.create(tmp.dir,recursive = T)
 }

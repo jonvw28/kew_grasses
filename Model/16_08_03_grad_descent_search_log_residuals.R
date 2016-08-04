@@ -90,15 +90,15 @@ setwd("~/Kew Summer")
 ############################ SET INPUT VALUES HERE #############################
 #
 # Directory path - location of csv input file
-dir.path <- "./Output/grass_1755_5y_acc/"
+dir.path <- "./Output/grass_1755_10y/"
 #
 # Species File name - name of csv file with species information 
 #(without .csv at end)
-spec.file.name <- "grass_1755_5y_acc_spec_summary"
+spec.file.name <- "grass_1755_10y_spec_summary"
 #
 # Location File name - name of csv file with location information 
 #(without .csv at end)
-tax.file.name <- "grass_1755_5y_acc_tax_summary"
+tax.file.name <- "grass_1755_10y_tax_summary"
 #
 # End year - input year at which data ends so as to enable trimming if need be
 en.yr <- 2015
@@ -109,7 +109,7 @@ out.dir <- "./Output/"
 #
 # Identifier string - include info for the file names and graph labels that 
 # describe the set of data used for clarity in naming output
-id.str <- "grass_1755_5y_acc"
+id.str <- "grass_1755_10y"
 #
 #
 ########################### Algorithm Parameters ###############################
@@ -170,8 +170,7 @@ grd.rat <- 1e-4
 #
 # Check for directory and create if needed
 #
-tmp.dir <- paste(out.dir,id.str,"/","least_squares_grad_descent_log_residuals",
-                 "/",sep = "")
+tmp.dir <- paste(out.dir,id.str,"/grad_descent_search_log_residuals/",sep = "")
 if(dir.exists(tmp.dir)==FALSE){
         dir.create(tmp.dir,recursive = T)
 }
