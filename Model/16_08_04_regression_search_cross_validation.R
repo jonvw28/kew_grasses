@@ -1,9 +1,9 @@
 ################################################################################           
 #                                                                              #
 #                                                                              #
-# This script is an altered implementation of the sister script 			   #
-# regression_search. Here the script runs the same algorithm as its sister,	   #
-# but uses it to run a jack-knife cross-validation. Here the algorithm is 	   #
+# This script is an altered implementation of the sister script 	       #
+# regression_search. Here the script runs the same algorithm as its sister,    #
+# but uses it to run a jack-knife cross-validation. Here the algorithm is      #
 # applied repeatedly to the data with one year left out and the results are    #
 # compiled and output as a .csv file. The parameters function in the same way  #
 # as laid out in the sister script                                             #
@@ -25,15 +25,15 @@ setwd("~/Kew Summer")
 ############################ SET INPUT VALUES HERE #############################
 #
 # Directory path - location of csv input file
-dir.path <- "./Output/grass_1755_10y/"
+dir.path <- "./Output/grass_1755_10y_acc/"
 #
 # Species File name - name of csv file with species information 
 #(without .csv at end)
-spec.file.name <- "grass_1755_10y_spec_summary"
+spec.file.name <- "grass_1755_10y_acc_spec_summary"
 #
 # Location File name - name of csv file with location information 
 #(without .csv at end)
-tax.file.name <- "grass_1755_10y_tax_summary"
+tax.file.name <- "grass_1755_10y_acc_tax_summary"
 #
 # End year - input year at which data ends so as to enable trimming if need be
 en.yr <- 2015
@@ -44,7 +44,7 @@ out.dir <- "./Output/"
 #
 # Identifier string - include info for the file names and graph labels that 
 # describe the set of data used for clarity in naming output
-id.str <- "grass_1755_10y"
+id.str <- "grass_1755_10y_acc"
 #
 ########################### Algorithm Parameters ###############################
 #
@@ -114,8 +114,8 @@ rm(en.yr,yr.int)
 cv.results <- matrix(NA,nrow = nrow(data),ncol = 10+nrow(data))
 cv.results <- as.data.frame(cv.results)
 names(cv.results) <- c("year_out","a","b","St","cost_fn","iterations_taken",
-						"guesses_per_it","ratio_kept","expansion_per_it",
-						"initial_multiple",as.character(data[,1]))
+			"guesses_per_it","ratio_kept","expansion_per_it",
+			"initial_multiple",as.character(data[,1]))
 #
 # Apply Jack-knifing
 #
@@ -148,68 +148,68 @@ for(j in 1:nrow(data)){
 	# iterations are reached, or convergence as defined above is reached
 	#
 	while (mark > 0.5 && flag < max.it){
+		#
+		# Create placeholder for error score of each guess for St
+		#
+		results <- numeric(length(guesses))
+		#
+		# Find best choice of a, b for each guess of St using linear
+		# regression
+		#
+		for(i in 1:length(guesses)){
 			#
-			# Create placeholder for error score of each guess for St
+			# Weights are needed to ensure the residuals being 
+			# considered for optimisation in calculating a, b are
+			# the same as those used in calculating the global best 
+			# fit for a, b & St
 			#
-			results <- numeric(length(guesses))
+			# This means that we can ensure the a, b choice for each
+			# St minimises our overall error score for given St
 			#
-			# Find best choice of a, b for each guess of St using linear
-			# regression
+			weight <- (tmp.data[,4]*(guesses[i]-tmp.data[,3]))
+			test <- lm(tmp.data[,2]/weight ~ tmp.data[,1],
+						weights = weight^2)
 			#
-			for(i in 1:length(guesses)){
-					#
-					# Weights are needed to ensure the residuals being 
-					# considered for optimisation in calculating a, b are
-					# the same as those used in calculating the global best 
-					# fit for a, b & St
-					#
-					# This means that we can ensure the a, b choice for each
-					# St minimises our overall error score for given St
-					#
-					weight <- (tmp.data[,4]*(guesses[i]-tmp.data[,3]))
-					test <- lm(tmp.data[,2]/weight ~ tmp.data[,1],
-								weights = weight^2)
-					#
-					# Produce error score for each St guess
-					#
-					results[i] <- conv.cost(tmp.data,test$coefficients[1],
-											test$coefficients[2],
-										   guesses[i])
-					rm(weight,test)
-			}
-			rm(i)
+			# Produce error score for each St guess
 			#
-			# Order the scores for each round of guesses and select only the
-			# top proportion, as set by the ratio parameter
-			#
-			picks <- guesses[order(results)[1:(ratio*length(guesses))]]
-			#
-			# Calculate the range of these selected values and extend it by
-			# the stretch factor set in the parameters
-			#
-			rng <- range(picks)
-			extra <- (rng[2]-rng[1])*(stretch-1)/2
-			rng[1] <- rng[1] - extra
-			rng[2] <- rng[2] + extra
-			#
-			# Ensure the range never drops below the current total number of
-			# species
-			#
-			if(rng[1] <= start){
-					rng[1] <- start + 1
-			}
-			#
-			# Use this range to pick the new guesses for the next iteration
-			#
-			guesses <- seq(rng[1],rng[2],length.out = guess.n)
-			#
-			# Score current convergence
-			#
-			mark <- rng[2]-rng[1]
-			rm(rng,extra)
-			flag <- flag + 1
-			#
-			#
+			results[i] <- conv.cost(tmp.data,test$coefficients[1],
+						test$coefficients[2],
+					        guesses[i])
+			rm(weight,test)
+		}
+		rm(i)
+		#
+		# Order the scores for each round of guesses and select only the
+		# top proportion, as set by the ratio parameter
+		#
+		picks <- guesses[order(results)[1:(ratio*length(guesses))]]
+		#
+		# Calculate the range of these selected values and extend it by
+		# the stretch factor set in the parameters
+		#
+		rng <- range(picks)
+		extra <- (rng[2]-rng[1])*(stretch-1)/2
+		rng[1] <- rng[1] - extra
+		rng[2] <- rng[2] + extra
+		#
+		# Ensure the range never drops below the current total number of
+		# species
+		#
+		if(rng[1] <= start){
+			rng[1] <- start + 1
+		}
+		#
+		# Use this range to pick the new guesses for the next iteration
+		#
+		guesses <- seq(rng[1],rng[2],length.out = guess.n)
+		#
+		# Score current convergence
+		#
+		mark <- rng[2]-rng[1]
+		rm(rng,extra)
+		flag <- flag + 1
+		#
+		#
 	}
 	rm(results,guesses)
 	#
@@ -217,22 +217,22 @@ for(j in 1:nrow(data)){
 	#
 	weight <- (tmp.data[,4]*(picks[1]-tmp.data[,3]))
 	test <- lm(tmp.data[,2]/weight ~ tmp.data[,1],weights = weight^2)
-	cv.results[j,2:4]<- c(test$coefficients[1],test$coefficients[2],picks[1])
+	cv.results[j,2:4]<-c(test$coefficients[1],test$coefficients[2],picks[1])
 	cv.results[j,1] <- data[j,1]
 	rm(test,weight,picks)
 	cv.results[j,5] <- conv.cost(tmp.data,cv.results[j,2],cv.results[j,3],
-									cv.results[j,4])
+				        cv.results[j,4])
 	cv.results[j,6] <- flag
 	cv.results[j,7] <- guess.n
 	cv.results[j,8] <- ratio
 	cv.results[j,9] <- stretch
 	cv.results[j,10] <- mult
 	if(mark > 0.5){
-			cat("Algorithm failed to converge to a value of total species",
-			" accurate to the nearest integer after",max.it,"iterations,",
-			" when excluding start year ",data[j,1],
-			" Try using more iterations or reducing the ratio of values",
-			" passed on after each round")
+		cat("Algorithm failed to converge to a value of total species",
+		" accurate to the nearest integer after",max.it,"iterations,",
+		" when excluding start year ",data[j,1],
+		" Try using more iterations or reducing the ratio of values",
+		" passed on after each round")
 	}
 	rm(mark,flag,start)
 	tmp <- (cv.results[j,4]-tmp.data[,3])

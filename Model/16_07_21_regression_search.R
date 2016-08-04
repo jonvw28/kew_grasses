@@ -2,14 +2,14 @@
 #                                                                              #
 #                                                                              #
 # This script is an altered implementation of the work of Joppa et al 2010 in  #
-# their Brazil paper.It takes as input two files, one giving aggregated        #
+# their Brazil paper. It takes as input two files, one giving aggregated       #
 # as well as cumulative species for set time windows, the other giving number  #
 # of active taxonomists. These can be easily created using the scripts in this #
 # repository.                                                                  #
 #                                                                              #
 # This script will then attempt to produce an estimate for total species yet   #
 # to be found using the model as proposed by Joppa. However, the algorithm to  #
-# do so varies from theirs. Here the least squares regression is used to       #
+# do so varies from theirs. Here the least squares residuals are used to       #
 # evaluate each estimate, as opposed to first log-transforming the data.       #
 #                                                                              #
 # The algorithm works by guessing a selection of of equally spaced values for  #
@@ -230,15 +230,16 @@ rm(test,weight,picks)
 # Process results depending on whether convergence was reached
 #
 if(mark > 0.5){
-        cat("Algorithm failed to converge to a value of total species accurate to the nearest integer after",
-            max.it,
-            "iterations. Try using more iterations or reducing the ratio of values passed on after each round")
+        cat("Algorithm failed to converge to a value of total species accurate",
+            " to the nearest integer after",max.it,"iterations. Try using more",
+            " iterations or reducing the ratio of values passed on after each",
+            " round")
 } else {
         cat("Algorithm reported the best-fitting number of species to be",
             params[3],"after completing",flag,"iterations, each comprising",
             guess.n,"guesses derived by taking the range of the top",
-            100*ratio,"% best-fitting guesses in the previous iteration and expanding it about its mid-point to",
-            100*stretch,
+            100*ratio,"% best-fitting guesses in the previous iteration and",
+            " expanding it about its mid-point to",100*stretch,
             "% of its size and spacing guesses equally amongst this")
         #
         # output data

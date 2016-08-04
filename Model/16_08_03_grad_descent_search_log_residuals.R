@@ -15,9 +15,10 @@
 # total species, where the number of guesses is set below. It then uses a grid #
 # search to pick an inital guess for a and b which minimises the squared log   #
 # residuals. It then applies steepest descent to this starting point until it  #
-# converges to a minimum of the square log residuals for the given value of St.#
-# This is either when the gradient is below a certain proportion of the        #
-# parameter value, or when a maximum number of steps have been taken.          #
+# converges to a minimum of the square residuals for the log-tranformed        #
+# variables for the given value of St. This is either when the gradient is     #
+# below a certain proportion of the parameter value, or when a maximum number  #
+# of steps have been taken.                                                    #
 #                                                                              #
 # In the gradient descent, the variables are re-scaled as set by the user to   #
 # facilitate more efficient convergence. This scaling is then un-done before   #

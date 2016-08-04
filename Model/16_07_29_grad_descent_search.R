@@ -9,7 +9,7 @@
 #                                                                              #
 # This script will then attempt to produce an estimate for total species yet   #
 # to be found using the model as proposed by Joppa. However, the algorithm to  #
-# do so varies from theirs. Here the least squares regression is used to       #
+# do so varies from theirs. Here the least squares residuals are used to       #
 # evaluate each estimate, as opposed to first log-transforming the data.       #
 #                                                                              #
 # The algorithm works by guessing a selection of of equally spaced values for  #
@@ -22,7 +22,7 @@
 #                                                                              #
 # In the gradient descent, the variables are re-scaled as set by the user to   #
 # facilitate more efficient convergence. This scaling is then un-done before   #
-# giving results, including appropriate adjusting the model coefficients. In   #
+# giving results, including appropriately adjusting the model coefficients. In #
 # addition, during the gradient descent an adaptive step size is used:         #
 #                                                                              #
 #       If the signs of the gradient are the same for the current, and next    #
