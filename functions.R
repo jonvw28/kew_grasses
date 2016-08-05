@@ -162,7 +162,7 @@ name.formatter <- function(df,col.ind,comma = TRUE,in.tag=TRUE,in.inc=TRUE,
         #
         # If in.inc and ex.inc are set to TRUE then the section of the string
         # after each occurance fo the break is included in the ouptut. If these
-        ## are set to dalse, then everything after the first case of ' in ' and
+        # are set to false, then everything after the first case of ' in ' and
         # ' ex '/' ex. ' respectively is removed.
         #
         if (class(col.ind) != "numeric"){
