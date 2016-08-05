@@ -91,15 +91,15 @@ setwd("~/Kew Summer")
 ############################ SET INPUT VALUES HERE #############################
 #
 # Directory path - location of csv input file
-dir.path <- "./Output/grass_1755_10y/"
+dir.path <- "./Output/grass_1753_5y_acc/"
 #
 # Species File name - name of csv file with species information 
 #(without .csv at end)
-spec.file.name <- "grass_1755_10y_spec_summary"
+spec.file.name <- "grass_1753_5y_acc_spec_summary"
 #
 # Location File name - name of csv file with location information 
 #(without .csv at end)
-tax.file.name <- "grass_1755_10y_tax_summary"
+tax.file.name <- "grass_1753_5y_acc_tax_summary"
 #
 # End year - input year at which data ends so as to enable trimming if need be
 en.yr <- 2015
@@ -110,7 +110,7 @@ out.dir <- "./Output/"
 #
 # Identifier string - include info for the file names and graph labels that 
 # describe the set of data used for clarity in naming output
-id.str <- "grass_1755_10y"
+id.str <- "grass_1753_5y_acc"
 #
 #
 ########################### Algorithm Parameters ###############################
@@ -585,7 +585,7 @@ if(mark > 0.5){
              ylim = c(0,1.25*max(data[,2])),
              xlab = "year", ylab = "Number",
              main = paste("Discovery rates and number of taxonomists",
-                          " - Log Residuals",
+                          " - Log Residuals ",
                           id.str,sep=""))
         lines(data[,1],data[,2],pch = 21,col='red')
         lines(data[,1],data[,4],col = 'blue')
@@ -602,7 +602,7 @@ if(mark > 0.5){
             height = 960)
         plot(data[,1],data[,2]/data[,4],pch = 21,col='red', ylim = c(0,20),
              xlab = "year", ylab = "Number",
-             main = paste("Species per taxonomist - Log Residuals",
+             main = paste("Species per taxonomist - Log Residuals ",
                           id.str,sep=""))
         lines(data[,1],data[,2]/data[,4],pch = 21,col='red')
         lines(data[,1],pred/data[,4],col = 'green')
