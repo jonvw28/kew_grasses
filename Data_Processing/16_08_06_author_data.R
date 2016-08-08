@@ -55,14 +55,23 @@ yr.ind <- 15
 # Primary Authors column - index of the column containing the primary authors
 auth.id <- 11
 #
-# Taxonomic status filtering - if set to true then there will
-
+# Taxonomic status filtering - if set to true then there will be filtering to 
+# only allow authors of species of the status specified in the column given
+tax.stat <- FALSE
+stat.id <- 17
+stat.mk <- c("A")
 #
+# Hybrid filtering - if set to true then there will be filtering to 
+# remove authors of species which are hybrids
+hyb.stat <- FALSE
+hyb.id <- c(4,6)
+hyb.mk <- c("×","×")
 #
-
-#
-#
-
+# Taxonomic rank filtering - if set to true then there will be filtering to 
+# only allow authors of species of the status specified in the column given
+rnk.stat <- FALSE
+rnk.id <- 23
+rnk.mk <- c("Species")
 #
 # Location Filter IDs - any columns in location data that are to be filtered in
 # creating a valid dataset
@@ -76,7 +85,7 @@ filt.mk <- c(1,1,1,1)
 loc.id <- c(4)
 #
 # Names of each level of regions
-levels <- c("continent")
+levels <- c("TDWG1")
 #
 # Start year
 st.yr <- 1753
@@ -176,10 +185,23 @@ tmp.l <- ncol(loc.data)
 rm(loc.id)
 #
 # Append location data with species author and year of
-# publication
+# publication - as well as markers if appropriate
+#
+data.index <- c(yr.ind,auth.id)
+if(tax.stat){
+	data.index <- c(data.index,stat.id)
+}
+if(hyb.stat){
+	data.index <- c(data.index,hyb.id)
+}
+if(rnk.stat){
+	data.index <- c(data.index,rnk.id)
+}
+#
+# Make the merge
 #
 loc.data <- table.merge(loc.data,spec.data,id = c(id.ind[1],1),
-                        data.index = c(yr.ind,auth.id),
+                        data.index = data.index,
                         split = tmp.l)
 #
 # Remove the NAs
@@ -189,11 +211,32 @@ loc.data <- loc.data[which(is.na(loc.data[,tmp.l+1])==FALSE),]
 #
 # Take only necessary data for overall names
 #
-names.data <- spec.data[,c(id.ind[1],yr.ind,auth.id)]
-rm(spec.data,yr.ind,auth.id,id.ind)
+names.data <- spec.data[,c(id.ind[1],data.index)]
+rm(spec.data,yr.ind,auth.id,id.ind,data.index)
 #
 #
 ##################### Author information with no location ######################
+#
+# Deal with filters if appropriate
+#
+filter.table <- c(tax.stat,hyb.stat,rnk.stat)
+if(tax.stat){
+	names.data <- names.data[which(names.data[,4] %in% stat.mk),]
+}
+if(hyb.stat){
+        for(p in 1:length(hyb.id)){
+                tmp <- which(names.data[,3+filter.table[1]+p] != hyb.mk[p])
+                names.data <- names.data[tmp,]
+                rm(tmp)
+        }
+        rm(p)
+}
+if(rnk.stat){
+        tmp.id <- 4+filter.table[1]+length(hyb.id)*filter.table[2]
+	names.data <- names.data[which(names.data[,tmp.id] %in% rnk.mk),]
+        rm(tmp.id)
+}
+names.data <- names.data[,1:3]
 #
 #
 # Deal with the missing author names
@@ -230,6 +273,28 @@ rm(overall.tax)
 #
 #################### Location breakdown of taxonomist data #####################
 #
+#
+# Deal with filters if appropriate
+#
+if(tax.stat){
+        loc.data <- loc.data[which(loc.data[,tmp.l+3] %in% stat.mk),]
+}
+if(hyb.stat){
+        for(p in 1:length(hyb.id)){
+                tmp <- which(loc.data[,tmp.l+2+filter.table[1]+p] != hyb.mk[p])
+                loc.data <- loc.data[tmp,]
+                rm(tmp)
+        }
+        rm(p)
+}
+if(rnk.stat){
+        tmp.id <- tmp.l+3+filter.table[1]+length(hyb.id)*filter.table[2]
+        loc.data <- loc.data[which(loc.data[,tmp.id] %in% rnk.mk),]
+        rm(tmp.id)
+}
+loc.data <- loc.data[,1:(tmp.l+2)]
+rm(tax.stat,stat.id,stat.mk,hyb.stat,hyb.id,hyb.mk,rnk.stat,rnk.id,rnk.mk,
+	filter.table)
 #
 # Deal with the missing author names
 #

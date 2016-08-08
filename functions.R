@@ -339,7 +339,8 @@ taxonimist.summary<-function(data,yr.col,start.year,end.year,year.interval){
                 tmp.mat[,1] <- rep(yrs[q],times = length(sam.un.tax))
                 # table of no of authors for each species
                 tot.tx <- sam[,tx.pos]
-                tot.tx <- cbind(tot.tx,num_auth = 6 - apply(is.na(tot.tx),1,sum))
+                tot.tx <- cbind(tot.tx,num_auth = n.tx - apply(
+                                                as.matrix(is.na(tot.tx)),1,sum))
                 #deal with each author
                 for(i in 1:length(sam.un.tax)){
                         tmp.mat[i,2] <- sam.un.tax[i]

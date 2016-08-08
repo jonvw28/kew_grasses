@@ -83,6 +83,9 @@ filt.mk <- c(1,1,1,1)
 # Location IDs - indices of columns in location data where loactions are stored
 loc.id <- c(4,6,8)
 #
+# Names of each level of regions
+levels <- c("TDWG1","TDWG2","TDWG3")
+#
 # Start year
 st.yr <- 1753
 #
@@ -93,10 +96,14 @@ en.yr <- 2015
 int.yr <- 5
 #
 # Output directory
-out.dir <- "./Output/"
+out.dir <- "./Output"
 #
 # Identifier string - include info for the file names and as subdirectory
 id.str <- "grass_1753_5y"
+#
+# Name of sub-directory within the above for this to go
+dir.name <- "species_data"
+#
 #
 ################################################################################
 #                                                                              #
@@ -106,11 +113,11 @@ id.str <- "grass_1753_5y"
 #
 # Check for directory and create if needed
 #
-tmp.dir <- paste(out.dir,id.str,"/",sep = "")
+tmp.dir <- paste(out.dir,"/",id.str,"/",dir.name,"/",sep = "")
 if(dir.exists(tmp.dir)==FALSE){
         dir.create(tmp.dir,recursive = T)
 }
-rm(out.dir)
+rm(out.dir,dir.name)
 #
 #
 # Install any dependancies and load functions
@@ -227,12 +234,12 @@ for (q in 1:length(yrs)){
         rm(tmp)
 }
 rm(q)
-
 #
 # Output the tallies
 #
 write.csv(spec.sum,
-          file=paste(tmp.dir,id.str,"_","spec_summary",".csv",sep =""),
+          file=paste(tmp.dir,id.str,"_","species_overall_summary",".csv",
+			sep =""),
           row.names = FALSE)
 rm(spec.sum,Acc.sp)
 #
@@ -255,6 +262,7 @@ rm(j)
 # Collect data
 #
 for(k in 1:(ncol(Acc.loc)-2)){
+	#
         # slimline data to non-redundant data at relevent detail level
         tmp.data <- unique(Acc.loc[,c(1,k+1,ncol(Acc.loc))])
         leng <- length(loc.code[[k]])
@@ -326,9 +334,18 @@ rm(k,int.yr,yrs,Acc.loc,loc.code)
 # Save Output
 #
 for (s in 1:length(loc.sum)){
+	#
+        # Set up output directory
+        #
+        lvl.dir <- paste(tmp.dir,levels[k],"/",sep = "")
+        if(dir.exists(lvl.dir)==FALSE){
+                dir.create(lvl.dir,recursive = T)
+        }
+        #
         write.csv(loc.sum[[s]],
-                  file=paste(tmp.dir,id.str,"_","loc_summary","_level_",s,
+                  file=paste(lvl.dir,id.str,"_species_summary_",levels[s],
                              ".csv",sep =""),
                   row.names = FALSE)
+	rm(lvl.dir)
 }
-rm(s,loc.sum,tmp.dir,id.str)
+rm(s,loc.sum,tmp.dir,id.str,levels)
