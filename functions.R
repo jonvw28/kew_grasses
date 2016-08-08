@@ -312,6 +312,9 @@ taxonimist.summary<-function(data,yr.col,start.year,end.year,year.interval){
                         data[,yr.col] >= yrs[q] & data[,yr.col] < yrs[q]+y.d)
                 sam<-data[tmp,]
                 rm(tmp)
+                if(nrow(sam) == 0){
+                        next()
+                }
                 # Collect a list of all authors
                 for (j in 1:n.tx){
                         assign(paste("sam.tax",j,sep=""),
