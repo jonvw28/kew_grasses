@@ -51,43 +51,40 @@ id.ind <- c(1,2)
 # the species data
 yr.ind <- 15
 #
-# Taxonomic status column - index of the column containing taxonomic status in
-# the species data
+# Taxonomic status filtering - if set to true then there will be filtering to 
+# only allow authors of species of the status specified in the column given
+tax.stat <- TRUE
 stat.ind <- 17
+stat.mk <- c("A")
 #
-# Accepted Species string - string that represents accepted species in the 
-# taxonomic status column
-acc.string <- "A"
-#
-# Hybrid column(s) - indices of columns containing markes for hybrid species or
-# genera
-hyb.id <- c(4,6)
-#
-# Hybrid markers - markers for hybrids for each column as given above
+# Hybrid filtering - if set to true then there will be filtering to 
+# remove authors of species which are hybrids
+hyb.stat <- TRUE
+hyb.ind <- c(4,6)
 hyb.mk <- c("×","×")
 #
-# Rank Column - column showing taxonomic rank
-rnk.id <- 23
-#
-# Rank String - string identifying species is above column
-rnk.str <- "Species"
+# Taxonomic rank filtering - if set to true then there will be filtering to 
+# only allow authors of species of the status specified in the column given
+rnk.stat <- TRUE
+rnk.ind <- 23
+rnk.mk <- c("Species")
 #
 # Location Filter IDs - any columns in location data that are to be filtered in
 # creating a valid dataset
-filt.id <- c(11,12,13,14)
+filt.ind <- c(11,12,13,14)
 #
 # Location Filter marks - marker in each such columns used to show data to be
 # filtered
 filt.mk <- c(1,1,1,1)
 #
 # Location IDs - indices of columns in location data where loactions are stored
-loc.id <- c(4,6,8)
+loc.ind <- c(4,6)
 #
 # Names of each level of regions
-levels <- c("TDWG1","TDWG2","TDWG3")
+levels <- c("TDWG1","TDWG2")
 #
 # Start year
-st.yr <- 1753
+st.yr <- 1755
 #
 # End year
 en.yr <- 2015
@@ -99,7 +96,7 @@ int.yr <- 5
 out.dir <- "./Output"
 #
 # Identifier string - include info for the file names and as subdirectory
-id.str <- "grass_1753_5y"
+id.str <- "grass_1755_5y"
 #
 # Name of sub-directory within the above for this to go
 dir.name <- "species_data"
@@ -152,57 +149,75 @@ spec.data[,yr.ind] <- as.numeric(stringr::str_sub(spec.data[,yr.ind],-4,-1))
 #
 # Filter out any messy location data
 #
-for(i in 1:length(filt.id)){
-        tmp <- which(loc.data[,filt.id[i]] == filt.mk[i])
+for(i in 1:length(filt.ind)){
+        tmp <- which(loc.data[,filt.ind[i]] == filt.mk[i])
         loc.data <- loc.data[-tmp,]
         rm(tmp)
 }
-rm(i,filt.id,filt.mk)
+rm(i,filt.ind,filt.mk)
 #
 # Select relevant location data
 #
-loc.data <- loc.data[c(id.ind[2],loc.id)]
+loc.data <- loc.data[c(id.ind[2],loc.ind)]
 tmp.l <- ncol(loc.data)
-rm(loc.id)
+rm(loc.ind)
 #
-# Append location data with species status, hybrid status and year of
+# Append location data with species status, hybrid status, rank and year of
 # publication
 #
+data.index <- c(yr.ind)
+if(tax.stat){
+	data.index <- c(data.index,stat.ind)
+}
+if(hyb.stat){
+	data.index <- c(data.index,hyb.ind)
+}
+if(rnk.stat){
+	data.index <- c(data.index,rnk.ind)
+}
+#
+# Make the merge
+#
 loc.data <- table.merge(loc.data,spec.data,id = c(id.ind[1],1),
-                        data.index = c(yr.ind,stat.ind,rnk.id,hyb.id),
+                        data.index = data.index,
                         split = tmp.l)
+#                       split = tmp.l)
 # Remove the NAs
 #
 spec.data <- spec.data[which(is.na(spec.data[,yr.ind])==FALSE),]
 loc.data <- loc.data[which(is.na(loc.data[,tmp.l+1])==FALSE),]
 #
-# Remove Hybrids
 #
-for(i in 1:length(hyb.id)){
-        tmp <- which(spec.data[,hyb.id[i]] == hyb.mk[i])
-        tmp2 <- which(loc.data[,tmp.l+3+i] == hyb.mk[i])
-        spec.data <- spec.data[-tmp,]
-        loc.data <- loc.data[-tmp2,]
-        rm(tmp,tmp2)
+# Deal with filters if appropriate
+#
+filter.table <- c(tax.stat,hyb.stat,rnk.stat)
+if(tax.stat){
+	spec.data <- spec.data[which(spec.data[,stat.ind] %in% stat.mk),]
+	loc.data <- loc.data[which(loc.data[,tmp.l+2] %in% stat.mk),]
 }
-rm(i)
-#
-# Filter for only accepted species
-#
-Acc.sp <- spec.data[which(spec.data[,stat.ind]==acc.string),]
-Acc.loc <- loc.data[which(loc.data[,tmp.l+2]==acc.string),]
-rm(loc.data,spec.data,acc.string)
-#
-# Filter for only species rank
-#
-Acc.sp <- Acc.sp[which(Acc.sp[,rnk.id]==rnk.str),]
-Acc.loc <- Acc.loc[which(Acc.loc[,tmp.l+3]==rnk.str),]
+if(hyb.stat){
+        for(p in 1:length(hyb.ind)){
+                tmp <- which(loc.data[,3+filter.table[1]+p] != hyb.mk[p])
+                loc.data <- loc.data[tmp,]
+		tmp2 <- which(spec.data[,hyb.ind[p]] != hyb.mk[p])
+		spec.data <- spec.data[tmp2,]
+                rm(tmp,tmp2)
+        }
+        rm(p)
+}
+if(rnk.stat){
+        tmp.ind <- 2+filter.table[1]+length(hyb.ind)*filter.table[2]+tmp.l
+	loc.data <- loc.data[which(loc.data[,tmp.ind] %in% rnk.mk),]
+        rm(tmp.ind)
+	spec.data <- spec.data[which(spec.data[,rnk.ind] %in% rnk.mk),]
+}
 #
 # Pick out only relevant data
 #
-Acc.sp <- Acc.sp[,c(id.ind[1],yr.ind)]
-Acc.loc <- Acc.loc[,1:(tmp.l+1)]
-rm(yr.ind,stat.ind,hyb.mk,hyb.id,tmp.l,id.ind,rnk.id,rnk.str)
+spec.data <- spec.data[,c(id.ind[1],yr.ind)]
+loc.data <- loc.data[,1:(tmp.l+1)]
+rm(yr.ind,stat.ind,hyb.mk,hyb.ind,tmp.l,id.ind,rnk.ind,rnk.mk,rnk.stat,tax.stat,
+hyb.stat,stat.mk,filter.table,data.index)
 #
 # Summarise totals in each window plus cumulative total
 #
@@ -214,19 +229,19 @@ rm(st.yr,en.yr)
 spec.sum<-matrix(data=0,ncol=3,nrow=length(yrs))
 colnames(spec.sum)<-c("Start_Year","New_species","Cumulative_species")
 spec.sum[,1]<-yrs
-tmp <- which(Acc.sp[,2] < yrs[1])
+tmp <- which(spec.data[,2] < yrs[1])
 spec.sum[1,3] <- length(tmp)
 rm(tmp)
 #
 # Check uniqueness
 #
-Acc.sp <- Acc.sp[!duplicated(Acc.sp[,1]),]
+spec.data <- spec.data[!duplicated(spec.data[,1]),]
 #
 # Deal with aggregate species data
 #
 for (q in 1:length(yrs)){
         tmp <- which(
-                Acc.sp[,2] >= yrs[q] & Acc.sp[,2] < yrs[q]+int.yr)
+                spec.data[,2] >= yrs[q] & spec.data[,2] < yrs[q]+int.yr)
         spec.sum[q,2] <- length(tmp)
         if(q >1){
                 spec.sum[q,3] <- spec.sum[q-1,3] + spec.sum[q-1,2]
@@ -241,17 +256,17 @@ write.csv(spec.sum,
           file=paste(tmp.dir,id.str,"_","species_overall_summary",".csv",
 			sep =""),
           row.names = FALSE)
-rm(spec.sum,Acc.sp)
+rm(spec.sum,spec.data)
 #
 # Deal with location data
 #
 loc.sum <- c()
 loc.code <-c()
-for (j in 1:(ncol(Acc.loc)-2)){
+for (j in 1:(ncol(loc.data)-2)){
         loc.sum[[j]] <- as.data.frame(matrix(data=0,nrow=length(yrs),
                                              ncol=2*length(unique(
-                                                     Acc.loc[,j+1]))+3))
-        loc.code[[j]] <- unique(Acc.loc[,j+1])
+                                                     loc.data[,j+1]))+3))
+        loc.code[[j]] <- unique(loc.data[,j+1])
         loc.sum[[j]][,1] <- yrs
         names(loc.sum[[j]]) <- c("Start_Year",loc.code[[j]],"Non_endogenous",
                                  paste(loc.code[[j]],"cumulative",
@@ -261,10 +276,10 @@ rm(j)
 #
 # Collect data
 #
-for(k in 1:(ncol(Acc.loc)-2)){
+for(k in 1:(ncol(loc.data)-2)){
 	#
         # slimline data to non-redundant data at relevent detail level
-        tmp.data <- unique(Acc.loc[,c(1,k+1,ncol(Acc.loc))])
+        tmp.data <- unique(loc.data[,c(1,k+1,ncol(loc.data))])
         leng <- length(loc.code[[k]])
         #
         # Deal with endogeny
@@ -329,7 +344,7 @@ for(k in 1:(ncol(Acc.loc)-2)){
         }
         rm(p,leng,tmp.data)
 }
-rm(k,int.yr,yrs,Acc.loc,loc.code)
+rm(k,int.yr,yrs,loc.data,loc.code)
 #
 # Save Output
 #
