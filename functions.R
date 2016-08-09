@@ -299,6 +299,19 @@ taxonimist.summary<-function(data,yr.col,start.year,end.year,year.interval){
         colnames(mat)<-c("Start_Year","Taxonomists")
         mat[,1]<-yrs
         y.d <- year.interval
+        #
+        # Deal with case of no data
+        #
+        if(nrow(data) == 0){
+                tax.tbl <- matrix(data=0 ,nrow =1, ncol =3)
+                tax.tbl <- as.data.frame(tax.tbl)
+                tax.tbl[1,1] <- "No_Author"
+                tax.tbl[1,2] <- start.year
+                colnames(tax.tbl) <- c("Start_Year","author",
+                                       paste("Pubs_w_1_authors",sep=""))
+                return(list(mat,tax.tbl))
+        }
+        #
         # Pull out maximum number of taxonimists per species
         tx.pos<-grep("Taxonomist_",colnames(data))
         n.tx<-length(tx.pos)

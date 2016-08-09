@@ -337,7 +337,7 @@ for (s in 1:length(loc.sum)){
 	#
         # Set up output directory
         #
-        lvl.dir <- paste(tmp.dir,levels[k],"/",sep = "")
+        lvl.dir <- paste(tmp.dir,levels[s],"/",sep = "")
         if(dir.exists(lvl.dir)==FALSE){
                 dir.create(lvl.dir,recursive = T)
         }

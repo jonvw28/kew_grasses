@@ -53,42 +53,42 @@ id.ind <- c(1,2)
 yr.ind <- 15
 #
 # Primary Authors column - index of the column containing the primary authors
-auth.id <- 11
+auth.ind <- 11
 #
 # Taxonomic status filtering - if set to true then there will be filtering to 
 # only allow authors of species of the status specified in the column given
-tax.stat <- FALSE
-stat.id <- 17
+tax.stat <- TRUE
+stat.ind <- 17
 stat.mk <- c("A")
 #
 # Hybrid filtering - if set to true then there will be filtering to 
 # remove authors of species which are hybrids
-hyb.stat <- FALSE
-hyb.id <- c(4,6)
+hyb.stat <- TRUE
+hyb.ind <- c(4,6)
 hyb.mk <- c("×","×")
 #
 # Taxonomic rank filtering - if set to true then there will be filtering to 
 # only allow authors of species of the status specified in the column given
-rnk.stat <- FALSE
-rnk.id <- 23
+rnk.stat <- TRUE
+rnk.ind <- 23
 rnk.mk <- c("Species")
 #
 # Location Filter IDs - any columns in location data that are to be filtered in
 # creating a valid dataset
-filt.id <- c(11,12,13,14)
+filt.ind <- c(11,12,13,14)
 #
 # Location Filter marks - marker in each such columns used to show data to be
 # filtered
 filt.mk <- c(1,1,1,1)
 #
 # Location IDs - indices of columns in location data where loactions are stored
-loc.id <- c(4)
+loc.ind <- c(4,6)
 #
 # Names of each level of regions
-levels <- c("TDWG1")
+levels <- c("TDWG1","TDWG2")
 #
 # Start year
-st.yr <- 1753
+st.yr <- 1755
 #
 # End year
 en.yr <- 2015
@@ -100,7 +100,7 @@ int.yr <- 5
 out.dir <- "./Output"
 #
 # Identifier string - include info for the file names and as subdirectory
-id.str <- "grass_1753_5y"
+id.str <- "grass_1755_5y"
 #
 # Name of sub-directory within the above for this to go
 dir.name <- "taxon_data"
@@ -157,13 +157,13 @@ spec.data[,yr.ind] <- as.numeric(stringr::str_sub(spec.data[,yr.ind],-4,-1))
 #
 # Deal with exceptions where ex. is not followed by a space
 #
-tmp <- grep('ex\\..',spec.data[,auth.id])
-spec.data[tmp,auth.id] <- gsub('ex\\.','ex ',spec.data[tmp,auth.id])
+tmp <- grep('ex\\..',spec.data[,auth.ind])
+spec.data[tmp,auth.ind] <- gsub('ex\\.','ex ',spec.data[tmp,auth.ind])
 rm(tmp)
 #
 # Re format to have breaks between authors given by &
 #
-spec.data <- name.formatter(spec.data, col.ind = auth.id, T,T,T,T,F)
+spec.data <- name.formatter(spec.data, col.ind = auth.ind, T,T,T,T,F)
 #
 #
 ######################## Merge names to location data ##########################
@@ -171,31 +171,31 @@ spec.data <- name.formatter(spec.data, col.ind = auth.id, T,T,T,T,F)
 #
 # Filter out any location data which is irrelevant - eg introduced species
 #
-for(i in 1:length(filt.id)){
-        tmp <- which(loc.data[,filt.id[i]] == filt.mk[i])
+for(i in 1:length(filt.ind)){
+        tmp <- which(loc.data[,filt.ind[i]] == filt.mk[i])
         loc.data <- loc.data[-tmp,]
         rm(tmp)
 }
-rm(i,filt.id,filt.mk)
+rm(i,filt.ind,filt.mk)
 #
 # Select relevant location data
 #
-loc.data <- loc.data[,c(id.ind[2],loc.id)]
+loc.data <- loc.data[,c(id.ind[2],loc.ind)]
 tmp.l <- ncol(loc.data)
-rm(loc.id)
+rm(loc.ind)
 #
 # Append location data with species author and year of
 # publication - as well as markers if appropriate
 #
-data.index <- c(yr.ind,auth.id)
+data.index <- c(yr.ind,auth.ind)
 if(tax.stat){
-	data.index <- c(data.index,stat.id)
+	data.index <- c(data.index,stat.ind)
 }
 if(hyb.stat){
-	data.index <- c(data.index,hyb.id)
+	data.index <- c(data.index,hyb.ind)
 }
 if(rnk.stat){
-	data.index <- c(data.index,rnk.id)
+	data.index <- c(data.index,rnk.ind)
 }
 #
 # Make the merge
@@ -212,7 +212,7 @@ loc.data <- loc.data[which(is.na(loc.data[,tmp.l+1])==FALSE),]
 # Take only necessary data for overall names
 #
 names.data <- spec.data[,c(id.ind[1],data.index)]
-rm(spec.data,yr.ind,auth.id,id.ind,data.index)
+rm(spec.data,yr.ind,auth.ind,id.ind,data.index)
 #
 #
 ##################### Author information with no location ######################
@@ -224,7 +224,7 @@ if(tax.stat){
 	names.data <- names.data[which(names.data[,4] %in% stat.mk),]
 }
 if(hyb.stat){
-        for(p in 1:length(hyb.id)){
+        for(p in 1:length(hyb.ind)){
                 tmp <- which(names.data[,3+filter.table[1]+p] != hyb.mk[p])
                 names.data <- names.data[tmp,]
                 rm(tmp)
@@ -232,9 +232,9 @@ if(hyb.stat){
         rm(p)
 }
 if(rnk.stat){
-        tmp.id <- 4+filter.table[1]+length(hyb.id)*filter.table[2]
-	names.data <- names.data[which(names.data[,tmp.id] %in% rnk.mk),]
-        rm(tmp.id)
+        tmp.ind <- 4+filter.table[1]+length(hyb.ind)*filter.table[2]
+	names.data <- names.data[which(names.data[,tmp.ind] %in% rnk.mk),]
+        rm(tmp.ind)
 }
 names.data <- names.data[,1:3]
 #
@@ -280,7 +280,7 @@ if(tax.stat){
         loc.data <- loc.data[which(loc.data[,tmp.l+3] %in% stat.mk),]
 }
 if(hyb.stat){
-        for(p in 1:length(hyb.id)){
+        for(p in 1:length(hyb.ind)){
                 tmp <- which(loc.data[,tmp.l+2+filter.table[1]+p] != hyb.mk[p])
                 loc.data <- loc.data[tmp,]
                 rm(tmp)
@@ -288,12 +288,12 @@ if(hyb.stat){
         rm(p)
 }
 if(rnk.stat){
-        tmp.id <- tmp.l+3+filter.table[1]+length(hyb.id)*filter.table[2]
-        loc.data <- loc.data[which(loc.data[,tmp.id] %in% rnk.mk),]
-        rm(tmp.id)
+        tmp.ind <- tmp.l+3+filter.table[1]+length(hyb.ind)*filter.table[2]
+        loc.data <- loc.data[which(loc.data[,tmp.ind] %in% rnk.mk),]
+        rm(tmp.ind)
 }
 loc.data <- loc.data[,1:(tmp.l+2)]
-rm(tax.stat,stat.id,stat.mk,hyb.stat,hyb.id,hyb.mk,rnk.stat,rnk.id,rnk.mk,
+rm(tax.stat,stat.ind,stat.mk,hyb.stat,hyb.ind,hyb.mk,rnk.stat,rnk.ind,rnk.mk,
 	filter.table)
 #
 # Deal with the missing author names
@@ -388,7 +388,7 @@ for(k in 1:(tmp.l-1)){
 		# Filter for each region
 		#
 		tmp.end <- end[which(end[,2] == loc.code[[k]][l]),]
-		tmp.res <- taxonimist.summary(tmp.end,tmp.l+1,st.yr,en.yr,
+		tmp.res <- taxonimist.summary(tmp.end,3,st.yr,en.yr,
 						int.yr)
 		#
 		# Store aggreated data
@@ -409,7 +409,7 @@ for(k in 1:(tmp.l-1)){
 	# Deal with non-endogenous data
 	#
 	nend <- tmp.data[which(tmp.data[,ncol(tmp.data)]=="NE"),]
-	tmp.res <- taxonimist.summary(nend,tmp.l+1,st.yr,en.yr,int.yr)
+	tmp.res <- taxonimist.summary(nend,3,st.yr,en.yr,int.yr)
 	loc.sum[[k]][,leng+2] <- tmp.res[[1]][,2]
 	write.csv(tmp.res[[2]],
 	          file=paste(lvl.dir,id.str,"_",levels[k],
@@ -420,7 +420,7 @@ for(k in 1:(tmp.l-1)){
 	#
 	# Save summary data
 	#
-	write.csv(loc.sum[[1]],
+	write.csv(loc.sum[[k]],
 	          file=paste(lvl.dir,id.str,"_",levels[k],
 	                     "_tax_summary",".csv",
 	                     sep =""),
