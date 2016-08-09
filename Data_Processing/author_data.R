@@ -435,5 +435,4 @@ dir.name, id.str){
 	}
 	rm(k,en.yr,st.yr,int.yr,loc.data,tmp.l,tmp.dir,id.str,levels,lvl.dir,loc.sum,
 	   loc.code)
-	return(NULL)
 }
