@@ -28,7 +28,7 @@
 #
 ########################## EXPLANATION OF ARGUMENTS ############################
 #
-# dir.path - location of csv input file
+# dir.path - location of csv input files
 # eg "./Data/07_05/"
 #
 # spec.file.name - name of csv file with species information 

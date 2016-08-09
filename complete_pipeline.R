@@ -65,6 +65,22 @@ en.yr <- 2015
 # Window Interval - how many years you want aggregation to occur over
 int.yr <- 5
 #
+######## St SEARCH PARAMETERS
+#
+# multiple of current total species to start at as maxmimum guess for St
+mult <- 3
+# Guesses per round for St values
+guess.n <- 500
+# Ratio of top scoring guesses to keep from all guesses per round
+ratio <- 0.2
+# stretch - Range Stretch to apply at each end (ie 1.25 would mean extend the
+# range in each iteration by 25%)
+stretch <- 1.5
+# Max iteratations of guessing St
+max.it <- 20
+#
+
+#
 ################## OUTPUT SAVE LOCATIONS
 #
 # Output directory
@@ -78,9 +94,13 @@ id.str <- paste("grass_",st.yr,"_",int.yr,"_year",sep = "")
 # go
 spec.dir <- "species_data"
 #
-# Name of sub-directory within the above for processed aggregate taxonomist data
-# to go
+# Name of sub-directory within the output directory for processed aggregate 
+# taxonomist data to go
 tax.dir <- "taxon_data"
+#
+# Name of sub-directory within the output directory for regression model results 
+#  to go
+reg.dir <- "regression_search"
 #
 #
 ################################################################################
@@ -97,6 +117,7 @@ source("./kew_grasses/functions.R")
 #
 # Complete the aggregated species data processing
 #
+cat("Processing Aggregate Species Data\n")
 source("./kew_grasses/data_processing/species_data.R")
 species_data(dir.path, spec.file.name, loc.file.name, id.ind, yr.ind, tax.stat,
              stat.ind, stat.mk, hyb.stat, hyb.ind, hyb.mk, rnk.stat, rnk.ind,
@@ -105,11 +126,26 @@ species_data(dir.path, spec.file.name, loc.file.name, id.ind, yr.ind, tax.stat,
 #
 # Complete the aggregated taxonomist data processing
 #
+cat("Processing Aggregate Taxonomists Data\n")
 source("./kew_grasses/data_processing/author_data.R")
 author_data(dir.path, spec.file.name, loc.file.name, id.ind, yr.ind,auth.ind, 
             tax.stat, stat.ind, stat.mk, hyb.stat, hyb.ind, hyb.mk, rnk.stat,
             rnk.ind, rnk.mk, filt.ind, filt.mk, loc.ind, levels, st.yr, en.yr, 
             int.yr, out.dir, tax.dir, id.str)
+#
+# loactions of the aggregate output
+#
+agg.loc <- paste(out.dir,"/",id.str,"/",sep="")
+agg.spec <- paste(spec.dir,"/",id.str,"_species_overall_summary",sep = "")
+agg.tax <- paste(tax.dir,"/",id.str,"_tax_overall_summary",sep = "")
+#
+# Run complete normal regression search method
+#
+cat("Computing Regression Search Model\n")
+source("./kew_grasses/model/regression_search.R")
+regression_search(dir.path = agg.loc, spec.file.name = agg.spec, tax.file.name = agg.tax, 
+                  en.yr, mult, guess.n, ratio, stretch, max.it, out.dir,
+                              id.str, mod.dir=reg.dir)
 #
 # Clear the workspace
 #
