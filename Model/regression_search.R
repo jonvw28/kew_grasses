@@ -226,14 +226,14 @@ regression_search <- function(dir.path, spec.file.name, tax.file.name, en.yr,
 		cat("Algorithm failed to converge to a value of total species accurate",
 		    " to the nearest integer after",max.it,"iterations. Try using more",
 		    " iterations or reducing the ratio of values passed on after each",
-		    " round")
+		    " round\n")
 	} else {
 		cat("Algorithm reported the best-fitting number of species to be",
 		    params[3],"after completing",flag,"iterations, each comprising",
 		    guess.n,"guesses derived by taking the range of the top",
 		    100*ratio,"% best-fitting guesses in the previous iteration and",
 		    " expanding it about its mid-point to",100*stretch,
-		    "% of its size and spacing guesses equally amongst this")
+		    "% of its size and spacing guesses equally amongst this\n")
 		#
 		# output data
 		#

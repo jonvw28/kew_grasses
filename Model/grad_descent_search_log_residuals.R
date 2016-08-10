@@ -2,7 +2,7 @@
 #                                                                              #
 #                                                                              #
 # This function is an altered implementation of the work of Joppa et al 2010   #
-# in their How many flowering species paper.It takes as input two files, one   #
+# in their How many flowering species paper. It takes as input two files, one  #
 # giving aggregated as well as cumulative species for set time windows, the    #
 # other giving number of active taxonomists. These can be easily created using #
 # the scripts in this repository.                                              #
@@ -116,16 +116,36 @@
 # max.it - Max iteratations of guessing St
 # eg 20
 #
-
-
-
-
-### GRAD DESCENT
-
-
-
-
-
+# scale - Scaling to apply to taxonomist numbers and species numbers respectively
+# (years are dealt with automatically) - This is to help gradient descent
+# efficiency
+# eg c(100,1000)
+#
+# rng.a, rng.b - Range to test for a and b starting point in each gradient 
+# descent - note these are not transformed by the scalings (ie these values will
+#  be used as they currently are directly with the tranformed data, however a 
+# and b as output are for the none scaled data) 
+# eg
+# rng.a <- c(-0.1,0.1)
+# rng.b <- c(-0.1,0.1)
+#
+# ab.guesses - No of initial values of a and b to try respectively
+# eg c(100,100)
+#
+# max.grad - Max repetitions of grad descent to get a,b for each St value
+# eg 500
+#
+# alpha - Step size for each gradient descent step
+# eg 0.01
+#
+# min.alp - Minimum step size - gradient descent stops if a step smaller than 
+# this is required
+# eg 2e-14
+#
+# grd.rat - Ratio for gradient/parameter value where gradient descent should be 
+# terminated - ie once this ratio is reached, gradient descent ends
+# eg 1e-4
+#
 # out.dir - Directory where the output directory should go 
 # eg "./Output"
 #
@@ -135,56 +155,15 @@
 # mod.dir - sub-directory where the model data should go
 # eg "regression_search"
 #
-
-
-
-
-
-
-
-########################### Algorithm Parameters ###############################
 #
-# Scaling to apply to taxonomist numbers and species numbers respectively
-# (years are dealt with automatically) - This is to help gradient descent
-# efficiency
-scale <- c(100,1000)
 #
-######################## Gradient Descent Paramters ############################
-#
-# Range to test for a starting point in each gradient descent
-rng.a <- c(-0.1,0.1)
-#
-# Range to test for b starting point in each gradient descent
-rng.b <- c(-0.1,0.1)
-#
-# No of initial values of a and b to try
-ab.guesses <- c(100,100)
-#
-# Max repetitions of grad descent to get a,b for each St value
-max.grad <- 500
-#
-# Step size for each gradient descent step
-alpha <- 0.01
-#
-# Minimum step size - program quits if a step smaller than this is required
-min.alp <- 2e-14
-#
-# Ratio for gradient/parameter value where gradient descent should be 
-# terminated - ie once this ratio is reached, gradient descent ends
-grd.rat <- 1e-4
-
-
-
-
-
 grad_descent_search_log_residuals <- function(dir.path, spec.file.name, 
                                               tax.file.name, en.yr, mult, 
                                               guess.n, ratio, stretch, max.it,
-                                              #
-                                              # Insert grad descent parameters here
-                                              #
-                                              #
-                                              out.dir,id.str, mod.dir){
+                                              scale, rng.a, rng.b, ab.guesses,
+					      max.grad, alpha, min.alp,
+					      grad.rat, out.dir, id.str, 
+					      mod.dir){
 
 
 
@@ -399,7 +378,7 @@ grad_descent_search_log_residuals <- function(dir.path, spec.file.name,
                                                       " during step ",
                                                       i," where St was ",guesses[i],
                                                       " as alpha to be used was smaller 
-                                                      than the minimum step size",
+                                                      than the minimum step size\n",
                                                       sep = ""))
                                         break
                                 }
@@ -410,7 +389,7 @@ grad_descent_search_log_residuals <- function(dir.path, spec.file.name,
                                                       i," where St was ",guesses[i],
                                                       " as gradient to be used was ",
                                                       "smaller than the minimum step ",
-                                                      "size",sep = ""))
+                                                      "size\n",sep = ""))
                                         break
                                 }
                                 #
@@ -545,14 +524,14 @@ grad_descent_search_log_residuals <- function(dir.path, spec.file.name,
                 cat("Algorithm failed to converge to a value of total species accurate",
                     "to the nearest integer after",max.it,"iterations. Try using more",
                     "iterations or reducing the ratio of values passed on after each",
-                    "round")
+                    "round\n")
         } else {
                 cat("Algorithm reported the best-fitting number of species to be",
                     params[3],"after completing",flag,"iterations, each comprising",
                     guess.n,"guesses derived by taking the range of the top",
                     100*ratio,"% best-fitting guesses in the previous iteration and",
                     " expanding it about its mid-point to",100*stretch,
-                    "% of its size and spacing guesses equally amongst this")
+                    "% of its size and spacing guesses equally amongst this\n")
                 #
                 # output data
                 #
