@@ -131,6 +131,10 @@ tax.dir <- "taxon_data"
 # to go
 reg.dir <- "regression_search"
 #
+# Name of sub-directory within the output directory for regression model 
+# cross-validation results to go
+reg.dir <- "regression_search_cross_validation"
+#
 # Name of sub-directory within the output directory for log difference gradient 
 # descent model results to go
 log.dir <- "grad_descent_search_log_residuals"
@@ -150,21 +154,23 @@ source("./kew_grasses/functions.R")
 #
 # Complete the aggregated species data processing
 #
-cat("Processing Aggregate Species Data\n")
+cat("Processing Aggregate Species Data...\n")
 source("./kew_grasses/data_processing/species_data.R")
 species_data(dir.path, spec.file.name, loc.file.name, id.ind, yr.ind, tax.stat,
              stat.ind, stat.mk, hyb.stat, hyb.ind, hyb.mk, rnk.stat, rnk.ind,
              rnk.mk, filt.ind, filt.mk, loc.ind, levels, st.yr, en.yr, int.yr, #
              out.dir, spec.dir, id.str)
+cat("Complete!/n/n")
 #
 # Complete the aggregated taxonomist data processing
 #
-cat("Processing Aggregate Taxonomists Data\n")
+cat("Processing Aggregate Taxonomists Data...\n")
 source("./kew_grasses/data_processing/author_data.R")
 author_data(dir.path, spec.file.name, loc.file.name, id.ind, yr.ind,auth.ind, 
             tax.stat, stat.ind, stat.mk, hyb.stat, hyb.ind, hyb.mk, rnk.stat,
             rnk.ind, rnk.mk, filt.ind, filt.mk, loc.ind, levels, st.yr, en.yr, 
             int.yr, out.dir, tax.dir, id.str)
+cat("Complete!/n/n")
 #
 # loactions of the aggregate output
 #
@@ -174,22 +180,36 @@ agg.tax <- paste(tax.dir,"/",id.str,"_tax_overall_summary",sep = "")
 #
 # Run complete normal regression search method
 #
-cat("Computing Regression Search Model\n")
+cat("Computing Regression Search Model...\n")
 source("./kew_grasses/model/regression_search.R")
 regression_search(dir.path = agg.loc, spec.file.name = agg.spec, tax.file.name = agg.tax, 
                   en.yr, mult, guess.n, ratio, stretch, max.it, out.dir,
                               id.str, mod.dir=reg.dir)
+cat("Complete!/n/n")
+#
+# Run complete normal regression search method cross validation
+#
+cat("Computing Regression Search Model cross validation...\n")
+source("./kew_grasses/model/regression_search_cross_validation.R")
+regression_search_cross_validation(dir.path = agg.loc, 
+                                   spec.file.name = agg.spec, 
+                                   tax.file.name = agg.tax, en.yr, mult, 
+                                   guess.n, ratio, stretch, max.it, out.dir,
+                                   id.str, mod.dir=regcv.dir)
+cat("Complete!/n/n")
 #
 # Run Joppa inspired difference in logs via (a,b) gradient descent combined with
 # St search
 #
-cat("Computing Log Difference Gradient Descent Search Model\n")
+cat("Computing Log Difference Gradient Descent Search Model...\n")
 source("./kew_grasses/model/grad_descent_search_log_residuals.R")
 grad_descent_search_log_residuals(dir.path = agg.loc, spec.file.name = agg.spec,
                                   tax.file.name = agg.tax, en.yr, mult, guess.n, 
                                   ratio, stretch, max.it, scale, rng.a, rng.b, 
                                   ab.guesses, max.grad, alpha, min.alp, 
                                   grad.rat, out.dir,id.str, mod.dir=log.dir)
+cat("Complete!/n/n")
+
 
 
 #
