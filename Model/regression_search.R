@@ -2,10 +2,10 @@
 #                                                                              #
 #                                                                              #
 # This function is an altered implementation of the work of Joppa et al 2010   #
-# in their Brazil paper. It takes as input two files, one giving aggregated    #
-# as well as cumulative species for set time windows, the other giving number  #
-# of active taxonomists. These can be easily created using the scripts in this #
-# repository.                                                                  #
+# in their Brazil paper. It takes as input two dataframes, one giving          #
+# aggregated as well as cumulative species for set time windows, the other     #
+# giving number of active taxonomists. These can be easily created using the   #
+# scripts in this repository.                                                                  #
 #                                                                              #
 # This script will then attempt to produce an estimate for total species yet   #
 # to be found using the model as proposed by Joppa. However, the algorithm to  #
@@ -42,16 +42,12 @@
 #
 ########################## EXPLANATION OF ARGUMENTS ############################
 #
-# dir.path- location of csv input files
-# eg "./Output/grass_1755_5y/"
+# spec.data - data frame where column 1 is start year, column 2 is number of new
+# species recorded in the time window, column 3 is the cumulative number of 
+# species up to the given window.
 #
-# spec.file.name - name of csv file with species information 
-# (without .csv at end)
-# eg "grass_1755_5y_spec_summary"
-#
-# tax.file.name - name of csv file with taxonomist information 
-# (without .csv at end)
-# eg "grass_1755_5y_tax_summary"
+# tax.data - data frame where column 1 is the start year and column 2 is the is 
+# number of active taxonomists in the time window.
 #
 # en.yr - year at which data ends so as to enable trimming if need be
 # eg 2015
@@ -81,13 +77,12 @@
 # mod.dir - sub-directory where the model data should go
 # eg "regression_search"
 #
-regression_search <- function(dir.path, spec.file.name, tax.file.name, en.yr,
-                              mult, guess.n, ratio, stretch, max.it, out.dir,
-                              id.str, mod.dir){
+regression_search <- function(spec.data, tax.data, en.yr, mult, guess.n, ratio,
+                              stretch, max.it, out.dir, id.str, mod.dir){
 	#
 	# Check for directory and create if needed
 	#
-	tmp.dir <- paste(out.dir,id.str,mod.dir,"/",sep = "/")
+	tmp.dir <- paste(out.dir,"/",id.str,"/",mod.dir,"/",sep = "")
 	if(dir.exists(tmp.dir)==FALSE){
 		dir.create(tmp.dir,recursive = T)
 	}
@@ -100,14 +95,6 @@ regression_search <- function(dir.path, spec.file.name, tax.file.name, en.yr,
 	#
 	#
 	########################### DATA PROCESSING ####################################
-	#
-	# Import data
-	#
-	spec.data <- read.csv(paste(dir.path,spec.file.name,".csv",sep=""),
-			      stringsAsFactors = FALSE)
-	tax.data <- read.csv(paste(dir.path,tax.file.name,".csv",sep=""),
-			     stringsAsFactors = FALSE)
-	rm(dir.path,tax.file.name,spec.file.name)
 	#
 	# Merge data
 	#
@@ -259,11 +246,11 @@ regression_search <- function(dir.path, spec.file.name, tax.file.name, en.yr,
 		}
 		rm(i)
 		#
-		png(paste(tmp.dir,id.str,"_error_plot.png",sep=""),width = 960,
+		png(paste(tmp.dir,id.str,"_regression_search_error_plot.png",sep=""),width = 960,
 		    height = 960)
 		plot(guesses,results,xlab = "Total Species",
 		     ylab = "Least Squares Score",
-		     main = paste("Least Squares Error vs Total Species ",
+		     main = paste("Least Squares Error vs Total Species - Regression Search ",
 				  id.str,sep=""),
 		     col = "blue",
 		     type = 'l')
@@ -277,12 +264,12 @@ regression_search <- function(dir.path, spec.file.name, tax.file.name, en.yr,
 		#
 		# Plot species and taxonomists per year
 		#
-		png(paste(tmp.dir,id.str,"_species_rat.png",sep=""),width = 960,
+		png(paste(tmp.dir,id.str,"_regression_search_species_rat.png",sep=""),width = 960,
 		    height = 960)
 		plot(data[,1],data[,2],pch = 21,col='red',
 		     ylim = c(0,1.25*max(data[,2])),
 		     xlab = "year", ylab = "Number",
-		     main = paste("Discovery rates and number of taxonomists ",
+		     main = paste("Discovery rates and number of taxonomists - Regression Search ",
 				  id.str,sep=""))
 		lines(data[,1],data[,2],pch = 21,col='red')
 		lines(data[,1],data[,4],col = 'blue')
@@ -295,11 +282,11 @@ regression_search <- function(dir.path, spec.file.name, tax.file.name, en.yr,
 		#
 		# Plot species per taxonomist
 		#
-		png(paste(tmp.dir,id.str,"_species_per_tax.png",sep=""),width = 960, 
+		png(paste(tmp.dir,id.str,"_regression_search_species_per_tax.png",sep=""),width = 960, 
 		    height = 960)
 		plot(data[,1],data[,2]/data[,4],pch = 21,col='red', ylim = c(0,20),
 		     xlab = "year", ylab = "Number",
-		     main = paste("Species per taxonomist ",
+		     main = paste("Species per taxonomist - Regression Search ",
 				  id.str,sep=""))
 		lines(data[,1],data[,2]/data[,4],pch = 21,col='red')
 		lines(data[,1],pred/data[,4],col = 'green')
@@ -310,10 +297,12 @@ regression_search <- function(dir.path, spec.file.name, tax.file.name, en.yr,
 		tmp <- cbind(data,pred)
 		
 		write.csv(tmp,
-			  file=paste(tmp.dir,id.str,"_model.csv",sep=""),
+			  file=paste(tmp.dir,id.str,"_regression_search",
+			             "_model.csv",sep=""),
 			  row.names = FALSE)
 		write.csv(t(out.dat),
-			  file=paste(tmp.dir,id.str,"_model_summary.csv",sep=""),
+			  file=paste(tmp.dir,id.str,"_regression_search",
+			             "_model_summary.csv",sep=""),
 			  row.names = FALSE)
 	}
 	rm(mult,stretch,max.it,ratio,mark,flag,guess.n,start,guesses,results,params)

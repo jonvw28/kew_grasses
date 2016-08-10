@@ -20,16 +20,12 @@
 #
 ########################## EXPLANATION OF ARGUMENTS ############################
 #
-# dir.path- location of csv input files
-# eg "./Output/grass_1755_5y/"
+# spec.data - data frame where column 1 is start year, column 2 is number of new
+# species recorded in the time window, column 3 is the cumulative number of 
+# species up to the given window.
 #
-# spec.file.name - name of csv file with species information 
-# (without .csv at end)
-# eg "grass_1755_5y_spec_summary"
-#
-# tax.file.name - name of csv file with taxonomist information 
-# (without .csv at end)
-# eg "grass_1755_5y_tax_summary"
+# tax.data - data frame where column 1 is the start year and column 2 is the is 
+# number of active taxonomists in the time window.
 #
 # en.yr - year at which data ends so as to enable trimming if need be
 # eg 2015
@@ -61,9 +57,9 @@
 #
 #
 #
-regression_search <- function(dir.path, spec.file.name, tax.file.name, en.yr,
-                              mult, guess.n, ratio, stretch, max.it, out.dir,
-                              id.str, mod.dir){
+regression_search_cross_validation <- function(spec.data, tax.data, en.yr, mult,
+                                               guess.n, ratio, stretch, max.it, 
+                                               out.dir, id.str, mod.dir){
 	#
 	# Check for directory and create if needed
 	#
@@ -80,14 +76,6 @@ regression_search <- function(dir.path, spec.file.name, tax.file.name, en.yr,
 	#
 	#
 	########################### DATA PROCESSING ####################################
-	#
-	# Import data
-	#
-	spec.data <- read.csv(paste(dir.path,spec.file.name,".csv",sep=""),
-			      stringsAsFactors = FALSE)
-	tax.data <- read.csv(paste(dir.path,tax.file.name,".csv",sep=""),
-			     stringsAsFactors = FALSE)
-	rm(dir.path,tax.file.name,spec.file.name)
 	#
 	# Merge data
 	#

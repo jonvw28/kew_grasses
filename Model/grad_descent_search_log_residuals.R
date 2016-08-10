@@ -2,10 +2,10 @@
 #                                                                              #
 #                                                                              #
 # This function is an altered implementation of the work of Joppa et al 2010   #
-# in their How many flowering species paper. It takes as input two files, one  #
-# giving aggregated as well as cumulative species for set time windows, the    #
-# other giving number of active taxonomists. These can be easily created using #
-# the scripts in this repository.                                              #
+# in their How many flowering species paper. It takes as input two dataframes, #
+# one giving aggregated as well as cumulative species for set time windows,    #
+# the other giving number of active taxonomists. These can be easily created   #
+# using the scripts in this repository.                                        #
 #                                                                              #
 # This script will then attempt to produce an estimate for total species yet   #
 # to be found using the model as proposed by Joppa. However, the algorithm to  #
@@ -86,16 +86,12 @@
 #
 ########################## EXPLANATION OF ARGUMENTS ############################
 #
-# dir.path- location of csv input files
-# eg "./Output/grass_1755_5y/"
+# spec.data - data frame where column 1 is start year, column 2 is number of new
+# species recorded in the time window, column 3 is the cumulative number of 
+# species up to the given window.
 #
-# spec.file.name - name of csv file with species information 
-# (without .csv at end)
-# eg "grass_1755_5y_spec_summary"
-#
-# tax.file.name - name of csv file with taxonomist information 
-# (without .csv at end)
-# eg "grass_1755_5y_tax_summary"
+# tax.data - data frame where column 1 is the start year and column 2 is the is 
+# number of active taxonomists in the time window.
 #
 # en.yr - year at which data ends so as to enable trimming if need be
 # eg 2015
@@ -157,8 +153,7 @@
 #
 #
 #
-grad_descent_search_log_residuals <- function(dir.path, spec.file.name, 
-                                              tax.file.name, en.yr, mult, 
+grad_descent_search_log_residuals <- function(spec.data, tax.data, en.yr, mult, 
                                               guess.n, ratio, stretch, max.it,
                                               scale, rng.a, rng.b, ab.guesses,
 					      max.grad, alpha, min.alp,
@@ -169,7 +164,7 @@ grad_descent_search_log_residuals <- function(dir.path, spec.file.name,
 
         # Check for directory and create if needed
         #
-        tmp.dir <- paste(out.dir,id.str,"/grad_descent_search_log_residuals/",sep = "")
+        tmp.dir <- paste(out.dir,"/",id.str,"/",mod.dir,sep = "")
         if(dir.exists(tmp.dir)==FALSE){
                 dir.create(tmp.dir,recursive = T)
         }
@@ -181,16 +176,7 @@ grad_descent_search_log_residuals <- function(dir.path, spec.file.name,
         source("./kew_grasses/functions.R")
         #
         #
-        ########################### DATA PROCESSING ####################################
-        #
-        # Import data
-        #
-        spec.data <- read.csv(paste(dir.path,spec.file.name,".csv",sep=""),
-                              stringsAsFactors = FALSE)
-        tax.data <- read.csv(paste(dir.path,tax.file.name,".csv",sep=""),
-                             stringsAsFactors = FALSE)
-        rm(dir.path,tax.file.name,spec.file.name)
-        #
+        ########################### DATA PROCESSING ####################################        #
         # Merge data
         #
         data <- table.merge(spec.data,tax.data,data.index=2,split = 3)
@@ -558,11 +544,11 @@ grad_descent_search_log_residuals <- function(dir.path, spec.file.name,
                 guesses <- seq(scale[2]*start+0.001,mult*scale[2]*start,
                                length.out = guess.n)
                 #
-                png(paste(tmp.dir,id.str,"_error_plot.png",sep=""),width = 960,
+                png(paste(tmp.dir,id.str,"_grad_descent_search_log_residuals_error_plot.png",sep=""),width = 960,
                     height = 960)
                 plot(guesses,res.cache[,1],xlab = "Total Species",
-                     ylab = "Representative Least Squares Score - Log Residuals",
-                     main = paste("Least Squares Error vs Total Species ",
+                     ylab = "Representative Least Squares Score",
+                     main = paste("Least Squares Error vs Total Species - Gradient Descent Search Log Residuals ",
                                   id.str,sep=""),
                      col = "blue",
                      type = 'l')
@@ -577,13 +563,13 @@ grad_descent_search_log_residuals <- function(dir.path, spec.file.name,
                 #
                 # Plot species and taxonomists per year
                 #
-                png(paste(tmp.dir,id.str,"_species_rat.png",sep=""),width = 960,
+                png(paste(tmp.dir,id.str,"_grad_descent_search_log_residuals_species_rat.png",sep=""),width = 960,
                     height = 960)
                 plot(data[,1],data[,2],pch = 21,col='red',
                      ylim = c(0,1.25*max(data[,2])),
                      xlab = "year", ylab = "Number",
                      main = paste("Discovery rates and number of taxonomists",
-                                  " - Log Residuals ",
+                                  " - Gradient Descent Search Log Residuals ",
                                   id.str,sep=""))
                 lines(data[,1],data[,2],pch = 21,col='red')
                 lines(data[,1],data[,4],col = 'blue')
@@ -596,11 +582,11 @@ grad_descent_search_log_residuals <- function(dir.path, spec.file.name,
                 #
                 # Plot species per taxonomist
                 #
-                png(paste(tmp.dir,id.str,"_species_per_tax.png",sep=""),width = 960, 
+                png(paste(tmp.dir,id.str,"_grad_descent_search_log_residuals_species_per_tax.png",sep=""),width = 960, 
                     height = 960)
                 plot(data[,1],data[,2]/data[,4],pch = 21,col='red', ylim = c(0,20),
                      xlab = "year", ylab = "Number",
-                     main = paste("Species per taxonomist - Log Residuals ",
+                     main = paste("Species per taxonomist - Gradient Descent Search Log Residuals ",
                                   id.str,sep=""))
                 lines(data[,1],data[,2]/data[,4],pch = 21,col='red')
                 lines(data[,1],pred/data[,4],col = 'green')
@@ -611,10 +597,12 @@ grad_descent_search_log_residuals <- function(dir.path, spec.file.name,
                 tmp <- cbind(data,pred)
                 
                 write.csv(tmp,
-                          file=paste(tmp.dir,id.str,"_model.csv",sep=""),
+                          file=paste(tmp.dir,id.str,"_grad_descent_search_log_",
+                                     "residuals_model.csv",sep=""),
                           row.names = FALSE)
                 write.csv(t(out.dat),
-                          file=paste(tmp.dir,id.str,"_model_summary.csv",sep=""),
+                          file=paste(tmp.dir,id.str,"_grad_descent_search_log_",
+                                     "residuals_model_summary.csv",sep=""),
                           row.names = FALSE)
         }
         rm(mult,stretch,max.it,ratio,mark,flag,guess.n,start,guesses,results,params)
