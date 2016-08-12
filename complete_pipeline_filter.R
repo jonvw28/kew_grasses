@@ -1,3 +1,7 @@
+# Issue with geographic data thus far
+
+
+
 # This script can be used to replicate the analysis undertaken in the summer
 # project "Where are the missing grasses?" based at RBG Kew in summer 2016.
 #
@@ -46,8 +50,9 @@ loc.file.name <- "Poaceae_distribution"
 #
 ###################### Filtering to subset data ################################
 #
-# Column where filter is to be applied - eg family
-subset.col <- 5
+# Column where filter is to be applied for species and location data set 
+# respectively - eg family
+subset.col <- 3
 #
 # Each subset to be selected - will apply method to each subset
 subset.mk <- c("Poaceae")
@@ -192,38 +197,49 @@ for(s in 1:length(subset.mk)){
         # Identifier string
         id.str <- paste(subset.mk[s],"_",st.yr,"_",int.yr,"_year",sep = "")
         #
-        tmp.dir <- paste(out.dir,subset.mk[s],"/",sep="")
-        tmp.spec <- paste(spec.file.name,"_",subest.mk[s],sep="")
-        tmp.loc <- paste(locc.file.name,"_",subest.mk[s],sep="")
+        tmp.dir <- paste(out.dir,"/",id.str,"/",sep="")
+        tmp.spec <- paste(spec.file.name,"_",subset.mk[s],sep="")
+        tmp.loc <- paste(loc.file.name,"_",subset.mk[s],sep="")
         #
-        csv_filter(dir.path, spec.file.name, subset.col, subset.mk[s],
-                   tmp.dir, tmp.spec)
-        csv_filter(dir.path, loc.file.name, subset.col, subset.mk[s],
-                   tmp.dir, tmp.loc)
+        csv_filter(dir.path, paste(spec.file.name,".csv",sep=""), subset.col, 
+                   subset.mk[s], tmp.dir, paste(tmp.spec,".csv",sep=""))
+        
+        #
+        #
+        # HERE BE ISSUE ~~~~~~~~~~~~~~ Don't currently have a location filter possible
+        # Could simply rely on filtering based on plant id
+        #
+        #
+        write.csv(read.csv(paste(dir.path,loc.file.name,".csv",sep=""),
+                           stringsAsFactors = FALSE),
+                  file=paste(tmp.dir,tmp.loc,".csv",sep =""),
+                  row.names = FALSE)
+        
+        
         #
         # Complete the aggregated species data processing
         #
         cat("Processing Aggregate Species Data...\n")
         source("./kew_grasses/data_processing/species_data.R")
-        species_data(dir.path, tmp.spec, tmp.loc, id.ind, yr.ind, tax.stat,
+        species_data(tmp.dir, tmp.spec, tmp.loc, id.ind, yr.ind, tax.stat,
                      stat.ind, stat.mk, hyb.stat, hyb.ind, hyb.mk, rnk.stat, rnk.ind,
                      rnk.mk, filt.ind, filt.mk, loc.ind, levels, st.yr, en.yr, int.yr, 
-                     tmp.dir, spec.dir, id.str)
+                     out.dir, spec.dir, id.str)
         cat("Complete!\n\n")
         #
         # Complete the aggregated taxonomist data processing
         #
         cat("Processing Aggregate Taxonomists Data...\n")
         source("./kew_grasses/data_processing/author_data.R")
-        author_data(dir.path, tmp.spec, tmp.loc, id.ind, yr.ind,auth.ind, 
+        author_data(tmp.dir, tmp.spec, tmp.loc, id.ind, yr.ind,auth.ind, 
                     tax.stat, stat.ind, stat.mk, hyb.stat, hyb.ind, hyb.mk, rnk.stat,
                     rnk.ind, rnk.mk, filt.ind, filt.mk, loc.ind, levels, st.yr, en.yr, 
-                    int.yr, tmp.dir, tax.dir, id.str)
+                    int.yr, out.dir, tax.dir, id.str)
         cat("Complete!\n\n")
         #
         # locations of the aggregate output
         #
-        agg.loc <- paste(tmp.dir,"/",id.str,"/",sep="")
+        agg.loc <- paste(out.dir,"/",id.str,"/",sep="")
         agg.spec <- paste(spec.dir,"/",id.str,"_species_overall_summary",sep = "")
         agg.tax <- paste(tax.dir,"/",id.str,"_tax_overall_summary",sep = "")
         #
@@ -239,7 +255,7 @@ for(s in 1:length(subset.mk)){
         cat("Computing Regression Search Model...\n")
         source("./kew_grasses/model/regression_search.R")
         regression_search(spec.data, tax.data, en.yr, mult, guess.n, ratio, stretch, 
-                          max.it, tmp.dir, id.str, mod.dir=reg.dir)
+                          max.it, out.dir, id.str, mod.dir=reg.dir)
         cat("Complete!\n\n")
         #
         # Run complete normal regression search method cross validation for global data
@@ -249,7 +265,7 @@ for(s in 1:length(subset.mk)){
                 cat("Computing Regression Search Model cross validation...\n")
                 source("./kew_grasses/model/regression_search_cross_validation.R")
                 regression_search_cross_validation(spec.data, tax.data, en.yr, mult, guess.n, 
-                                                   ratio, stretch, max.it, tmp.dir, id.str, 
+                                                   ratio, stretch, max.it, out.dir, id.str, 
                                                    mod.dir=regcv.dir)
                 cat("Complete!\n\n")
         }
@@ -263,7 +279,7 @@ for(s in 1:length(subset.mk)){
                 grad_descent_search_log_residuals(spec.data, tax.data, en.yr, mult, guess.n,
                                                   ratio, stretch, max.it, scale, rng.a, rng.b,
                                                   ab.guesses, max.grad, alpha, min.alp, 
-                                                  grad.rat, tmp.dir,id.str, mod.dir=log.dir)
+                                                  grad.rat, out.dir,id.str, mod.dir=log.dir)
                 cat("Complete!\n\n")  
         }
         rm(spec.data,tax.data)
@@ -307,7 +323,7 @@ for(s in 1:length(subset.mk)){
                         capture.output(regression_search(spec.data[,c(1,j+1,j+n.region+1)], 
                                           tax.data[,c(1,j+1)], en.yr, mult, guess.n, 
                                           ratio, stretch, 
-                                          max.it, tmp.dir, id.str, 
+                                          max.it, out.dir, id.str, 
                                           mod.dir=paste(reg.dir,"/",levels[i],"/",
                                                         tmp.reg,sep="")
                                           ),
@@ -318,7 +334,7 @@ for(s in 1:length(subset.mk)){
                                                                    tax.data[,c(1,j+1)],
                                                                    en.yr, mult, guess.n, 
                                                                    ratio, stretch, max.it,
-                                                                   tmp.dir, id.str, 
+                                                                   out.dir, id.str, 
                                                                    mod.dir=paste(reg.dir,"/",levels[i],"/",
                                                                                  tmp.reg,sep="")
                                                                    ),
@@ -331,7 +347,7 @@ for(s in 1:length(subset.mk)){
                                                                   guess.n, ratio, stretch, max.it, 
                                                                   scale, rng.a, rng.b, ab.guesses, 
                                                                   max.grad, alpha, min.alp, 
-                                                                  grad.rat, tmp.dir,id.str, 
+                                                                  grad.rat, out.dir,id.str, 
                                                                   mod.dir=paste(reg.dir,"/",levels[i],"/",
                                                                                 tmp.reg,sep="")
                                                                   ),

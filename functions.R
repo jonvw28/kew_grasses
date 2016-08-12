@@ -249,6 +249,11 @@ csv_filter <- function(dir.path, file.name, filter.col, filter.mk,
         # by filter.mk in the column filter.col. This then outputs a .csv file
         # in the directory given by out.dir and with the name out.file.name
         #
+        # Create output directory if needed
+        if(dir.exists(out.dir)==FALSE){
+                dir.create(out.dir,recursive = T)
+        }
+        #
         data <- read.csv(paste(dir.path,file.name,sep=""),
                          stringsAsFactors = FALSE) 
         ind <- NULL
