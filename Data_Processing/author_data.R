@@ -134,8 +134,16 @@ dir.name, id.str){
 	#
 	spec.data <- read.csv(paste(dir.path,spec.file.name,".csv",sep=""),
 			 stringsAsFactors = FALSE)
+	if(nrow(spec.data)==0){
+	        stop("Species dataset contains no data")
+	}
+	spec.data[is.na(spec.data)] <- ""
 	loc.data <- read.csv(paste(dir.path,loc.file.name,".csv",sep=""),
 			     stringsAsFactors = FALSE)
+	if(nrow(loc.data)==0){
+	        stop("Location dataset contains no data")
+	}
+	loc.data[is.na(loc.data)] <- ""
 	rm(dir.path,loc.file.name,spec.file.name)
 	#
 	#
@@ -232,8 +240,11 @@ dir.name, id.str){
 	}
 	if(hyb.stat){
 		for(p in 1:length(hyb.ind)){
-			tmp <- which(names.data[,3+filter.table[1]+p] != hyb.mk[p])
-			names.data <- names.data[tmp,]
+		        tmp <- which(names.data[,3+filter.table[1]+p] == hyb.mk[p])
+		        # get error if filter has nothing to remove
+		        if(length(tmp)>0){
+        		        names.data <- names.data[-tmp,]
+        		}
 			rm(tmp)
 		}
 		rm(p)
@@ -249,8 +260,15 @@ dir.name, id.str){
 	# Deal with the missing author names
 	#
 	miss.ind <- which(summary(strsplit(names.data[,3],'&'))[,1] == 0)
-	names.data <- names.data[-miss.ind,]
+	# get error if filter has nothing to remove
+	if(length(miss.ind)>0){
+	        names.data <- names.data[-miss.ind,]
+	}
 	rm(miss.ind)
+	#
+	if(nrow(names.data)==0){
+	        stop("After Filtering there is no data left")
+	}
 	#
 	# Apply Method from Joppa et al, 2011 to count authors
 	#
@@ -288,8 +306,11 @@ dir.name, id.str){
 	}
 	if(hyb.stat){
 		for(p in 1:length(hyb.ind)){
-			tmp <- which(loc.data[,tmp.l+2+filter.table[1]+p] != hyb.mk[p])
-			loc.data <- loc.data[tmp,]
+			tmp <- which(loc.data[,tmp.l+2+filter.table[1]+p] == hyb.mk[p])
+			# get error if filter has nothing to remove
+			if(length(tmp)>0){
+			        loc.data <- loc.data[-tmp,]
+			}
 			rm(tmp)
 		}
 		rm(p)
@@ -306,8 +327,15 @@ dir.name, id.str){
 	# Deal with the missing author names
 	#
 	miss.ind <- which(summary(strsplit(loc.data[,tmp.l+2],'&'))[,1] == 0)
-	loc.data <- loc.data[-miss.ind,]
+	# get error if filter has nothing to remove
+	if(length(miss.ind)>0){
+	        loc.data <- loc.data[-miss.ind,]
+	}
 	rm(miss.ind)
+	#
+	if(nrow(loc.data)==0){
+	        stop("after filtering there is no location data")
+	}
 	#
 	# split the names in the location merge
 	#

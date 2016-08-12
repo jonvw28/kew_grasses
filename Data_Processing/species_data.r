@@ -128,9 +128,17 @@ dir.name, id.str){
 	# Import data
 	#
 	spec.data <- read.csv(paste(dir.path,spec.file.name,".csv",sep=""),
-			 stringsAsFactors = FALSE)
+	                      stringsAsFactors = FALSE)
+	if(nrow(spec.data)==0){
+	        stop("Species dataset contains no data")
+	}
+	spec.data[is.na(spec.data)] <- ""
 	loc.data <- read.csv(paste(dir.path,loc.file.name,".csv",sep=""),
-			     stringsAsFactors = FALSE)
+	                     stringsAsFactors = FALSE)
+	if(nrow(loc.data)==0){
+	        stop("Location dataset contains no data")
+	}
+	loc.data[is.na(loc.data)] <- ""
 	rm(dir.path,loc.file.name,spec.file.name)
 	#
 	# Tidy up publication date data into numeric format, removing brackets
@@ -200,10 +208,16 @@ dir.name, id.str){
 	}
 	if(hyb.stat){
 		for(p in 1:length(hyb.ind)){
-			tmp <- which(loc.data[,tmp.l+1+filter.table[1]+p] != hyb.mk[p])
-			loc.data <- loc.data[tmp,]
-			tmp2 <- which(spec.data[,hyb.ind[p]] != hyb.mk[p])
-			spec.data <- spec.data[tmp2,]
+			tmp <- which(loc.data[,tmp.l+1+filter.table[1]+p] == hyb.mk[p])
+			# get error if filter has nothing to remove
+			if(length(tmp)>0){
+			        loc.data <- loc.data[-tmp,]
+			}
+			tmp2 <- which(spec.data[,hyb.ind[p]] == hyb.mk[p])
+			if(length(tmp2)>0){
+			        spec.data <- spec.data[-tmp2,]
+			}
+
 			rm(tmp,tmp2)
 		}
 		rm(p)
