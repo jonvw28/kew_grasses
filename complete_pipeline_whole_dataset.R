@@ -1,5 +1,11 @@
-
-
+# This script can be used to replicate the analysis undertaken in the summer
+# project "Where are the missing grasses?" based at RBG Kew in summer 2016.
+#
+# For a full explanation of the script and the methods it employs, as well as
+# how to use it yourself please see the readme in this repository.
+#
+#
+################################################################################
 #
 # SET DIRECTORY where you have downloaded repository (ie before /kew_grasses)
 #
@@ -7,7 +13,7 @@ setwd("~/Kew Summer")
 #
 ############################ SET INPUT VALUES HERE #############################
 #
-##################### Select models to apply
+######################## Select models to apply ################################
 #
 # By default, the regression search model will be applied to the global data as 
 # as well as to each level in region data. Cross validation and the Joppa method 
@@ -27,7 +33,7 @@ global.joppa <- FALSE
 region.joppa <- FALSE
 #
 #
-################## RAW DATA LOCATION - WCSP download
+####################### RAW DATA LOCATION - WCSP download ######################
 #
 # Directory path - location of csv input files
 dir.path <- "./Data/07_05/"
@@ -38,7 +44,7 @@ spec.file.name <- "public_checklist_flat_plant_dl_20160705_poaceae"
 #(without .csv at end)
 loc.file.name <- "Poaceae_distribution"
 #
-######################## INDICES IN DATA FILES
+########################## INDICES IN DATA FILES ###############################
 #
 # Plant ID column - indices of the columns where plant IDs are held for the
 # species and location data respectively
@@ -54,7 +60,7 @@ loc.ind <- c(4,6)
 # Names of each level of regions
 levels <- c("TDWG1","TDWG2")
 #
-#################### DATA FILTERING
+############################# DATA FILTERING ###################################
 #
 # Taxonomic status filtering - if set to true then there will be filtering to 
 # only allow authors of species of the status specified in the column given
@@ -76,7 +82,7 @@ rnk.mk <- c("Species")
 filt.ind <- c(11,12,13,14)
 filt.mk <- c(1,1,1,1)
 #
-#################### MODEL PARAMETERS
+####################### MODEL PARAMETERS #######################################
 #
 # Start year
 st.yr <- 1766
@@ -85,7 +91,7 @@ en.yr <- 2015
 # Window Interval - how many years you want aggregation to occur over
 int.yr <- 5
 #
-######## St SEARCH PARAMETERS
+###################### St SEARCH PARAMETERS ####################################
 #
 # multiple of current total species to start at as maxmimum guess for St
 mult <- 3
@@ -99,8 +105,7 @@ stretch <- 1.5
 # Max iteratations of guessing St
 max.it <- 20
 #
-################## Gradient Descent Parameters
-#
+###################### Gradient Descent Parameters #############################
 #
 # Scaling to apply to taxonomist numbers and species numbers respectively
 # (years are dealt with automatically) - This is to help gradient descent
@@ -130,7 +135,7 @@ min.alp <- 2e-14
 # terminated - ie once this ratio is reached, gradient descent ends
 grd.rat <- 1e-4
 #
-################## OUTPUT SAVE LOCATIONS
+######################### OUTPUT SAVE LOCATIONS ################################
 #
 # Output directory
 out.dir <- "./Output"
