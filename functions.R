@@ -240,6 +240,27 @@ name.formatter <- function(df,col.ind,comma = TRUE,in.tag=TRUE,in.inc=TRUE,
         df
 }
 #
+#
+csv_filter <- function(dir.path, file.name, filter.col, filter.mk,
+                       out.dir, out.file.name){
+        #
+        # Function that reads a .csv file at the directory dir.path and filters
+        # the data to only include the data which matches the selections given
+        # by filter.mk in the column filter.col. This then outputs a .csv file
+        # in the directory given by out.dir and with the name out.file.name
+        #
+        data <- read.csv(paste(dir.path,file.name,sep=""),
+                         stringsAsFactors = FALSE) 
+        ind <- NULL
+        for(i in 1:length(filter.mk)){
+                ind <- c(ind,which(data[,filter.col]==filter.mk[i]))
+        }
+        data <- data[ind,]
+        write.csv(data,file=paste(out.dir,out.file.name,sep =""),
+                  row.names = FALSE)
+}
+#
+#
 ################################################################################
 #                                                                              #
 # Functions based on work of Joppa et al 2011                                  #
