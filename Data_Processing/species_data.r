@@ -105,11 +105,12 @@
 # eg "grass_1755_5y"
 #
 #
-species_data <- function(dir.path, spec.file.name, loc.file.name, id.ind, 
-yr.ind, tax.stat=FALSE, stat.ind=NULL, stat.mk=NULL, hyb.stat=FALSE,
-hyb.ind=NULL, hyb.mk=NULL, rnk.stat=FALSE, rnk.ind=NULL, rnk.mk=NULL,
-filt.ind=NULL, filt.mk=NULL, loc.ind, levels, st.yr, en.yr, int.yr, out.dir,
-dir.name, id.str){
+species_data <- function(dir.path, spec.file.name, loc.file.name = NULL, id.ind, 
+                         yr.ind, tax.stat=FALSE, stat.ind=NULL, stat.mk=NULL, 
+                         hyb.stat=FALSE, hyb.ind=NULL, hyb.mk=NULL, 
+                         rnk.stat=FALSE, rnk.ind=NULL, rnk.mk=NULL,
+                         filt.ind=NULL, filt.mk=NULL, loc.ind=NULL, levels=NULL,
+                         st.yr, en.yr, int.yr,out.dir,dir.name, id.str){
 	#
 	# Check for directory and create if needed
 	#
@@ -133,13 +134,19 @@ dir.name, id.str){
 	        stop("Species dataset contains no data")
 	}
 	spec.data[is.na(spec.data)] <- ""
-	loc.data <- read.csv(paste(dir.path,loc.file.name,".csv",sep=""),
-	                     stringsAsFactors = FALSE)
-	if(nrow(loc.data)==0){
-	        stop("Location dataset contains no data")
+	#
+	# Import location data if appropriate
+	#
+	if(!is.null(levels)){
+	        loc.data <- read.csv(paste(dir.path,loc.file.name,".csv",sep=""),
+	                             stringsAsFactors = FALSE)
+	        if(nrow(loc.data)==0){
+	                stop("Location dataset contains no data")
+	        }
+	        loc.data[is.na(loc.data)] <- ""
+	        rm(loc.file.name)
 	}
-	loc.data[is.na(loc.data)] <- ""
-	rm(dir.path,loc.file.name,spec.file.name)
+	rm(dir.path,spec.file.name)
 	#
 	# Tidy up publication date data into numeric format, removing brackets
 	#
@@ -160,18 +167,24 @@ dir.name, id.str){
 	#
 	# Filter out any messy location data
 	#
-	for(i in 1:length(filt.ind)){
-		tmp <- which(loc.data[,filt.ind[i]] == filt.mk[i])
-		loc.data <- loc.data[-tmp,]
-		rm(tmp)
+	if(!is.null(levels)){
+	        if(length(filt.ind) > 0){
+	                for(i in 1:length(filt.ind)){
+	                        tmp <- which(loc.data[,filt.ind[i]] == filt.mk[i])
+	                        loc.data <- loc.data[-tmp,]
+	                        rm(tmp)
+	                }
+	                rm(i,filt.ind,filt.mk)   
+	        }
 	}
-	rm(i,filt.ind,filt.mk)
 	#
 	# Select relevant location data
 	#
-	loc.data <- loc.data[c(id.ind[2],loc.ind)]
-	tmp.l <- ncol(loc.data)
-	rm(loc.ind)
+	if(!is.null(levels)){
+	        loc.data <- loc.data[,c(id.ind[2],loc.ind)]
+	        tmp.l <- ncol(loc.data)
+	        rm(loc.ind) 
+	}
 	#
 	# Append location data with species status, hybrid status, rank and year of
 	# publication
@@ -189,14 +202,18 @@ dir.name, id.str){
 	#
 	# Make the merge
 	#
-	loc.data <- table.merge(loc.data,spec.data,id = c(id.ind[1],1),
-				data.index = data.index,
-				split = tmp.l)
+	if(!is.null(levels)){
+	        loc.data <- table.merge(loc.data,spec.data,id = c(id.ind[1],1),
+	                                data.index = data.index,
+	                                split = tmp.l)   
+	}
 	#
 	# Remove the NAs
 	#
 	spec.data <- spec.data[which(is.na(spec.data[,yr.ind])==FALSE),]
-	loc.data <- loc.data[which(is.na(loc.data[,tmp.l+1])==FALSE),]
+	if(!is.null(levels)){
+	        loc.data <- loc.data[which(is.na(loc.data[,tmp.l+1])==FALSE),]        
+	}
 	#
 	#
 	# Deal with filters if appropriate
@@ -204,38 +221,45 @@ dir.name, id.str){
 	filter.table <- c(tax.stat,hyb.stat,rnk.stat)
 	if(tax.stat){
 		spec.data <- spec.data[which(spec.data[,stat.ind] %in% stat.mk),]
-		loc.data <- loc.data[which(loc.data[,tmp.l+2] %in% stat.mk),]
+		if(!is.null(levels)){
+		        loc.data <- loc.data[which(loc.data[,tmp.l+2] %in% stat.mk),]        
+		}
+		
 	}
 	if(hyb.stat){
 		for(p in 1:length(hyb.ind)){
-			tmp <- which(loc.data[,tmp.l+1+filter.table[1]+p] == hyb.mk[p])
-			# get error if filter has nothing to remove
-			if(length(tmp)>0){
-			        loc.data <- loc.data[-tmp,]
-			}
+		        if(!is.null(levels)){
+		                tmp <- which(loc.data[,tmp.l+1+filter.table[1]+p] == hyb.mk[p])
+		                # get error if filter has nothing to remove
+		                if(length(tmp)>0){
+		                        loc.data <- loc.data[-tmp,]
+		                }
+		                rm(tmp)
+		        }
 			tmp2 <- which(spec.data[,hyb.ind[p]] == hyb.mk[p])
 			if(length(tmp2)>0){
 			        spec.data <- spec.data[-tmp2,]
 			}
-
-			rm(tmp,tmp2)
+			rm(tmp2)
 		}
 		rm(p)
 	}
 	if(rnk.stat){
-		tmp.ind <- 2+filter.table[1]+length(hyb.ind)*filter.table[2]+tmp.l
-		loc.data <- loc.data[which(loc.data[,tmp.ind] %in% rnk.mk),]
-		rm(tmp.ind)
+	        if(!is.null(levels)){
+	                tmp.ind <- 2+filter.table[1]+length(hyb.ind)*filter.table[2]+tmp.l
+	                loc.data <- loc.data[which(loc.data[,tmp.ind] %in% rnk.mk),]
+	                rm(tmp.ind)        
+	        }
 		spec.data <- spec.data[which(spec.data[,rnk.ind] %in% rnk.mk),]
 	}
 	#
 	# Pick out only relevant data
 	#
 	spec.data <- spec.data[,c(id.ind[1],yr.ind)]
-	loc.data <- loc.data[,1:(tmp.l+1)]
-	rm(yr.ind,stat.ind,hyb.mk,hyb.ind,tmp.l,id.ind,rnk.ind,rnk.mk,rnk.stat,tax.stat,
-	hyb.stat,stat.mk,filter.table,data.index)
-	#
+	if(!is.null(levels)){
+	        loc.data <- loc.data[,1:(tmp.l+1)]	        
+	}
+        #
 	# Summarise totals in each window plus cumulative total
 	#
 	yrs<-seq(st.yr,en.yr,int.yr)
@@ -277,108 +301,110 @@ dir.name, id.str){
 	#
 	# Deal with location data
 	#
-	loc.sum <- c()
-	loc.code <-c()
-	for (j in 1:(ncol(loc.data)-2)){
-		loc.sum[[j]] <- as.data.frame(matrix(data=0,nrow=length(yrs),
-						     ncol=2*length(unique(
-							     loc.data[,j+1]))+3))
-		loc.code[[j]] <- unique(loc.data[,j+1])
-		loc.sum[[j]][,1] <- yrs
-		names(loc.sum[[j]]) <- c("Start_Year",loc.code[[j]],"Non_endogenous",
-					 paste(loc.code[[j]],"cumulative",
-					       sep = "_"),"Non_endogenous_cumulative")
+	if(!is.null(levels)){
+        	loc.sum <- c()
+        	loc.code <-c()
+        	for (j in 1:(ncol(loc.data)-2)){
+        		loc.sum[[j]] <- as.data.frame(matrix(data=0,nrow=length(yrs),
+        						     ncol=2*length(unique(
+        							     loc.data[,j+1]))+3))
+        		loc.code[[j]] <- unique(loc.data[,j+1])
+        		loc.sum[[j]][,1] <- yrs
+        		names(loc.sum[[j]]) <- c("Start_Year",loc.code[[j]],"Non_endogenous",
+        					 paste(loc.code[[j]],"cumulative",
+        					       sep = "_"),"Non_endogenous_cumulative")
+        	}
+        	rm(j)
+        	#
+        	# Collect data
+        	#
+        	for(k in 1:(ncol(loc.data)-2)){
+        		#
+        		# slimline data to non-redundant data at relevent detail level
+        		tmp.data <- unique(loc.data[,c(1,k+1,ncol(loc.data))])
+        		leng <- length(loc.code[[k]])
+        		#
+        		# Deal with endogeny
+        		#
+        		end.test <- as.data.frame(table(tmp.data[,1]),stringsAsFactors = F)
+        		end.test[,1] <- as.numeric(end.test[,1])
+        		end.id <- end.test[which(end.test[,2] == 1),1] %>%
+        			match(tmp.data[,1],.) %>%
+        			is.na() == F
+        		end.ind <- which(end.id)
+        		non.id <- end.test[which(end.test[,2] > 1),1] %>%
+        			match(tmp.data[,1],.) %>%
+        			is.na() == F
+        		non.ind <- which(non.id)
+        		rm(end.id,non.id,end.test)
+        		#
+        		tmp <- character(nrow(tmp.data))
+        		tmp.data <- cbind(tmp.data,tmp,stringsAsFactors=F)
+        		names(tmp.data)[ncol(tmp.data)] <- "endogeny_status"
+        		rm(tmp)
+        		tmp.data[end.ind,ncol(tmp.data)] <- "E"
+        		tmp.data[non.ind,ncol(tmp.data)] <- "NE"
+        		rm(end.ind,non.ind)
+        		#
+        		# Deal with already existing species
+        		#
+        		tmp <- tmp.data[which(tmp.data[,3] < yrs[1]),]
+        		non.end <- tmp[which(tmp[,4]=="NE"),]
+        		loc.sum[[k]][1,2*leng+3] <- length(unique(non.end[,1]))
+        		end <- tmp[which(tmp[,4]=="E"),]
+        		for(s in 1:leng){
+        			tmp.inf <- end[which(end[,2] == loc.code[[k]][s]),]
+        			loc.sum[[k]][1,leng+2+s] <- nrow(tmp.inf)
+        			rm(tmp.inf)
+        		}
+        		rm(tmp,non.end,end)
+        		#
+        		# Year window summaries
+        		#
+        		for (p in 1:length(yrs)){
+        			tmp <- tmp.data[which(
+        				tmp.data[,3] >= yrs[p] & tmp.data[,3] < yrs[p]+int.yr),]
+        			non.end <- tmp[which(tmp[,4]=="NE"),]
+        			loc.sum[[k]][p,leng+2] <- length(unique(non.end[,1]))
+        			if (p > 1){
+        				loc.sum[[k]][p,2*leng+3] <- (loc.sum[[k]][p-1,2*leng+3] 
+        						     + loc.sum[[k]][p-1,leng+2])
+        			}
+        			rm(non.end)
+        			end <- tmp[which(tmp[,4]=="E"),]
+        			for(r in 1:leng){
+        				tmp.inf <- end[which(end[,2] == loc.code[[k]][r]),]
+        				loc.sum[[k]][p,r+1] <- nrow(tmp.inf)
+        				if (p > 1){ 
+        					loc.sum[[k]][p,leng+2+r] <- (loc.sum[[k]][p-1,
+        										  leng+r+2] 
+        								+ loc.sum[[k]][[p-1,r+1]])
+        				}
+        				rm(tmp.inf)
+        			}
+        			rm(tmp,end,r)
+        		}
+        		rm(p,leng,tmp.data)
+        	}
+        	rm(k,int.yr,yrs,loc.data,loc.code)
+        	#
+        	# Save Output
+        	#
+        	for (s in 1:length(loc.sum)){
+        		#
+        		# Set up output directory
+        		#
+        		lvl.dir <- paste(tmp.dir,levels[s],"/",sep = "")
+        		if(dir.exists(lvl.dir)==FALSE){
+        			dir.create(lvl.dir,recursive = T)
+        		}
+        		#
+        		write.csv(loc.sum[[s]],
+        			  file=paste(lvl.dir,id.str,"_species_summary_",levels[s],
+        				     ".csv",sep =""),
+        			  row.names = FALSE)
+        		rm(lvl.dir)
+        	}
+        	rm(s,loc.sum,tmp.dir,id.str,levels)
 	}
-	rm(j)
-	#
-	# Collect data
-	#
-	for(k in 1:(ncol(loc.data)-2)){
-		#
-		# slimline data to non-redundant data at relevent detail level
-		tmp.data <- unique(loc.data[,c(1,k+1,ncol(loc.data))])
-		leng <- length(loc.code[[k]])
-		#
-		# Deal with endogeny
-		#
-		end.test <- as.data.frame(table(tmp.data[,1]),stringsAsFactors = F)
-		end.test[,1] <- as.numeric(end.test[,1])
-		end.id <- end.test[which(end.test[,2] == 1),1] %>%
-			match(tmp.data[,1],.) %>%
-			is.na() == F
-		end.ind <- which(end.id)
-		non.id <- end.test[which(end.test[,2] > 1),1] %>%
-			match(tmp.data[,1],.) %>%
-			is.na() == F
-		non.ind <- which(non.id)
-		rm(end.id,non.id,end.test)
-		#
-		tmp <- character(nrow(tmp.data))
-		tmp.data <- cbind(tmp.data,tmp,stringsAsFactors=F)
-		names(tmp.data)[ncol(tmp.data)] <- "endogeny_status"
-		rm(tmp)
-		tmp.data[end.ind,ncol(tmp.data)] <- "E"
-		tmp.data[non.ind,ncol(tmp.data)] <- "NE"
-		rm(end.ind,non.ind)
-		#
-		# Deal with already existing species
-		#
-		tmp <- tmp.data[which(tmp.data[,3] < yrs[1]),]
-		non.end <- tmp[which(tmp[,4]=="NE"),]
-		loc.sum[[k]][1,2*leng+3] <- length(unique(non.end[,1]))
-		end <- tmp[which(tmp[,4]=="E"),]
-		for(s in 1:leng){
-			tmp.inf <- end[which(end[,2] == loc.code[[k]][s]),]
-			loc.sum[[k]][1,leng+2+s] <- nrow(tmp.inf)
-			rm(tmp.inf)
-		}
-		rm(tmp,non.end,end)
-		#
-		# Year window summaries
-		#
-		for (p in 1:length(yrs)){
-			tmp <- tmp.data[which(
-				tmp.data[,3] >= yrs[p] & tmp.data[,3] < yrs[p]+int.yr),]
-			non.end <- tmp[which(tmp[,4]=="NE"),]
-			loc.sum[[k]][p,leng+2] <- length(unique(non.end[,1]))
-			if (p > 1){
-				loc.sum[[k]][p,2*leng+3] <- (loc.sum[[k]][p-1,2*leng+3] 
-						     + loc.sum[[k]][p-1,leng+2])
-			}
-			rm(non.end)
-			end <- tmp[which(tmp[,4]=="E"),]
-			for(r in 1:leng){
-				tmp.inf <- end[which(end[,2] == loc.code[[k]][r]),]
-				loc.sum[[k]][p,r+1] <- nrow(tmp.inf)
-				if (p > 1){ 
-					loc.sum[[k]][p,leng+2+r] <- (loc.sum[[k]][p-1,
-										  leng+r+2] 
-								+ loc.sum[[k]][[p-1,r+1]])
-				}
-				rm(tmp.inf)
-			}
-			rm(tmp,end,r)
-		}
-		rm(p,leng,tmp.data)
-	}
-	rm(k,int.yr,yrs,loc.data,loc.code)
-	#
-	# Save Output
-	#
-	for (s in 1:length(loc.sum)){
-		#
-		# Set up output directory
-		#
-		lvl.dir <- paste(tmp.dir,levels[s],"/",sep = "")
-		if(dir.exists(lvl.dir)==FALSE){
-			dir.create(lvl.dir,recursive = T)
-		}
-		#
-		write.csv(loc.sum[[s]],
-			  file=paste(lvl.dir,id.str,"_species_summary_",levels[s],
-				     ".csv",sep =""),
-			  row.names = FALSE)
-		rm(lvl.dir)
-	}
-	rm(s,loc.sum,tmp.dir,id.str,levels)
 }

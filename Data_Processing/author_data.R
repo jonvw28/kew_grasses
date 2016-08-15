@@ -8,10 +8,12 @@
 # showing how many species they were authors on, broken down by the number of  #
 # authors on each of these papers                                	       #
 #                                                                              #
-# The csv files outputted include aggregated worldwide data, as well as a      #
-# breakdown at the specified geograhic levels of levels of endogenous species  #
-# Here endogenous is taken to mean only naturally present in one region at     #
-# the given level of geographic zoning                                         #
+# The csv files outputted include aggregated worldwide data, if the optional   #
+# location csv has been included, in such a case the levels argument will need #
+# to be specified or else the location breakdown will not take place. There    #
+# will also be a breakdown at the specified geographic levels of levels of     #
+# endogenous species.,Here endogenous is taken to mean only naturally present  #
+# in one region at the given level of geographic zoning                        #
 #                                                                              #
 # Excluding brackets, the year of publication will need to be in a 4 digit     #
 # format and be at the end of the entry in the year column for each row.       #
@@ -88,7 +90,8 @@
 # stored for the levels of interest
 # eg c(4,6)
 #
-# levels - Names of each level of regional data
+# levels - Names of each level of regional data - if NULL then the location 
+# breakdown will not take place
 # eg c("TDWG1","TDWG2")
 #
 # st.yr - Start year
@@ -111,11 +114,12 @@
 #
 #
 #
-author_data <- function(dir.path, spec.file.name, loc.file.name, id.ind, yr.ind,
-auth.ind, tax.stat=FALSE, stat.ind=NULL, stat.mk=NULL, hyb.stat=FALSE,
-hyb.ind=NULL, hyb.mk=NULL, rnk.stat=FALSE, rnk.ind=NULL, rnk.mk=NULL,
-filt.ind=NULL, filt.mk=NULL, loc.ind, levels, st.yr, en.yr, int.yr, out.dir,
-dir.name, id.str){
+author_data <- function(dir.path, spec.file.name, loc.file.name=NULL, id.ind,
+                        yr.ind, auth.ind, tax.stat=FALSE, stat.ind=NULL, 
+                        stat.mk=NULL, hyb.stat=FALSE, hyb.ind=NULL, 
+                        hyb.mk=NULL, rnk.stat=FALSE, rnk.ind=NULL, rnk.mk=NULL,
+                        filt.ind=NULL, filt.mk=NULL, loc.ind=NULL, levels=NULL,
+                        st.yr, en.yr, int.yr, out.dir, dir.name, id.str){
 	#
 	# Check for directory and create if needed
 	#
@@ -138,13 +142,19 @@ dir.name, id.str){
 	        stop("Species dataset contains no data")
 	}
 	spec.data[is.na(spec.data)] <- ""
-	loc.data <- read.csv(paste(dir.path,loc.file.name,".csv",sep=""),
-			     stringsAsFactors = FALSE)
-	if(nrow(loc.data)==0){
-	        stop("Location dataset contains no data")
+	#
+	# Import location data if appropriate
+	#
+	if(!is.null(levels)){
+        	loc.data <- read.csv(paste(dir.path,loc.file.name,".csv",sep=""),
+        			     stringsAsFactors = FALSE)
+        	if(nrow(loc.data)==0){
+        	        stop("Location dataset contains no data")
+        	}
+	        loc.data[is.na(loc.data)] <- ""
+	        rm(loc.file.name)
 	}
-	loc.data[is.na(loc.data)] <- ""
-	rm(dir.path,loc.file.name,spec.file.name)
+	rm(dir.path,spec.file.name)
 	#
 	#
 	#### Tidy up publication date data into numeric format, removing brackets ######
@@ -184,20 +194,25 @@ dir.name, id.str){
 	#
 	# Filter out any location data which is irrelevant - eg introduced species
 	#
-	if(length(filt.ind) > 0){
-		for(i in 1:length(filt.ind)){
-			tmp <- which(loc.data[,filt.ind[i]] == filt.mk[i])
-			loc.data <- loc.data[-tmp,]
-			rm(tmp)
-		}
+	if(!is.null(levels)){
+	        if(length(filt.ind) > 0){
+	                for(i in 1:length(filt.ind)){
+	                        tmp <- which(loc.data[,filt.ind[i]] == filt.mk[i])
+	                        loc.data <- loc.data[-tmp,]
+	                        rm(tmp)
+	                }
+	                rm(i,filt.ind,filt.mk)   
+	        }
 	}
-	rm(i,filt.ind,filt.mk)
+
 	#
 	# Select relevant location data
 	#
-	loc.data <- loc.data[,c(id.ind[2],loc.ind)]
-	tmp.l <- ncol(loc.data)
-	rm(loc.ind)
+	if(!is.null(levels)){
+	        loc.data <- loc.data[,c(id.ind[2],loc.ind)]
+	        tmp.l <- ncol(loc.data)
+	        rm(loc.ind) 
+	}
 	#
 	# Append location data with species author and year of
 	# publication - as well as markers if appropriate
@@ -215,14 +230,18 @@ dir.name, id.str){
 	#
 	# Make the merge
 	#
-	loc.data <- table.merge(loc.data,spec.data,id = c(id.ind[1],1),
-				data.index = data.index,
-				split = tmp.l)
+	if(!is.null(levels)){
+	        loc.data <- table.merge(loc.data,spec.data,id = c(id.ind[1],1),
+	                                data.index = data.index,
+	                                split = tmp.l)   
+	}
 	#
 	# Remove the NAs
 	#
 	spec.data <- spec.data[which(is.na(spec.data[,yr.ind])==FALSE),]
-	loc.data <- loc.data[which(is.na(loc.data[,tmp.l+1])==FALSE),]
+	if(!is.null(levels)){
+	        loc.data <- loc.data[which(is.na(loc.data[,tmp.l+1])==FALSE),]        
+	}
 	#
 	# Take only necessary data for overall names
 	#
@@ -235,6 +254,7 @@ dir.name, id.str){
 	# Deal with filters if appropriate
 	#
 	filter.table <- c(tax.stat,hyb.stat,rnk.stat)
+	rm(rnk.stat,tax.stat,hyb.stat)
 	if(tax.stat){
 		names.data <- names.data[which(names.data[,4] %in% stat.mk),]
 	}
@@ -301,166 +321,166 @@ dir.name, id.str){
 	#
 	# Deal with filters if appropriate
 	#
-	if(tax.stat){
-		loc.data <- loc.data[which(loc.data[,tmp.l+3] %in% stat.mk),]
-	}
-	if(hyb.stat){
-		for(p in 1:length(hyb.ind)){
-			tmp <- which(loc.data[,tmp.l+2+filter.table[1]+p] == hyb.mk[p])
-			# get error if filter has nothing to remove
-			if(length(tmp)>0){
-			        loc.data <- loc.data[-tmp,]
-			}
-			rm(tmp)
-		}
-		rm(p)
-	}
-	if(rnk.stat){
-		tmp.ind <- tmp.l+3+filter.table[1]+length(hyb.ind)*filter.table[2]
-		loc.data <- loc.data[which(loc.data[,tmp.ind] %in% rnk.mk),]
-		rm(tmp.ind)
-	}
-	loc.data <- loc.data[,1:(tmp.l+2)]
-	rm(tax.stat,stat.ind,stat.mk,hyb.stat,hyb.ind,hyb.mk,rnk.stat,rnk.ind,rnk.mk,
-		filter.table)
-	#
-	# Deal with the missing author names
-	#
-	miss.ind <- which(summary(strsplit(loc.data[,tmp.l+2],'&'))[,1] == 0)
-	# get error if filter has nothing to remove
-	if(length(miss.ind)>0){
-	        loc.data <- loc.data[-miss.ind,]
-	}
-	rm(miss.ind)
-	#
-	if(nrow(loc.data)==0){
-	        stop("after filtering there is no location data")
-	}
-	#
-	# split the names in the location merge
-	#
-	loc.data <- taxonomic.splitting.function(loc.data,ncol(loc.data))
-	#
-	# Keep format as numeric for id and year
-	#
-	loc.data[,1] <- as.numeric(loc.data[,1])
-	loc.data[,tmp.l+1] <- as.numeric(loc.data[,tmp.l + 1])
-	#
-	# Set up data collection for location data - here have list where first index
-	# gives TDWG level, then second index includes first the overall summary, then
-	# full breakdown for each author
-	#
-	loc.sum <- c()
-	loc.code <-c()
-	yrs<-seq(st.yr,en.yr,int.yr)
-	for (j in 1:(tmp.l-1)){
-		#
-		# Set up summary table for each level
-		#
-		loc.sum[[j]] <- as.data.frame(matrix(data=0,nrow=length(yrs),
-							ncol=length(unique(
-								loc.data[,j+1]))+2))
-		loc.sum[[j]][,1] <- yrs 
-		#
-		# List all regions at each level
-		#
-		loc.code[[j]] <- unique(loc.data[,j+1])
-		names(loc.sum[[j]]) <- c("Start_Year",loc.code[[j]],
-						"Non_endogenous")
-	}
-	rm(j,yrs)
-	#
-	# Loop over all levels of geographic detail
-	#
-	for(k in 1:(tmp.l-1)){
-		#
-		# Set up output directory
-		#
-		lvl.dir <- paste(tmp.dir,levels[k],"/",sep = "")
-		if(dir.exists(lvl.dir)==FALSE){
-			dir.create(lvl.dir,recursive = T)
-		}
-		#
-		# slimline data to non-redundant data at relevent detail level
-		# ie species id, region at relevant level, year and authors column
-		#
-		tmp.data <- unique(loc.data[,c(1,k+1,(tmp.l+1):ncol(loc.data))])
-		#
-		# Number of regions
-		#
-		leng <- length(loc.code[[k]])
-		#
-		# Classify each species as either endogenous or not at the given level
-		#
-		end.test <- as.data.frame(table(tmp.data[,1]),stringsAsFactors = F)
-		end.test[,1] <- as.numeric(end.test[,1])
-		end.id <- end.test[which(end.test[,2] == 1),1] %>%
-			match(tmp.data[,1],.) %>%
-			is.na() == F
-		end.ind <- which(end.id)
-		non.id <- end.test[which(end.test[,2] > 1),1] %>%
-			match(tmp.data[,1],.) %>%
-			is.na() == F
-		non.ind <- which(non.id)
-		rm(end.id,non.id,end.test)
-		#
-		tmp <- character(nrow(tmp.data))
-		tmp.data <- cbind(tmp.data,tmp,stringsAsFactors=F)
-		names(tmp.data)[ncol(tmp.data)] <- "endogeny_status"
-		rm(tmp)
-		tmp.data[end.ind,ncol(tmp.data)] <- "E"
-		tmp.data[non.ind,ncol(tmp.data)] <- "NE"
-		rm(end.ind,non.ind)
-		#
-		# Apply method to endongenous data
-		#
-		end <- tmp.data[which(tmp.data[,ncol(tmp.data)]=="E"),]
-		#
-		# Loop over all regions at this level
-		#
-		for(l in 1:leng){
-			#
-			# Filter for each region
-			#
-			tmp.end <- end[which(end[,2] == loc.code[[k]][l]),]
-			tmp.res <- taxonimist.summary(tmp.end,3,st.yr,en.yr,
-							int.yr)
-			#
-			# Store aggreated data
-			#
-			loc.sum[[k]][,l+1] <- tmp.res[[1]][,2]
-			#
-			# Save breakdown
-			#
-			write.csv(tmp.res[[2]],
-				  file=paste(lvl.dir,id.str,"_",levels[k],
-					     "_tax_breakdown_",loc.code[[k]][l],".csv",
-					     sep =""),
-				  row.names = FALSE)
-			rm(tmp.res,tmp.end)
-		}
-		rm(end,l)
-		#
-		# Deal with non-endogenous data
-		#
-		nend <- tmp.data[which(tmp.data[,ncol(tmp.data)]=="NE"),]
-		tmp.res <- taxonimist.summary(nend,3,st.yr,en.yr,int.yr)
-		loc.sum[[k]][,leng+2] <- tmp.res[[1]][,2]
-		write.csv(tmp.res[[2]],
-			  file=paste(lvl.dir,id.str,"_",levels[k],
-				     "_tax_breakdown_Non_Endogenous",".csv",
-				     sep =""),
-			  row.names = FALSE)
-		rm(nend,tmp.res,leng,tmp.data)
-		#
-		# Save summary data
-		#
-		write.csv(loc.sum[[k]],
-			  file=paste(lvl.dir,id.str,"_",levels[k],
-				     "_tax_summary",".csv",
-				     sep =""),
-			  row.names = FALSE)
-	}
-	rm(k,en.yr,st.yr,int.yr,loc.data,tmp.l,tmp.dir,id.str,levels,lvl.dir,loc.sum,
-	   loc.code)
+	if(!is.null(levels)){
+        	if(tax.stat){
+        		loc.data <- loc.data[which(loc.data[,tmp.l+3] %in% stat.mk),]
+        	}
+        	if(hyb.stat){
+        		for(p in 1:length(hyb.ind)){
+        			tmp <- which(loc.data[,tmp.l+2+filter.table[1]+p] == hyb.mk[p])
+        			# get error if filter has nothing to remove
+        			if(length(tmp)>0){
+        			        loc.data <- loc.data[-tmp,]
+        			}
+        			rm(tmp)
+        		}
+        		rm(p)
+        	}
+        	if(rnk.stat){
+        		tmp.ind <- tmp.l+3+filter.table[1]+length(hyb.ind)*filter.table[2]
+        		loc.data <- loc.data[which(loc.data[,tmp.ind] %in% rnk.mk),]
+        		rm(tmp.ind)
+        	}
+        	loc.data <- loc.data[,1:(tmp.l+2)]
+        	#
+        	# Deal with the missing author names
+        	#
+        	miss.ind <- which(summary(strsplit(loc.data[,tmp.l+2],'&'))[,1] == 0)
+        	# get error if filter has nothing to remove
+        	if(length(miss.ind)>0){
+        	        loc.data <- loc.data[-miss.ind,]
+        	}
+        	rm(miss.ind)
+        	#
+        	if(nrow(loc.data)==0){
+        	        stop("after filtering there is no location data")
+        	}
+        	#
+        	# split the names in the location merge
+        	#
+        	loc.data <- taxonomic.splitting.function(loc.data,ncol(loc.data))
+        	#
+        	# Keep format as numeric for id and year
+        	#
+        	loc.data[,1] <- as.numeric(loc.data[,1])
+        	loc.data[,tmp.l+1] <- as.numeric(loc.data[,tmp.l + 1])
+        	#
+        	# Set up data collection for location data - here have list where first index
+        	# gives TDWG level, then second index includes first the overall summary, then
+        	# full breakdown for each author
+        	#
+        	loc.sum <- c()
+        	loc.code <-c()
+        	yrs<-seq(st.yr,en.yr,int.yr)
+        	for (j in 1:(tmp.l-1)){
+        		#
+        		# Set up summary table for each level
+        		#
+        		loc.sum[[j]] <- as.data.frame(matrix(data=0,nrow=length(yrs),
+        							ncol=length(unique(
+        								loc.data[,j+1]))+2))
+        		loc.sum[[j]][,1] <- yrs 
+        		#
+        		# List all regions at each level
+        		#
+        		loc.code[[j]] <- unique(loc.data[,j+1])
+        		names(loc.sum[[j]]) <- c("Start_Year",loc.code[[j]],
+        						"Non_endogenous")
+        	}
+        	rm(j,yrs)
+        	#
+        	# Loop over all levels of geographic detail
+        	#
+        	for(k in 1:(tmp.l-1)){
+        		#
+        		# Set up output directory
+        		#
+        		lvl.dir <- paste(tmp.dir,levels[k],"/",sep = "")
+        		if(dir.exists(lvl.dir)==FALSE){
+        			dir.create(lvl.dir,recursive = T)
+        		}
+        		#
+        		# slimline data to non-redundant data at relevent detail level
+        		# ie species id, region at relevant level, year and authors column
+        		#
+        		tmp.data <- unique(loc.data[,c(1,k+1,(tmp.l+1):ncol(loc.data))])
+        		#
+        		# Number of regions
+        		#
+        		leng <- length(loc.code[[k]])
+        		#
+        		# Classify each species as either endogenous or not at the given level
+        		#
+        		end.test <- as.data.frame(table(tmp.data[,1]),stringsAsFactors = F)
+        		end.test[,1] <- as.numeric(end.test[,1])
+        		end.id <- end.test[which(end.test[,2] == 1),1] %>%
+        			match(tmp.data[,1],.) %>%
+        			is.na() == F
+        		end.ind <- which(end.id)
+        		non.id <- end.test[which(end.test[,2] > 1),1] %>%
+        			match(tmp.data[,1],.) %>%
+        			is.na() == F
+        		non.ind <- which(non.id)
+        		rm(end.id,non.id,end.test)
+        		#
+        		tmp <- character(nrow(tmp.data))
+        		tmp.data <- cbind(tmp.data,tmp,stringsAsFactors=F)
+        		names(tmp.data)[ncol(tmp.data)] <- "endogeny_status"
+        		rm(tmp)
+        		tmp.data[end.ind,ncol(tmp.data)] <- "E"
+        		tmp.data[non.ind,ncol(tmp.data)] <- "NE"
+        		rm(end.ind,non.ind)
+        		#
+        		# Apply method to endongenous data
+        		#
+        		end <- tmp.data[which(tmp.data[,ncol(tmp.data)]=="E"),]
+        		#
+        		# Loop over all regions at this level
+        		#
+        		for(l in 1:leng){
+        			#
+        			# Filter for each region
+        			#
+        			tmp.end <- end[which(end[,2] == loc.code[[k]][l]),]
+        			tmp.res <- taxonimist.summary(tmp.end,3,st.yr,en.yr,
+        							int.yr)
+        			#
+        			# Store aggreated data
+        			#
+        			loc.sum[[k]][,l+1] <- tmp.res[[1]][,2]
+        			#
+        			# Save breakdown
+        			#
+        			write.csv(tmp.res[[2]],
+        				  file=paste(lvl.dir,id.str,"_",levels[k],
+        					     "_tax_breakdown_",loc.code[[k]][l],".csv",
+        					     sep =""),
+        				  row.names = FALSE)
+        			rm(tmp.res,tmp.end)
+        		}
+        		rm(end,l)
+        		#
+        		# Deal with non-endogenous data
+        		#
+        		nend <- tmp.data[which(tmp.data[,ncol(tmp.data)]=="NE"),]
+        		tmp.res <- taxonimist.summary(nend,3,st.yr,en.yr,int.yr)
+        		loc.sum[[k]][,leng+2] <- tmp.res[[1]][,2]
+        		write.csv(tmp.res[[2]],
+        			  file=paste(lvl.dir,id.str,"_",levels[k],
+        				     "_tax_breakdown_Non_Endogenous",".csv",
+        				     sep =""),
+        			  row.names = FALSE)
+        		rm(nend,tmp.res,leng,tmp.data)
+        		#
+        		# Save summary data
+        		#
+        		write.csv(loc.sum[[k]],
+        			  file=paste(lvl.dir,id.str,"_",levels[k],
+        				     "_tax_summary",".csv",
+        				     sep =""),
+        			  row.names = FALSE)
+        	}
+        	rm(k,en.yr,st.yr,int.yr,loc.data,tmp.l,tmp.dir,id.str,levels,lvl.dir,loc.sum,
+        	   loc.code)
+        }
 }
