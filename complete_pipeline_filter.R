@@ -75,21 +75,29 @@ levels <- c("TDWG1","TDWG2")
 #
 ############################# DATA FILTERING ###################################
 #
+# Here setting the spe.tax.stat etc tags will apply the filtering to species
+# data processing and setting the tx.hyb.stat etc tags will apply the filtering
+# to the taxonomist data
+#
 # Taxonomic status filtering - if set to true then there will be filtering to 
-# only allow authors of species of the status specified in the column given
-tax.stat <- TRUE
+# only allow species of the status specified in the column given
+spe.tax.stat <- TRUE
+tx.tax.stat <- FALSE
 stat.ind <- 17
 stat.mk <- c("A")
 # Hybrid filtering - if set to true then there will be filtering to 
-# remove authors of species which are hybrids
-hyb.stat <- TRUE
+# remove species which are hybrids
+spe.hyb.stat <- TRUE
+tx.hyb.stat <- FALSE
 hyb.ind <- c(4,6)
 hyb.mk <- c("×","×")
 # Taxonomic rank filtering - if set to true then there will be filtering to 
-# only allow authors of species of the status specified in the column given
-rnk.stat <- TRUE
+# only allow  species of the status specified in the column given
+spe.rnk.stat <- TRUE
+tx.rnk.stat <-FALSE
 rnk.ind <- 23
 rnk.mk <- c("Species")
+#
 # Location Filter IDs - any columns in location data that are to be filtered in
 # creating a valid dataset and the marks in these columns for removal
 filt.ind <- c(11,12,13,14)
@@ -220,20 +228,20 @@ for(s in 1:length(subset.mk)){
         #
         # Complete the aggregated species data processing
         #
-        cat("Processing Aggregate Species Data...\n")
+        cat("Processing Aggregate Species Data for",subset.mk[s],"...\n")
         source("./kew_grasses/data_processing/species_data.R")
-        species_data(tmp.dir, tmp.spec, tmp.loc, id.ind, yr.ind, tax.stat,
-                     stat.ind, stat.mk, hyb.stat, hyb.ind, hyb.mk, rnk.stat, rnk.ind,
+        species_data(tmp.dir, tmp.spec, tmp.loc, id.ind, yr.ind, spe.tax.stat,
+                     stat.ind, stat.mk, spe.hyb.stat, hyb.ind, hyb.mk, spe.rnk.stat, rnk.ind,
                      rnk.mk, filt.ind, filt.mk, loc.ind, levels, st.yr, en.yr, int.yr, 
                      out.dir, spec.dir, id.str)
         cat("Complete!\n\n")
         #
         # Complete the aggregated taxonomist data processing
         #
-        cat("Processing Aggregate Taxonomists Data...\n")
+        cat("Processing Aggregate Taxonomists Data for",subset.mk[s],"...\n")
         source("./kew_grasses/data_processing/author_data.R")
         author_data(tmp.dir, tmp.spec, tmp.loc, id.ind, yr.ind,auth.ind, 
-                    tax.stat, stat.ind, stat.mk, hyb.stat, hyb.ind, hyb.mk, rnk.stat,
+                    tx.tax.stat, stat.ind, stat.mk, tx.hyb.stat, hyb.ind, hyb.mk, tx.rnk.stat,
                     rnk.ind, rnk.mk, filt.ind, filt.mk, loc.ind, levels, st.yr, en.yr, 
                     int.yr, out.dir, tax.dir, id.str)
         cat("Complete!\n\n")
@@ -253,7 +261,7 @@ for(s in 1:length(subset.mk)){
         #
         # Run complete normal regression search method for global data
         #
-        cat("Computing Regression Search Model...\n")
+        cat("Computing Regression Search Model for",subset.mk[s],"...\n")
         source("./kew_grasses/model/regression_search.R")
         regression_search(spec.data, tax.data, en.yr, mult, guess.n, ratio, stretch, 
                           max.it, out.dir, id.str, mod.dir=reg.dir)
@@ -263,7 +271,7 @@ for(s in 1:length(subset.mk)){
         # if selected
         #
         if(global.CV){
-                cat("Computing Regression Search Model cross validation...\n")
+                cat("Computing Regression Search Model cross validation for",subset.mk[s],"...\n")
                 source("./kew_grasses/model/regression_search_cross_validation.R")
                 regression_search_cross_validation(spec.data, tax.data, en.yr, mult, guess.n, 
                                                    ratio, stretch, max.it, out.dir, id.str, 
@@ -275,7 +283,7 @@ for(s in 1:length(subset.mk)){
         # St search if selected
         #
         if(global.joppa){
-                cat("Computing Log Difference Gradient Descent Search Model...\n")
+                cat("Computing Log Difference Gradient Descent Search Model for",subset.mk[s],"...\n")
                 source("./kew_grasses/model/grad_descent_search_log_residuals.R")
                 grad_descent_search_log_residuals(spec.data, tax.data, en.yr, mult, guess.n,
                                                   ratio, stretch, max.it, scale, rng.a, rng.b,
@@ -321,9 +329,10 @@ for(s in 1:length(subset.mk)){
                                         next()
                                 }
                 
-                                cat("Fitting models for",levels[i],tmp.reg,"\n")
+                                cat("Fitting models for",subset.mk[s],"for",levels[i],tmp.reg,"\n")
                                 capture.output(regression_search(spec.data[,c(1,j+1,j+n.region+1)], 
-                                                  tax.data[,c(1,j+1)], en.yr, mult, guess.n, 
+                                                  tax.data[,c(1,grep(names(spec.data)[j+1],names(tax.data)))], 
+                                                  en.yr, mult, guess.n, 
                                                   ratio, stretch, 
                                                   max.it, out.dir, id.str, 
                                                   mod.dir=paste(reg.dir,"/",levels[i],"/",
@@ -333,7 +342,7 @@ for(s in 1:length(subset.mk)){
                                 )
                                 if(region.CV){
                                         capture.output(regression_search_cross_validation(spec.data[,c(1,j+1,j+n.region+1)], 
-                                                                           tax.data[,c(1,j+1)],
+                                                                           tax.data[,c(1,grep(names(spec.data)[j+1],names(tax.data)))],
                                                                            en.yr, mult, guess.n, 
                                                                            ratio, stretch, max.it,
                                                                            out.dir, id.str, 
@@ -345,7 +354,8 @@ for(s in 1:length(subset.mk)){
                                 }
                                 if(region.joppa){
                                         capture.output(grad_descent_search_log_residuals(spec.data[,c(1,j+1,j+n.region+2)], 
-                                                                          tax.data[,c(1,j+1)], en.yr, mult,
+                                                                          tax.data[,c(1,grep(names(spec.data)[j+1],names(tax.data)))], 
+                                                                          en.yr, mult,
                                                                           guess.n, ratio, stretch, max.it, 
                                                                           scale, rng.a, rng.b, ab.guesses, 
                                                                           max.grad, alpha, min.alp, 

@@ -254,7 +254,6 @@ author_data <- function(dir.path, spec.file.name, loc.file.name=NULL, id.ind,
 	# Deal with filters if appropriate
 	#
 	filter.table <- c(tax.stat,hyb.stat,rnk.stat)
-	rm(rnk.stat,tax.stat,hyb.stat)
 	if(tax.stat){
 		names.data <- names.data[which(names.data[,4] %in% stat.mk),]
 	}
