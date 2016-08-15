@@ -1,15 +1,17 @@
 ################################################################################
 #                                                                              #
 # Function that takes as input a csv file of a list of species including their #
-# year of publication and a csv of the locations of thsese species. The script #
-# will ouput a series of csv files of numbers of new species published in each #
-# time window as defined by the inputs below as well as cumulative numbers of  #
-# species discovered.                                                          #
+# year of publication and an optional csv of the locations of these species.   #
+# The script will ouput a series of csv files of numbers of new species        #
+# published in each time window as defined by the inputs below as well as      #
+# cumulative numbers of species discovered.                                    #
 #                                                                              #
-# The csv files outputted include aggregated worldwide data, as well as a      #
-# breakdown at the specified geograhic levels of levels of endogenous species  #
-# Here endogenous is taken to mean only naturally present in one region at     #
-# the given level of geographic zoning                                         #
+# The csv files outputted include aggregated worldwide data, if the optional   #
+# location csv has been included, in such a case the levels argument will need #
+# to be specified or else the location breakdown will not take place there     #
+# will also be a breakdown at the specified geographic levels of levels of     #
+# endogenous species. Here endogenous is taken to mean only naturally present  #
+# in one region at the given level of geographic zoning                        #
 #                                                                              #
 # Excluding brackets, the year of publication will need to be in a 4 digit     #
 # format and be at the end of the entry in the year column for each row.       #

@@ -1,9 +1,12 @@
+#
 # This script can be used to replicate the analysis undertaken in the summer
 # project "Where are the missing grasses?" based at RBG Kew in summer 2016.
 #
 # For a full explanation of the script and the methods it employs, as well as
 # how to use it yourself please see the readme in this repository.
-#
+#                                                                              
+# Jonathan Williams, 2016                                                      
+# jonvw28@gmail.com    
 #
 ################################################################################
 #
@@ -57,7 +60,8 @@ yr.ind <- 15
 auth.ind <- 11
 # Location IDs - indices of columns in location data where loactions are stored
 loc.ind <- c(4,6)
-# Names of each level of regions
+# Names of each level of regions - if set to NULL then there will be no
+# geographic data handling
 levels <- c("TDWG1","TDWG2")
 #
 ############################# DATA FILTERING ###################################
@@ -246,113 +250,115 @@ rm(spec.data,tax.data)
 #
 # Deal with regional levels
 #
-#
-# Set up collection for predictions and later adjustments
-#
-predictions <- list()
-if(region.CV){
-        source("./kew_grasses/model/regression_search_cross_validation.R")
-}
-if(region.joppa){
-        source("./kew_grasses/model/grad_descent_search_log_residuals.R")
-}
-for(i in 1:length(levels)){
-        spec.data <- read.csv(paste(agg.loc,spec.dir,"/",levels[i],"/",
-                                    id.str,"_species_summary_",levels[i],".csv",sep=""),
-                              stringsAsFactors = FALSE)
-        tax.data <- read.csv(paste(agg.loc,tax.dir,"/",levels[i],"/",
-                                    id.str,"_",levels[i],"_tax_summary.csv",sep=""),
-                              stringsAsFactors = FALSE)
-        names(tax.data) <- paste(names(tax.data),"_t",sep="")
-        n.region <- (ncol(spec.data)-1)/2
-        predictions[[i]] <- matrix(0, ncol = 5, nrow = n.region)
-        predictions[[i]] <- as.data.frame(predictions[[i]])       
-        names(predictions[[i]]) <- c("region","current_level","raw_prediction",
-                                "adjusted_prediction","percentage_observed")
+if(!is.null(levels)){
         #
-        for(j in 1:n.region){
-                predictions[[i]][j,2] <- (spec.data[nrow(spec.data),n.region+j+1]
-                                     + spec.data[nrow(spec.data),j+1])
-                tmp.reg <- colnames(spec.data)[j+1]
-                predictions[[i]][j,1] <- tmp.reg
-                if(spec.data[nrow(spec.data),n.region+j+1] < 50){
-                        next()
-                }
-
-                cat("Fitting models for",levels[i],tmp.reg,"\n")
-                capture.output(regression_search(spec.data[,c(1,j+1,j+n.region+1)], 
-                                  tax.data[,c(1,j+1)], en.yr, mult, guess.n, 
-                                  ratio, stretch, 
-                                  max.it, out.dir, id.str, 
-                                  mod.dir=paste(reg.dir,"/",levels[i],"/",
-                                                tmp.reg,sep="")
-                                  ),
-                               file='NUL'
-                )
-                if(region.CV){
-                        capture.output(regression_search_cross_validation(spec.data[,c(1,j+1,j+n.region+1)], 
-                                                           tax.data[,c(1,j+1)],
-                                                           en.yr, mult, guess.n, 
-                                                           ratio, stretch, max.it,
-                                                           out.dir, id.str, 
-                                                           mod.dir=paste(reg.dir,"/",levels[i],"/",
-                                                                         tmp.reg,sep="")
-                                                           ),
+        # Set up collection for predictions and later adjustments
+        #
+        predictions <- list()
+        if(region.CV){
+                source("./kew_grasses/model/regression_search_cross_validation.R")
+        }
+        if(region.joppa){
+                source("./kew_grasses/model/grad_descent_search_log_residuals.R")
+        }
+        for(i in 1:length(levels)){
+                spec.data <- read.csv(paste(agg.loc,spec.dir,"/",levels[i],"/",
+                                            id.str,"_species_summary_",levels[i],".csv",sep=""),
+                                      stringsAsFactors = FALSE)
+                tax.data <- read.csv(paste(agg.loc,tax.dir,"/",levels[i],"/",
+                                            id.str,"_",levels[i],"_tax_summary.csv",sep=""),
+                                      stringsAsFactors = FALSE)
+                names(tax.data) <- paste(names(tax.data),"_t",sep="")
+                n.region <- (ncol(spec.data)-1)/2
+                predictions[[i]] <- matrix(0, ncol = 5, nrow = n.region)
+                predictions[[i]] <- as.data.frame(predictions[[i]])       
+                names(predictions[[i]]) <- c("region","current_level","raw_prediction",
+                                        "adjusted_prediction","percentage_observed")
+                #
+                for(j in 1:n.region){
+                        predictions[[i]][j,2] <- (spec.data[nrow(spec.data),n.region+j+1]
+                                             + spec.data[nrow(spec.data),j+1])
+                        tmp.reg <- colnames(spec.data)[j+1]
+                        predictions[[i]][j,1] <- tmp.reg
+                        if(spec.data[nrow(spec.data),n.region+j+1] < 50){
+                                next()
+                        }
+        
+                        cat("Fitting models for",levels[i],tmp.reg,"\n")
+                        capture.output(regression_search(spec.data[,c(1,j+1,j+n.region+1)], 
+                                          tax.data[,c(1,j+1)], en.yr, mult, guess.n, 
+                                          ratio, stretch, 
+                                          max.it, out.dir, id.str, 
+                                          mod.dir=paste(reg.dir,"/",levels[i],"/",
+                                                        tmp.reg,sep="")
+                                          ),
                                        file='NUL'
                         )
+                        if(region.CV){
+                                capture.output(regression_search_cross_validation(spec.data[,c(1,j+1,j+n.region+1)], 
+                                                                   tax.data[,c(1,j+1)],
+                                                                   en.yr, mult, guess.n, 
+                                                                   ratio, stretch, max.it,
+                                                                   out.dir, id.str, 
+                                                                   mod.dir=paste(reg.dir,"/",levels[i],"/",
+                                                                                 tmp.reg,sep="")
+                                                                   ),
+                                               file='NUL'
+                                )
+                        }
+                        if(region.joppa){
+                                capture.output(grad_descent_search_log_residuals(spec.data[,c(1,j+1,j+n.region+2)], 
+                                                                  tax.data[,c(1,j+1)], en.yr, mult,
+                                                                  guess.n, ratio, stretch, max.it, 
+                                                                  scale, rng.a, rng.b, ab.guesses, 
+                                                                  max.grad, alpha, min.alp, 
+                                                                  grad.rat, out.dir,id.str, 
+                                                                  mod.dir=paste(reg.dir,"/",levels[i],"/",
+                                                                                tmp.reg,sep="")
+                                                                  ),
+                                               file = 'NUL'
+                                )
+                        }
+                        tmp.dat <- read.csv(paste(agg.loc,reg.dir,"/",levels[i],"/",tmp.reg,"/",
+                                                  id.str,"_regression_search_model_summary.csv",sep=""),
+                                            stringsAsFactors = FALSE)
+                        predictions[[i]][j,3] <- tmp.dat[1,3]
+                        rm(tmp.reg,tmp.dat)
+                        cat("Complete!\n\n")
                 }
-                if(region.joppa){
-                        capture.output(grad_descent_search_log_residuals(spec.data[,c(1,j+1,j+n.region+2)], 
-                                                          tax.data[,c(1,j+1)], en.yr, mult,
-                                                          guess.n, ratio, stretch, max.it, 
-                                                          scale, rng.a, rng.b, ab.guesses, 
-                                                          max.grad, alpha, min.alp, 
-                                                          grad.rat, out.dir,id.str, 
-                                                          mod.dir=paste(reg.dir,"/",levels[i],"/",
-                                                                        tmp.reg,sep="")
-                                                          ),
-                                       file = 'NUL'
-                        )
-                }
-                tmp.dat <- read.csv(paste(agg.loc,reg.dir,"/",levels[i],"/",tmp.reg,"/",
-                                          id.str,"_regression_search_model_summary.csv",sep=""),
-                                    stringsAsFactors = FALSE)
-                predictions[[i]][j,3] <- tmp.dat[1,3]
-                rm(tmp.reg,tmp.dat)
-                cat("Complete!\n\n")
+                rm(spec.data,tax.data,n.region)
         }
-        rm(spec.data,tax.data,n.region)
-}
-#
-# Pick out global predicted total
-#
-tmp.file <- read.csv(paste(agg.loc,reg.dir,"/",id.str,
-                           "_regression_search_model_summary.csv",sep=""),
-                     stringsAsFactors = FALSE)
-pred.glob <- tmp.file[1,3]
-rm(tmp.file)
-#
-# impute predictions where total is too small
-#       Here any missing values are assumed to take on the ratio of
-#       prediction/current as given by the aggregated data for regions 
-#       with a prediction
-#
-# Rescale eventual predictions in current ratio so that global total is equal
-# to the predicted global trend
-#
-for(k in 1:length(levels)){
-        issues <- which(predictions[[k]][,3]==0)
-        pred.rat <- sum(predictions[[k]][,3])/sum(predictions[[k]][-issues,2])
-        predictions[[k]][issues,3] <- predictions[[k]][issues,2]*pred.rat
-        rm(pred.rat)
-        adj.rat <- pred.glob/sum(predictions[[k]][,3])
-        predictions[[k]][,4] <- predictions[[k]][,3]*adj.rat
-        predictions[[k]][,5] <- predictions[[k]][,2]/predictions[[k]][,4]*100
-        rm(adj.rat)
-        write.csv(predictions[[k]],
-                  file=paste(agg.loc,id.str,"_regional_predictions_",levels[k],
-                             "_model_summary.csv",sep=""),
-                  row.names = FALSE)
+        #
+        # Pick out global predicted total
+        #
+        tmp.file <- read.csv(paste(agg.loc,reg.dir,"/",id.str,
+                                   "_regression_search_model_summary.csv",sep=""),
+                             stringsAsFactors = FALSE)
+        pred.glob <- tmp.file[1,3]
+        rm(tmp.file)
+        #
+        # impute predictions where total is too small
+        #       Here any missing values are assumed to take on the ratio of
+        #       prediction/current as given by the aggregated data for regions 
+        #       with a prediction
+        #
+        # Rescale eventual predictions in current ratio so that global total is equal
+        # to the predicted global trend
+        #
+        for(k in 1:length(levels)){
+                issues <- which(predictions[[k]][,3]==0)
+                pred.rat <- sum(predictions[[k]][,3])/sum(predictions[[k]][-issues,2])
+                predictions[[k]][issues,3] <- predictions[[k]][issues,2]*pred.rat
+                rm(pred.rat)
+                adj.rat <- pred.glob/sum(predictions[[k]][,3])
+                predictions[[k]][,4] <- predictions[[k]][,3]*adj.rat
+                predictions[[k]][,5] <- predictions[[k]][,2]/predictions[[k]][,4]*100
+                rm(adj.rat)
+                write.csv(predictions[[k]],
+                          file=paste(agg.loc,id.str,"_regional_predictions_",levels[k],
+                                     "_model_summary.csv",sep=""),
+                          row.names = FALSE)
+        }
 }
 #
 # Clear the workspace

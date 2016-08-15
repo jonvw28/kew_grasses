@@ -10,9 +10,9 @@
 #                                                                              #
 # The csv files outputted include aggregated worldwide data, if the optional   #
 # location csv has been included, in such a case the levels argument will need #
-# to be specified or else the location breakdown will not take place. There    #
+# to be specified or else the location breakdown will not take place there     #
 # will also be a breakdown at the specified geographic levels of levels of     #
-# endogenous species.,Here endogenous is taken to mean only naturally present  #
+# endogenous species. Here endogenous is taken to mean only naturally present  #
 # in one region at the given level of geographic zoning                        #
 #                                                                              #
 # Excluding brackets, the year of publication will need to be in a 4 digit     #
