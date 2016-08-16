@@ -73,7 +73,7 @@ This equation can then be used to find a and b directly via linear regression in
 
 ![alt text][img7]
 
-In this case the residuals need to be given appropriate weightings in the linear model to ensure that the effective sum of sqaures being minimised is equivalanet to the overall residuals being minimised in the first equation in this section. Hence in the linear regression to find a and b the weighted least squares is used as below:
+In this case the residuals need to be given appropriate weightings in the linear model to ensure that the effective sum of squares being minimised is equivalanet to the overall residuals being minimised in the first equation in this section. Hence in the linear regression to find a and b the weighted least squares is used as below:
 
 ![alt text][img8]
 
@@ -82,6 +82,24 @@ In this case the residuals need to be given appropriate weightings in the linear
 By using the built in R function `lm` this process can be applied very efficiently and hence this method is computationally much faster than the gradient descent search outlined below. It is for this efficiency that this method is the default method used in the anaylsis in this project.
 
 ### Gradient Descent Search
+
+In order to determine whether the regression search method above produces results that could be compared to the method proposed by Joppa et al 2010<sup>1</sup> in which the residuals are taken as the difference between the logarithms of the model estiamte and actual number of species in each time window it was sought to develop an optimisation method that could fit such a model. Joppa et al suggest three such methods to fit the model as outlined below:
+
+![alt text][img10]
+
+The first of these from 2010<sup>1</sup> uses grid search and gradient descent. This method will find minima of the problem, but is also very inefficient. The second method proposed is also from 2010<sup>2</sup>, and proposes a method very similar to the regression search method outlined here. This involves guessing S<sub>T</sub> and using linear regression to find a and b from re-arrangement. However, when fully evaulated from the above the expression below results.
+
+![alt text][img11]
+
+Even when weightings are applied, the effective residual term still contains an exponential of the residual to be considered in minimising the overall model. As such a normal linear regression of the type in the regression search model for a and b is not equivalent to minimising the overall model with respect to a and b (when considering a case with S<sub>T</sub> fixed). As such this method is rejected as being unable to correctly identify the minimising values of a and b.
+
+The final method proposed by Joppa et al in 2011<sup>3</sup> involves introducing an extra spread parameter and then using a maximum-likelihood estimation method by assuming the residuals are normally distributed. Whilst this method has its merits, it was decided not to replicate the method. This method enables the computation of confidence intervals, but this requires the assumption that the residuals are normally distributed. Not only this, but this model also introduces a spread parameter in order to facilitate this. The model is then optimized with respect to this parameter as well as a, b and S<sub>T</sub>. Given this parameter does not have a direct interpretation in terms of the data there is a risk that such a model will result in overfitting. 
+
+Recall, the final goal of this project is to aid the study of taxonomy and give an idea of the gaps in our knowledge and not to try to precisely predict exact species numbers. In particular, species discovery is an inherently complex process with many confounding factors. Additionally the data set, whilst very detialed, naturally comes with the caveats and limitations of a dataset based on over 250 years of work. As such it was decided to proceed with a parsimonious method, keeping the focus on exploring the data and various filters and thereby reducing the danger of overfitting. As such the first method of gradient descent as outlined above was chosen to address the issue of the logarithmic difference residuals.
+
+### Geographical Methods
+
+### Method Comparison
 
 ## Cross Validation
 
@@ -107,3 +125,5 @@ By using the built in R function `lm` this process can be applied very efficient
 [img7]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img7.jpg "Regression Search residuals"
 [img8]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img8.jpg "Regression Search Least Squares"
 [img9]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img9.jpg "Regression Search residual Weightings"
+[img10]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img10.jpg "Gradient Descent Search residuals"
+[img11]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img11.jpg "Gradient Descent Search residuals"
