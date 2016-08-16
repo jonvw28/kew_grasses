@@ -55,6 +55,17 @@
 # dataset
 # eg 11
 #
+# comma - logical expression respectively decide whether to split 
+# name strings based on the string ','
+#
+# in.tag, in.inc - logical expressions respectively decide whether to split 
+# name strings based on the string 'in' (if in.tag = TRUE) and then whether to
+# include the names to the right of the split (if in.inc = TRUE)
+#
+# ex.tag, ex.inc - logical expressions respectively decide whether to split 
+# name strings based on the string 'ex' (if ex.tag = TRUE) and then whether to
+# include the names to the left of the split (if ex.inc = TRUE)
+#
 # tax.stat - if set to true then there will be filtering to only allow authors
 # of species of the taxonomic status(es) specified by argument stat.mk in the
 # column given by the index stat.ind
@@ -115,11 +126,13 @@
 #
 #
 author_data <- function(dir.path, spec.file.name, loc.file.name=NULL, id.ind,
-                        yr.ind, auth.ind, tax.stat=FALSE, stat.ind=NULL, 
-                        stat.mk=NULL, hyb.stat=FALSE, hyb.ind=NULL, 
-                        hyb.mk=NULL, rnk.stat=FALSE, rnk.ind=NULL, rnk.mk=NULL,
-                        filt.ind=NULL, filt.mk=NULL, loc.ind=NULL, levels=NULL,
-                        st.yr, en.yr, int.yr, out.dir, dir.name, id.str){
+                        yr.ind, auth.ind, comma = TRUE, in.tag=TRUE, 
+                        in.inc=TRUE, ex.tag=TRUE, ex.inc=FALSE, tax.stat=FALSE,
+                        stat.ind=NULL, stat.mk=NULL, hyb.stat=FALSE, 
+                        hyb.ind=NULL, hyb.mk=NULL, rnk.stat=FALSE, rnk.ind=NULL,
+                        rnk.mk=NULL, filt.ind=NULL, filt.mk=NULL, loc.ind=NULL, 
+                        levels=NULL, st.yr, en.yr, int.yr, out.dir, dir.name, 
+                        id.str){
 	#
 	# Check for directory and create if needed
 	#
@@ -186,7 +199,8 @@ author_data <- function(dir.path, spec.file.name, loc.file.name=NULL, id.ind,
 	#
 	# Re format to have breaks between authors given by &
 	#
-	spec.data <- name.formatter(spec.data, col.ind = auth.ind, T,T,T,T,F)
+	spec.data <- name.formatter(spec.data, col.ind = auth.ind, comma,in.tag,
+					in.inc,ex.tag,ex.inc)
 	#
 	#
 	######################## Merge names to location data ##########################

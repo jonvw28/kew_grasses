@@ -18,12 +18,13 @@ setwd("~/Kew Summer")
 #
 ######################## Select models to apply ################################
 #
+#
 # By default, the regression search model will be applied to the global data as 
 # as well as to each level in region data. Cross validation and the Joppa method 
 # will only be applied if the appropriate variables below are set to true.
 #
 #
-# Cross Validation on glabal level
+# Cross Validation on global level
 global.CV <- FALSE
 #
 # Cross Validation on regional data
@@ -38,33 +39,72 @@ region.joppa <- FALSE
 #
 ####################### RAW DATA LOCATION - WCSP download ######################
 #
+#
 # Directory path - location of csv input files
 dir.path <- "./Data/07_05/"
+#
 # Species File name - name of csv file with species information 
 #(without .csv at end)
 spec.file.name <- "public_checklist_flat_plant_dl_20160705_poaceae"
+#
 # Location File name - name of csv file with location information 
 #(without .csv at end)
 loc.file.name <- "Poaceae_distribution"
 #
+#
 ########################## INDICES IN DATA FILES ###############################
+#
 #
 # Plant ID column - indices of the columns where plant IDs are held for the
 # species and location data respectively
 id.ind <- c(1,2)
+#
 # Year column - index of the column where the year of publication is stored in 
 # the species data
 yr.ind <- 15
+#
 # Primary Authors column - index of the column containing the primary authors in 
 # the specis data
 auth.ind <- 11
+#
 # Location IDs - indices of columns in location data where loactions are stored
 loc.ind <- c(4,6)
+#
 # Names of each level of regions - if set to NULL then there will be no
 # geographic data handling
 levels <- c("TDWG1","TDWG2")
 #
+#
+############################ AUTHOR PROCESSING #################################
+#
+#
+# logical expression respectively decide whether to split 
+# name strings based on the string ',' (splits if true)
+comma <- TRUE
+#
+# logical expressions respectively decide whether to split name strings based on
+# the string 'in' (if in.tag = TRUE) and then whether to include the names to 
+# the right of the split (if in.inc = TRUE)
+in.tag <- TRUE
+in.inc <- TRUE
+#
+# ex.tag, ex.inc - logical expressions respectively decide whether to split 
+# name strings based on the string 'ex' (if ex.tag = TRUE) and then whether to
+# include the names to the left of the split (if ex.inc = TRUE)
+ex.tag <- TRUE
+ex.inc <- TRUE
+#
+#
 ############################# DATA FILTERING ###################################
+#
+#
+# Location Filter IDs - any columns in location data that are to be filtered in
+# creating a valid dataset and the marks in these columns for removal 
+# eg remove locations where a species has been introduced
+filt.ind <- c(11,12,13,14)
+filt.mk <- c(1,1,1,1)
+#
+# FILTERING OF SPECIES - to remove or allow certain taxonomic groups
 #
 # Here setting the spe.tax.stat etc tags will apply the filtering to species
 # data processing and setting the tx.hyb.stat etc tags will apply the filtering
@@ -76,12 +116,14 @@ spe.tax.stat <- TRUE
 tx.tax.stat <- FALSE
 stat.ind <- 17
 stat.mk <- c("A")
+#
 # Hybrid filtering - if set to true then there will be filtering to 
 # remove species which are hybrids
 spe.hyb.stat <- TRUE
 tx.hyb.stat <- FALSE
 hyb.ind <- c(4,6)
 hyb.mk <- c("×","×")
+#
 # Taxonomic rank filtering - if set to true then there will be filtering to 
 # only allow  species of the status specified in the column given
 spe.rnk.stat <- TRUE
@@ -89,35 +131,42 @@ tx.rnk.stat <-FALSE
 rnk.ind <- 23
 rnk.mk <- c("Species")
 #
-# Location Filter IDs - any columns in location data that are to be filtered in
-# creating a valid dataset and the marks in these columns for removal
-filt.ind <- c(11,12,13,14)
-filt.mk <- c(1,1,1,1)
 #
 ####################### MODEL PARAMETERS #######################################
 #
+#
 # Start year
 st.yr <- 1766
+#
 # End year
 en.yr <- 2015
+#
 # Window Interval - how many years you want aggregation to occur over
 int.yr <- 5
 #
+#
 ###################### St SEARCH PARAMETERS ####################################
+#
 #
 # multiple of current total species to start at as maxmimum guess for St
 mult <- 3
+#
 # Guesses per round for St values
 guess.n <- 500
+#
 # Ratio of top scoring guesses to keep from all guesses per round
 ratio <- 0.2
+#
 # stretch - Range Stretch to apply at each end (ie 1.25 would mean extend the
 # range in each iteration by 25%)
 stretch <- 1.5
+#
 # Max iteratations of guessing St
 max.it <- 20
 #
+#
 ###################### Gradient Descent Parameters #############################
+#
 #
 # Scaling to apply to taxonomist numbers and species numbers respectively
 # (years are dealt with automatically) - This is to help gradient descent
@@ -126,8 +175,8 @@ scale <- c(100,1000)
 #
 # Range to test for a and b starting point in each gradient 
 # descent - note these are not transformed by the scalings (ie these values will
-#  be used as they currently are directly with the tranformed data, however a 
-# and b as output are for the none scaled data) 
+# be used as they currently are directly with the scaled data, however a 
+# and b as output are for the raw data) 
 rng.a <- c(-0.1,0.1)
 rng.b <- c(-0.1,0.1)
 #
@@ -147,7 +196,9 @@ min.alp <- 2e-14
 # terminated - ie once this ratio is reached, gradient descent ends
 grd.rat <- 1e-4
 #
+#
 ######################### OUTPUT SAVE LOCATIONS ################################
+#
 #
 # Output directory
 out.dir <- "./Output"
@@ -203,7 +254,8 @@ cat("Complete!\n\n")
 #
 cat("Processing Aggregate Taxonomists Data...\n")
 source("./kew_grasses/data_processing/author_data.R")
-author_data(dir.path, spec.file.name, loc.file.name, id.ind, yr.ind,auth.ind, 
+author_data(dir.path, spec.file.name, loc.file.name, id.ind, yr.ind,auth.ind,
+	    comma, in.tag, in.inc, ex.tag, ex.inc,
             tx.tax.stat, stat.ind, stat.mk, tx.hyb.stat, hyb.ind, hyb.mk, tx.rnk.stat,
             rnk.ind, rnk.mk, filt.ind, filt.mk, loc.ind, levels, st.yr, en.yr, 
             int.yr, out.dir, tax.dir, id.str)
