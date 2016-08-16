@@ -20,8 +20,9 @@ setwd("~/Kew Summer")
 #
 #
 # By default, the regression search model will be applied to the global data as 
-# as well as to each level in region data. Cross validation and the Joppa method 
-# will only be applied if the appropriate variables below are set to true.
+# as well as to each level in region data. Cross validation and the Gradient
+# Descent Search method will only be applied if the appropriate variables below 
+# are set to true.
 #
 #
 # Cross Validation on global level
@@ -30,11 +31,11 @@ global.CV <- FALSE
 # Cross Validation on regional data
 region.CV <- FALSE
 #
-# Joppa on glabal level
-global.joppa <- FALSE
+# Gradient Descent Search on global level
+global.grad <- FALSE
 #
-# Joppa on regional data
-region.joppa <- FALSE
+# Gradient Descent Search on regional data
+region.grad <- FALSE
 #
 #
 ####################### RAW DATA LOCATION - WCSP download ######################
@@ -297,7 +298,7 @@ if(global.CV){
 # Run Joppa inspired difference in logs via (a,b) gradient descent combined with
 # St search if selected
 #
-if(global.joppa){
+if(global.grad){
         cat("Computing Log Difference Gradient Descent Search Model...\n")
         source("./kew_grasses/model/grad_descent_search_log_residuals.R")
         grad_descent_search_log_residuals(spec.data, tax.data, en.yr, mult, guess.n,
@@ -318,7 +319,7 @@ if(!is.null(levels)){
         if(region.CV){
                 source("./kew_grasses/model/regression_search_cross_validation.R")
         }
-        if(region.joppa){
+        if(region.grad){
                 source("./kew_grasses/model/grad_descent_search_log_residuals.R")
         }
         for(i in 1:length(levels)){
@@ -366,7 +367,7 @@ if(!is.null(levels)){
                                                file='NUL'
                                 )
                         }
-                        if(region.joppa){
+                        if(region.grad){
                                 capture.output(grad_descent_search_log_residuals(spec.data[,c(1,j+1,j+n.region+2)], 
                                                                   tax.data[,c(1,grep(names(spec.data)[j+1],names(tax.data)))], 
                                                                   en.yr, mult,

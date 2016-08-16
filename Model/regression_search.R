@@ -5,7 +5,7 @@
 # in their Brazil paper. It takes as input two dataframes, one giving          #
 # aggregated as well as cumulative species for set time windows, the other     #
 # giving number of active taxonomists. These can be easily created using the   #
-# scripts in this repository.                                                                  #
+# scripts in this repository.                                                  #                #
 #                                                                              #
 # This script will then attempt to produce an estimate for total species yet   #
 # to be found using the model as proposed by Joppa. However, the algorithm to  #
