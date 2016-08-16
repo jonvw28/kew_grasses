@@ -75,7 +75,9 @@ This equation can then be used to find a and b directly via linear regression in
 
 In this case the residuals need to be given appropriate weightings in the linear model to ensure that the effective sum of sqaures being minimised is equivalanet to the overall residuals being minimised in the first equation in this section. Hence in the linear regression to find a and b the weighted least squares is used as below:
 
-![alt text][img8],	![alt text][img9]
+![alt text][img8]
+
+![alt text][img9]
 
 By using the built in R function `lm` this process can be applied very efficiently and hence this method is computationally much faster than the gradient descent search outlined below. It is for this efficiency that this method is the default method used in the anaylsis in this project.
 
