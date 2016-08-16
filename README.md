@@ -54,7 +54,7 @@ For the collected data for each time winow, the primary authors are then collect
 
 [1]: http://apps.kew.org/wcsp/home.do
 
-[img1]: http://www.sciweavers.org/download/Tex2Img_1471269938.jpg "Species Left to be Discovered"
-[img2]: http://www.sciweavers.org/download/Tex2Img_1471270568.jpg "Taxonomiic Effort"
-[img3]: http://www.sciweavers.org/download/Tex2Img_1471270946.jpg "Estimate of Species Described"
-[img4]: http://www.sciweavers.org/download/Tex2Img_1471271504.jpg "Model Parameters"
+[img1]: https://github.com/jonvw28/kew_grasses/figures/img1.jpg "Species Left to be Discovered"
+[img2]: https://github.com/jonvw28/kew_grasses/figures/img2.jpg "Taxonomiic Effort"
+[img3]: https://github.com/jonvw28/kew_grasses/figures/img3.jpg "Estimate of Species Described"
+[img4]: https://github.com/jonvw28/kew_grasses/figures/img4.jpg "Model Parameters"
