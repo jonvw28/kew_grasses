@@ -41,7 +41,7 @@ The above data set was then summarised, collecting the number of species first p
 
 The number of taxonomists was calculated by taking WCSP data set and collecting the entries for each time window. In this instance the filtering of the species as per above was not used as it was deemed appropriate to keep all of the data as this represents the effort in grass taxonomy at the time. This includes authors whose work is later moved into synonomy or working on various sub-species and hybrids. In general, these authors still represent taxonomic effort at the time. It is however possible to set the script to apply such filters should the user desire.
 
-For the collected data for each time winow, the primary authors are then collected. To these strings the names are split based upon commas, & and the specific taxonomic symbols in and ex. By default the authors after the string 'in' are included as these represent authors on the paper that published the species description, and hence were active at the time of publication (the authors before the 'in' are always included as these are the authors of the description). For the string 'ex' the authors to the right are always included (as these are the authors of the descriptions), but by default the names to the left are excluded as these represent the taxonomist to whom the name is attributed, but this can be historic and so does not necessarily represent taxonomic effort at the time.
+For the collected data for each time winow, the primary authors are then collected. To these strings the names are split based upon commas, & and the specific taxonomic symbols in and ex. By default the string of names is split wherever a comma is found. Also the default is for the authors after the string 'in' are included as these represent authors on the paper that published the species description, and hence were active at the time of publication (the authors before the 'in' are always included as these are the authors of the description). For the string 'ex' the authors to the right are always included (as these are the authors of the descriptions), but by default the names to the left are excluded as these represent the taxonomist to whom the name is attributed, but this can be historic and so does not necessarily represent taxonomic effort at the time. The user is able to change whether there is splitting based on commas, in and ex and whether the above described names are included or not.
 
 ## Model Fitting
 
@@ -49,9 +49,42 @@ The method for fitting the model can be selected to be one of two methods inspir
 
 Both methods employ an optimization algorithm analogous to that described in Joppa et al 2010<sup>2</sup>. Here the algorithm starts with guesses for the total number of species, and then finds the values of a and b that give the best fitting model for this value of S<sub>T</sub>. The best fitting values of S<sub>T</sub> are then used as to select new possible guesses and the process is repeated. This process is applied iteratively until a final value of S<sub>T</sub> is found.
 
+In both methods the number of guesses per iteration is set by the user, the example being using 500. For the first iteration, the range of guesses is equally spaced between the current number of species published and a user-defined multiple of this number. The defualt multiple is 3. 
+
+Once the methods have found the best fitting a and b for each guess of S<sub>T</sub>, the set of scores for each model is considered, and the models are ranked. From this the top models are selected. The proportion of models selected in each iteration is set by the user, the example default being 0.2. The range of values of S<sub>T</sub> for the selected models is then extended about its midpoint by a factor set by the user. The example default is 1.5, this would result in a range 150% the length of the original range with the same midpoint. The guesses for the next iteration are then equally spaced amongst this range. 
+
+The strecthing of the range at each iteration is applied to allow a greater searching of the parameter space. Should the lower end of the range of new guesses fall below the current number of species recorded, then this current level is used as the lower bound instead. In such a case the guesses are equally spaced between this lower bound and the upper end of the range.
+
+This algorithm is applied iteratively until the range of guesses of S<sub>T</sub> is less than 0.5 in which case the final value reported will be selected to be the best scoring one. This should ensure that the reported best-fitting value of S<sub>T</sub> will be reported to the accuracy of the nearest whole number. The user must also define a maximum number of iterations for the the algorithm to ensure it terminates if it does not converge. The default example is 20 iterations, and a message will be displayed should this maximum be reached.
+
+The details of how each method optimises the values of a and b in each model is outlined below
+
 ### Regression Search
 
-The regression search method employs an optimization algorithm analogous to that described in Joppa et al 2010<sup>2</sup>. Here the algorithm starts with guesses for the total number of species, and then finds the values of a and b that give the best fitting model for this value of S<sub>T</sub>. The best fitting values of S<sub>T</sub> are then used as to select new possible guesses and the process is repeated. 
+In the regression search method, the conventional residuals are being used. As such, the following expression relates the actual number of species described to the model estimate for each window. The residual term is the rightmost term and it is the sum of the squares of these which the algorithm minimises.
+
+![alt text][img5]
+
+This equation can however be readily arranged to give a linear equation for a and b as is shown below:
+
+![alt text][img6]
+
+This equation can then be used to find a and b directly via linear regression in a manner similar to that used for the log-transform method in Joppa et al 2010<sup>2</sup>. with the residuals e<sub>i</sub> as given below:
+
+![alt text][img7]
+
+In this case the residuals need to be given appropriate weightings in the linear model to ensure that the effective sum of sqaures being minimised is equivalanet to the overall residuals being minimised in the first equation in this section. Hence in the linear regression to find a and b the weighted least squares is used as below:
+
+![alt text][img8]
+![alt text][img9]
+
+By using the built in R function `lm` this process can be applied very efficiently and hence this method is computationally much faster than the gradient descent search outlined below. It is for this efficiency that this method is the default method used in the anaylsis in this project.
+
+### Gradient Descent Search
+
+## Cross Validation
+
+## Utlisiing the Scripts
 
 ## References
 
@@ -68,3 +101,8 @@ The regression search method employs an optimization algorithm analogous to that
 [img2]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img2.jpg "Taxonomiic Effort"
 [img3]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img3.jpg "Estimate of Species Described"
 [img4]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img4.jpg "Model Parameters"
+[img5]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img5.jpg "Regression Search Model"
+[img6]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img6.jpg "Regression Search equation"
+[img7]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img7.jpg "Regression Search residuals"
+[img8]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img8.jpg "Regression Search Least Squares"
+[img9]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img9.jpg "Regression Search residual Weightings"
