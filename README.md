@@ -23,7 +23,7 @@ The model then states that the estimate for the number of new species published 
 
 ![alt text][img3]
 
-Thus the model is parameterised by the the coefficients of the efficieny term, and the theoretical total number of species:
+Thus the model is parameterised by the the coefficients of the efficiency term, and the theoretical total number of species:
 
 ![alt text][img4]
 
@@ -47,20 +47,13 @@ For the collected data for each time winow, the primary authors are then collect
 
 The method for fitting the model can be selected to be one of two methods inspired by the work of Joppa et al 2010<sup>1,2</sup> (or both). Both methods fit the model parameters by minimising the sum of squared residuals. In the default method employed in the analysis of this project, here referred to as 'Regression Search', these residuals are simply the difference in each window between the estimate of new species that the model gives and the actual number of new species published. This is a measure not used by Joppa et al in any of their published work. The other method, here referred to as 'Gradient Descent Search', instead first log-transforms the model estimate and actual number of species and then calculates the difference in these log values and uses this as the residual for each data point.
 
-
-
-
-
-
-
-
+Both methods employ an optimization algorithm analogous to that described in Joppa et al 2010<sup>2</sup>. Here the algorithm starts with guesses for the total number of species, and then finds the values of a and b that give the best fitting model for this value of S<sub>T</sub>. The best fitting values of S<sub>T</sub> are then used as to select new possible guesses and the process is repeated. This process is applied iteratively until a final value of S<sub>T</sub> is found.
 
 ### Regression Search
 
-In this method the model is fitted by minimising the sum of the square of residuals given by comparing the model predictions with the actual number of new species discovered in each window. This is a departure from the method employed by Joppa et al as it does not first log transform the estimate and actual species discovered before comparing their difference and using this as a residual. In comparisons, the log transformed method does not appear to create huge relative differences in most instances. However, as will be outlined below, the convergence of this regular residuals model is far quicker and so is the base model for the analysis in this project.
+The regression search method employs an optimization algorithm analogous to that described in Joppa et al 2010<sup>2</sup>. Here the algorithm starts with guesses for the total number of species, and then finds the values of a and b that give the best fitting model for this value of S<sub>T</sub>. The best fitting values of S<sub>T</sub> are then used as to select new possible guesses and the process is repeated. 
 
-
-
+## References
 
 1. Flowering Plants
 2. Brazil
