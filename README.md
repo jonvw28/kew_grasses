@@ -71,7 +71,7 @@ In this method the model is fitted by minimising the sum of the square of residu
 [1]: http://www.kew.org
 [2]: http://apps.kew.org/wcsp/
 
-[img1]: https://github.com/jonvw28/kew_grasses/Figures/blob/master/Figures/img1.jpg "Species Left to be Discovered"
-[img2]: https://github.com/jonvw28/kew_grasses/Figures/blob/master/Figures/img2.jpg "Taxonomiic Effort"
-[img3]: https://github.com/jonvw28/kew_grasses/Figures/blob/master/Figures/img3.jpg "Estimate of Species Described"
-[img4]: https://github.com/jonvw28/kew_grasses/Figures/blob/master/Figures/img4.jpg "Model Parameters"
+[img1]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img1.jpg "Species Left to be Discovered"
+[img2]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img2.jpg "Taxonomiic Effort"
+[img3]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img3.jpg "Estimate of Species Described"
+[img4]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img4.jpg "Model Parameters"
