@@ -124,8 +124,8 @@ ex.inc <- TRUE
 # Location Filter IDs - any columns in location data that are to be filtered in
 # creating a valid dataset and the marks in these columns for removal 
 # eg remove locations where a species has been introduced
-filt.ind <- c(11,12,13,14)
-filt.mk <- c(1,1,1,1)
+filt.ind <- c(11,12,13,1415)
+filt.mk <- c(1,1,1,1,1)
 #
 # FILTERING OF SPECIES - to remove or allow certain taxonomic groups
 #
