@@ -160,6 +160,14 @@ The user should then decide whether they desire a geographic breakdown, and whet
 
 With knowledge of the required script and the input files in place the user should then load the script they need and edit any of the input variables as explained in the table below. Any non-essential input variables can be left as they are, but are left for the user to alter should they wish to do so.
 
+Both scripts will create a sub-directory within the output directory for their analysis. This sub-directory will then have further sub-directories created within it. One of these will be filled with aggregated species discovery data, broken down by each time window and with an additional file for each geographic level of interest showing this breakdown by region.
+
+Next of these will be a subdirectory created and populated with aggreagted taxonomist data. Here there will be a summary file, with a breakdown by time window. There is also a detailed breakdown file showing the names of all authors in each time window, and how many papers they authored, broken down by number of co-authors. This analysis is then repeated at each geogrpahic level where appropriate. Here there is a summary file with sregional summary data broken down by time window. There is then an additional file for each region with the full author breakdown as per the overall data analysis.
+
+For each model that is fitted, there is also a sub-directory created. Within each of these there is a model summary file showing the key model parameters. There is then a full model file showing the estimates for each time window. There are also three plots ocmpleted. One shows the squared residuals score for the best fitting model for the initial guesses of S<sub>T</sub>. Another shows the trends in number of taxonomists and new species discovered over time, with the model fit overlaid. The final plot shows the number of species per taxonomist with the fitted model theoretical species per taxonomist overlaid. Within this directory, if appropriate, there are then subdirectories containing the same information for the models fitted for different regions.
+
+Finally the scripts output a csv file showing the regional predictions and percentage of species seen at each geographic lebvel if appropriate, at the top level output directory.
+
 ### Essential inputs
 
 | Input Variable 	| Default 						| Explanation |
@@ -173,7 +181,7 @@ With knowledge of the required script and the input files in place the user shou
 
 #### Subsetting Essential Inputs
 
-These are the variables that are only available in the script `complete_pipeline_whole_dataset.r` which must be set in order to allow subsetting
+These are the variables that are only available in the script `complete_pipeline_whole_dataset.r` which must be set in order to allow subsetting.
 
 | Input Variable 	| Default 						| Explanation |
 |:---------------------:|:-----------------------------------------------------:| ----------- |		
@@ -183,13 +191,28 @@ These are the variables that are only available in the script `complete_pipeline
   
 ### Optional Inputs
 
-These are the remaining input variable sin both scripts which the user if free to alter to adapt the method to their needs.
+These are the remaining input variables in both scripts which the user if free to alter to adapt the method to their needs.
+
+#### Model Options and Output Locations
 
 | Input Variable 	| Default 						| Explanation |
 |:---------------------:|:-----------------------------------------------------:| ----------- |	
-| global.CV		| FALSE							| When set to TRUE this will run the cross-validation regime on the complete data set (or on each subset in complete_pipeline_filter.r)	|
-| region.CV		| FALSE			| When set to TRUE this will run the cross-validation regime on the complete data set (or on each subset in complete_pipeline_filter.r)	|
-| global.grad		| FALSE			| When set to TRUE this will run the gradient descent search method on the complete data set (or on each subset in complete_pipeline_filter.r)	|
+| `global.CV`		| `FALSE`						| When set to TRUE this will run the cross-validation regime on the complete data set (or on each subset in complete_pipeline_filter.r)	|
+| `region.CV`		| `FALSE`						| When set to TRUE this will run the cross-validation regime on each valid region (within each subset in complete_pipeline_filter.r)	|
+| `global.grad`		| `FALSE`						| When set to TRUE this will run the gradient descent search method on the complete data set (or on each subset in complete_pipeline_filter.r)	|
+| `region.grad`		| `FALSE`						| When set to TRUE this will run the gradient descent search method on each valid region (within each subset in complete_pipeline_filter.r) **WARNING: This will be very slow**|
+| `spec.dir`		| `"species_data"`					| Name for the sub-directory within the output directory in which the aggregated species data will go|
+| `tax.dir`		| `"taxon_data"`						| Name for the sub-directory within the output directory in which the aggregated taxonomist data will go|
+| `reg.dir`		| `"regression_search"`					| Name for the sub-directory within the output directory in which the regression search results will go|
+| `regcv.dir`		| `"regression_search_cross_validation"`		| Name for the sub-directory within the output directory in which the regression search cross validation results will go (if selected)|
+| `log.dir`		| `"grad_descent_search_log_residuals"`			| Name for the sub-directory within the output directory in which the gradient descent search results will go (if selected)|
+
+#### Indices in the Data Files
+
+| Input Variable 	| Default 	| Explanation				|
+|:---------------------:|:-------------:| ------------------------------------- |
+| `id.ind`		| `c(1,2)`	| The indices of the columns containing the plant name IDs in the species and distribution datasets respectively. The deafutls are for a WCSP download. The second index is only necessary if the the geographic model is required.|
+| `yr.ind`		| `15`		| The index of the column in the species dataset which contains the year of publication|
 
 
 ## References
