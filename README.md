@@ -147,26 +147,37 @@ This repository contains two main scripts for this analysis. The main script is 
 
 In order to run this repository, the user must first download a copy to their local machine.
 
-There are two scripts in this repository which can be used to re-create the analysis described above. Both scripts will require the input of a .csv file of a download of WCSP data and a posisble extra .csv file of the distribution data from the WCSP. These files should be located a directory at the same level as the downloaded repository. That is to say you should have a structure of this form './location/kew_grasses' with your data in a directory of the form './location/data' or similar.
+There are two scripts in this repository which can be used to re-create the analysis described above. Both scripts will require the input of a .csv file of a download of WCSP data and a posisble extra .csv file of the distribution data from the WCSP. These files should be located a directory at the same level as the downloaded repository. That is to say you should have a structure of this form `./location/kew_grasses` with your data in a directory of the form `./location/data` or similar.
 
 The user should then decide whether they desire a geographic breakdown, and whether they want the analysis to be on the entire dataset or if they would like it subsetted in some way. The table below shows which script to use in which case, and which csv files will be needed.
 
 | Model Desired 		| Script 				| Required .csv 		|
 |:-----------------------------:|:-------------------------------------:|:-----------------------------:|
-| Global only - Entire Dataset	| complete_pipeline_whole_dataset.r	| Species Data only		|
-| Global only - Subsets		| complete_pipeline_filter.r		| Species Data only		|
-| Geographic - Entire Dataset 	| complete_pipeline_whole_dataset.r	| Species Data and Distribution	|
-| Geographic - Subsets		| complete_pipeline_filter.r		| Species Data and Distribution	|
+| Global only - Entire Dataset	| `complete_pipeline_whole_dataset.r`	| Species Data only		|
+| Global only - Subsets		| `complete_pipeline_filter.r`		| Species Data only		|
+| Geographic - Entire Dataset 	| `complete_pipeline_whole_dataset.r`	| Species Data and Distribution	|
+| Geographic - Subsets		| `complete_pipeline_filter.r`		| Species Data and Distribution	|
 
 With knowledge of the required script and the input files in place the user should then load the script they need and edit any of the input variables as explained in the table below. Any non-essential input variables can be left as they are, but are left for the user to alter should they wish to do so.
 
 ### Essential inputs
 
-| Input Variable 	| Default 		| Explanation |
-|:---------------------:|:---------------------:| ----------- |		
-| setwd			| "~/Kew Summer"	| This is where the user can set the parent directory within which the "kew_grasses" directory (and .csv files (or their directory) are)|
-| global.cv		| FALSE			| When set to TRUE this will run the cross-validation regime on the complete data set (or on each subset in complete_pipeline_filter.r)	|
-| global.gradient	| FALSE			| When set to TRUE this will run the gradient descent search method on the complete data set (or on each subset in complete_pipeline_filter.r)	|
+| Input Variable 	| Default 						| Explanation |
+|:---------------------:|:-----------------------------------------------------:| ----------- |		
+| `setwd()`		| `"~/Kew Summer"`					| This is where the user can set the parent directory within which the "kew_grasses" directory (and .csv files (or their directory) are)|
+| `dir.path`		| `"./Data/07_05/"`					| This is the location within the above directory where the .csv files are stored (can simply be "./")|
+| `spec.file.name`	| `"public_checklist_flat_plant_dl_20160705_poaceae"`	| This is the name of the WCSP species data file (**NOT**E: without the .csv at the end)|
+| `levels`		| `c("TDWG1",TDWG2")`					| These are the names for the geographic levels to be used in output filenames (can be any string the user desires). **For a global only model this will need to be set to `NULL`**
+| `loc.file.name`	| `"Poaceae_distribution"`				| If a geographic breakdown model is desired then this needs to be the name of the WCSP distribution data file (**NOTE**: without .csv). If no geographic breakdown is desired then this can be ignored, but does not need to be altered as it will be ignored|
+| `out.dir`		| `"./Output"`						| This is the location of the directory within the working directory where the output should go (in default this would mean `"~/Kew Summer/Output/"`)
+
+#### Subsetting Essential Inputs
+
+
+
+| global.CV		| FALSE			| When set to TRUE this will run the cross-validation regime on the complete data set (or on each subset in complete_pipeline_filter.r)	|
+| region.CV		| FALSE			| When set to TRUE this will run the cross-validation regime on the complete data set (or on each subset in complete_pipeline_filter.r)	|
+| global.grad		| FALSE			| When set to TRUE this will run the gradient descent search method on the complete data set (or on each subset in complete_pipeline_filter.r)	|
 
 
 ## References
