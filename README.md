@@ -166,16 +166,28 @@ With knowledge of the required script and the input files in place the user shou
 |:---------------------:|:-----------------------------------------------------:| ----------- |		
 | `setwd()`		| `"~/Kew Summer"`					| This is where the user can set the parent directory within which the "kew_grasses" directory (and .csv files (or their directory) are)|
 | `dir.path`		| `"./Data/07_05/"`					| This is the location within the above directory where the .csv files are stored (can simply be "./")|
-| `spec.file.name`	| `"public_checklist_flat_plant_dl_20160705_poaceae"`	| This is the name of the WCSP species data file (**NOT**E: without the .csv at the end)|
+| `spec.file.name`	| `"public_checklist_flat_plant_dl_20160705_poaceae"`	| This is the name of the WCSP species data file (**NOTE**: without the .csv at the end)|
 | `levels`		| `c("TDWG1",TDWG2")`					| These are the names for the geographic levels to be used in output filenames (can be any string the user desires). **For a global only model this will need to be set to `NULL`**
 | `loc.file.name`	| `"Poaceae_distribution"`				| If a geographic breakdown model is desired then this needs to be the name of the WCSP distribution data file (**NOTE**: without .csv). If no geographic breakdown is desired then this can be ignored, but does not need to be altered as it will be ignored|
 | `out.dir`		| `"./Output"`						| This is the location of the directory within the working directory where the output should go (in default this would mean `"~/Kew Summer/Output/"`)
 
 #### Subsetting Essential Inputs
 
+These are the variables that are only available in the script `complete_pipeline_whole_dataset.r` which must be set in order to allow subsetting
 
+| Input Variable 	| Default 						| Explanation |
+|:---------------------:|:-----------------------------------------------------:| ----------- |		
+| `subset.col`		| `3`							| Index of the cloumn which contains the varibale uon which the data is to be subsetted|
+| `subset.mk`		| `c("Poaceae")`					|The values within `subset.col` which are ot be the basis of the subset. Requires a vector, where each element represents a distinct subset|
+  
+  
+### Optional Inputs
 
-| global.CV		| FALSE			| When set to TRUE this will run the cross-validation regime on the complete data set (or on each subset in complete_pipeline_filter.r)	|
+These are the remaining input variable sin both scripts which the user if free to alter to adapt the method to their needs.
+
+| Input Variable 	| Default 						| Explanation |
+|:---------------------:|:-----------------------------------------------------:| ----------- |	
+| global.CV		| FALSE							| When set to TRUE this will run the cross-validation regime on the complete data set (or on each subset in complete_pipeline_filter.r)	|
 | region.CV		| FALSE			| When set to TRUE this will run the cross-validation regime on the complete data set (or on each subset in complete_pipeline_filter.r)	|
 | global.grad		| FALSE			| When set to TRUE this will run the gradient descent search method on the complete data set (or on each subset in complete_pipeline_filter.r)	|
 
