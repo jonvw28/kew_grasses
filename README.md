@@ -123,17 +123,29 @@ From the abover methods the scores for each guess of S<sub>T</sub> can then be c
 
 This method requires a huge number of computations for the gradient descent method. As such it can be computationally very inefficeint (even with caching and vectorisation) and hence is not the preferred method for the project analysis.
 
-### Method Comparison
+### Cross Validation
 
-
+In order to test the reliability of the results from the methods above a cross-validation regime was also implemented. This works by applying a jack-knife approach and fitting the model whilst leaving out one time window at a time. The complete set of S<sub>T</sub> predictions can then be compared to the prediction made by the model on the complete data. Owing to how exhaustive this is, the method has only been implemented for the primary regression search method. However a very similar implementation could relatively easily be applied to the gradient descent search method.
 
 ### Geographical Methods
 
+To address the question of where the gaps in our knowledge lie, the above methods were extended to predict the total number of species which exist in each geographic region of interest. This is supported at any [Taxonomic Database Working Group (TDWG)][3] level.
 
+In this method the total number of species globally is first calculated using the regression search method. Following this, the species data is mapped to the distribution data at the desired TDWG level. Each species is then classified as endogenous or not at this level. Here endogeny refers to any species that is only present in one region at the given TDWG level.
 
-## Cross Validation
+For each region, the regression search model is then used to predict the total number of endogenous species to be found in that region (regions with fewer than a user-defined cumulative endogenous species to date are excluded as the model is unrelaible with too little data). The same model is then applied to the non-endogenous species in the same way.
+
+The predictions for the regions and non-endogenous species are then collated. For regions where the model couldn't be applied, the prediction for total number of species is calculated by calculating the ratio of aggregate predictions over aggregate current species recorded for the regions that succeeded and non-endogenous species. This is then used to multiply the current recorded species in these regions to get a predicted total of species.
+
+The total number of predicted species across all regions and non-endogenous is then computed and compared to the earlier global prediction. At this point all of the regional predictions as well as non-endogenous species are scaled by a constant ratio such that the total of the regional analysis is equal to the global total. The final results are then reported, as well as the percentage of the predicted total of species in each region that have so far been recorded. 
+
+### Family Filtering
+
+This repository contains two main scripts for this analysis. The main script is desgined to be used for a WCSP download where the analysis is to be applied to all species included in the data, this is designed to calculate global gaps in knowledge across all included plant data. There is an altered script that allows additional filtering of the raw download, for example, to select on certain families of interest. This script will then apply the above pipelines to each family in turn. This is designed for applying the model to specific sub-groups of interest.
 
 ## Utlisiing the Scripts
+
+
 
 ## References
 
@@ -143,8 +155,9 @@ This method requires a huge number of computations for the gradient descent meth
 4. Taxonomists
 5. WCSP
 
-[1]: http://www.kew.org
+[1]: http://www.kew.org/
 [2]: http://apps.kew.org/wcsp/
+[3]: http://www.tdwg.org/
 
 [img1]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img1.jpg "Species Left to be Discovered"
 [img2]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img2.jpg "Taxonomiic Effort"

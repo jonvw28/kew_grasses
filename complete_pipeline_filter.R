@@ -94,6 +94,9 @@ loc.ind <- c(4,6)
 # geographic data handling
 levels <- c("TDWG1","TDWG2")
 #
+# Minimum number of species in each region for model to be fitted
+n.spec <- 50
+#
 #
 ############################ AUTHOR PROCESSING #################################
 #
@@ -384,7 +387,7 @@ for(s in 1:length(subset.mk)){
                                                      + spec.data[nrow(spec.data),j+1])
                                 tmp.reg <- colnames(spec.data)[j+1]
                                 predictions[[i]][j,1] <- tmp.reg
-                                if(spec.data[nrow(spec.data),n.region+j+1] < 50){
+                                if(spec.data[nrow(spec.data),n.region+j+1] < n.spec){
                                         next()
                                 }
                 
