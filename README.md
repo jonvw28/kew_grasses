@@ -143,9 +143,16 @@ The total number of predicted species across all regions and non-endogenous spec
 
 This repository contains two main scripts for this analysis. The main script is desgined to be used for a WCSP download where the analysis is to be applied to all species included in the data, this is designed to calculate global gaps in knowledge across all included plant data. There is an altered script that allows additional filtering of the raw download, for example, to select on certain families of interest. This script will then apply the above pipelines to each family in turn. This is designed for applying the model to specific sub-groups of interest.
 
-## Utlisiing the Scripts
+## Utilising the Scripts
 
+There are two scripts in this repository which can be used to re-create the analysis described above. Both scripts will require the input of a .csv file of a download of WCSP data. The user should then decide whether they desire a geographic breakdown, and whether they want the analysis to be on the entire dataset or if they would like it subsetted in some way. The table below shows which script to use in which case, and which csv files will be needed.
 
+| Model Desired 		| Script 				| Required .csv 		|
+|:-----------------------------:|:-------------------------------------:|:-----------------------------:|
+| Global only - Entire Dataset	| complete_pipeline_whole_dataset.r	| Species Data only		|
+| Global only - Subsets		| complete_pipeline_filter.r		| Species Data only		|
+| Geographic - Entire Dataset 	| complete_pipeline_whole_dataset.r	| Species Data and Distribution	|
+| Geographic - Subsets		| complete_pipeline_filter.r		| Species Data and Distribution	|
 
 ## References
 
