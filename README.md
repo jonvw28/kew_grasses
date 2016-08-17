@@ -83,6 +83,8 @@ By using the built in R function `lm` this process can be applied very efficient
 
 ### Gradient Descent Search
 
+#### Motivation
+
 In order to determine whether the regression search method above produces results that could be compared to the method proposed by Joppa et al 2010<sup>1</sup> in which the residuals are taken as the difference between the logarithms of the model estiamte and actual number of species in each time window it was sought to develop an optimisation method that could fit such a model. Joppa et al suggest three such methods to fit the model as outlined below:
 
 ![alt text][img10]
@@ -97,9 +99,37 @@ The final method proposed by Joppa et al in 2011<sup>3</sup> involves introducin
 
 Recall, the final goal of this project is to aid the study of taxonomy and give an idea of the gaps in our knowledge and not to try to precisely predict exact species numbers. In particular, species discovery is an inherently complex process with many confounding factors. Additionally the data set, whilst very detialed, naturally comes with the caveats and limitations of a dataset based on over 250 years of work. As such it was decided to proceed with a parsimonious method, keeping the focus on exploring the data and various filters and thereby reducing the danger of overfitting. As such the first method of gradient descent as outlined above was chosen to address the issue of the logarithmic difference residuals.
 
-### Geographical Methods
+#### Methodology
+
+Owing the large differences in magnitude between the parameters a, b and S<sub>T</sub> it was decided not to use tehe method of steepest descent for all 3 paramters simultaneously (as per Joppa et al 2010<sup>1</sup>). This was because a small change in a or b had a much more drastic change than an equivalent change in S<sub>T</sub>. Instead, the gradient descent search method here developed works in the same way as the regression search method, only where the linear regression is used to find a and b for each guess of S<sub>T</sub>, this method instead uses steepest descent to find a and b, with S<sub>T</sub> fixed.
+
+The method of steepest descent starts from a guess of the parameters, and then by following the direction of steepest gradient of the least-squares function with respect to the parameters it takes a step towards a guess that reduces the error. In order to facilitate faster descent, scaling of the model variables is recommended, and this is included in the implementation presented here, with scaling to apply to taxonomist and species numbers set by the user (year is automatically scaled).
+
+To further support rapid convergence, for each guess of S<sub>T</sub> in the gradient descent search method a grid search is first used for the values of a and b. Here a range of possible values are scored and gradient descent starts from the best scoring combination of these. The user can control this grid search by setting the number of guesses to try for a and b respectively, as well as setting the range over which to space these values.
+
+After the grid search, the gradient descent then begins from the best scoring pairing of a and b. For eah step of gradient descent, the step maximising the reduction in the sum of squared-residuals is taken by calculating the partial derivative of this with respect to a and b and altering a and b by this scaled by a step-size parameter. The default step size parameter, alpha, is set by the user.
+
+![alt text][img12]
+
+In order to facilitate faster convergence, this implememntation uses an adaptive step size. Initially, for each grdient descent step is considered using the default step size. The partial derivatives of the error function at the new values for a and b are then calculated. If the sign of both derivatives don't change then the step is taken (as this is assumed to mean that a fixed point has not been crossed). If however either of the derivatives changes sign, then an alternative step size parameter of half the current step size is considered. The process is then repeated to calculate and compare the signs of the derivatives. Should the signs of the halved step size no longer change, then the step is taken with the full step size. If not, the nominal step size is then set to the halved step size, and the halving process is applied again. This process is then applied iteratively until a small enough step size is found, or until a user-definied minimum step size is considered. In this case the algorithm stops, outputting the current values for a and b.
+
+The reason that the larger of the two options is used in the halving process above is because this always ensures when an adaptive step size is used, it forces the step to cross the fixed-point. This enables faster convergence, as otherwise the method would only ever be able to approach a fixed-point from one side, effectively requiring asymptotic convergence.
+
+The only exception to the above routine in each step is where the initial gradient and step size combination would cause a negative prediction for species discovery in any timw window. Given the logarithmic tranformation this causes an error, and so in such cases the effective step size is reduced until the predictions are all non-negative by rescaling the gradient. This reduced gradient is then used in the normal way as outlined above with the adaptive step size.
+
+The process of gradient descent is then repeated until the partial derivatives have a magnitude less than a user-defined multiple of the magnitudes of the parameters a and b. At this point the values of a and b are reported and the algorithm moves on to the next guess for S<sub>T</sub>. The user also sets a maximum number of gradient descent steps, that if reached for a given guess, causes the gradient descent to temrinate and report the current values of a and b, as well as outputting a warning. 
+
+From the abover methods the scores for each guess of S<sub>T</sub> can then be calculated and the searching method as used in the regression search can be used ot find the best guess for S<sub>T</sub>.
+
+This method requires a huge number of computations for the gradient descent method. As such it can be computationally very inefficeint (even with caching and vectorisation) and hence is not the preferred method for the project analysis.
 
 ### Method Comparison
+
+
+
+### Geographical Methods
+
+
 
 ## Cross Validation
 
@@ -127,3 +157,4 @@ Recall, the final goal of this project is to aid the study of taxonomy and give 
 [img9]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img9.jpg "Regression Search residual Weightings"
 [img10]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img10.jpg "Gradient Descent Search residuals"
 [img11]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img11.jpg "Gradient Descent Search residuals"
+[img12]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img12.jpg "Gradient Descent Method"
