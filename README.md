@@ -272,24 +272,37 @@ These will only be used if the Gradient Search Descent method is selected by the
 |:---------------------:|:-------------:| ------------------------------------- |
 | `scale`		| `c(100,1000)`	| The scaling factor to be used to re-scale the taxonomist numbers and species numbers respectively. A factor of 10 would mean dividing the level of that variable by 10. Years are automatically scaled to fill the range [0,1]|
 | `ab.guesses`		| `c(100,100)`	| The number of initial guesses of a and b to be considered in the grid search.
-| `rng.a`		| `c(-0.1,0.1)	| The range over which to space the initial guesses for a. **NOTE:** this number will be applied to the rescaled data, but the outputted a will be adjusted to apply to the raw input data|
-| `rng.b`		| `c(-0.1,0.1)	| The range over which to space the initial guesses for b. **NOTE:** this number will be applied to the rescaled data, but the outputted b will be adjusted to apply to the raw input data|
+| `rng.a`		| `c(-0.1,0.1)`	| The range over which to space the initial guesses for a. **NOTE:** this number will be applied to the rescaled data, but the outputted a will be adjusted to apply to the raw input data|
+| `rng.b`		| `c(-0.1,0.1)`	| The range over which to space the initial guesses for b. **NOTE:** this number will be applied to the rescaled data, but the outputted b will be adjusted to apply to the raw input data|
 | `alpha`		| `0.01`	| Default step-size for the gradient descent|
 | `min.alp`		| `2e-14`	| Minimum step-size allowed in the adaptive step-size algorithm|
 | `grad.rat`		| `1e-4`	| Ratio of the magnitudes of the gradient to the magnitudes of the parameters at which gradient descent will stop|
 | `max.grad`		| `500`		| The maximum number of steps that each gradient descent will be aloowed to take|
 
-## References
+## Technical Information
 
-1. Flowering Plants
-2. Brazil
-3. Hotspots
-4. Taxonomists
-5. WCSP
+The code presented here was prepared in R studio using R version `3.2.3` in a Windows architecture, with 64-bit operating system. The following packages and version were used:
+
+* `dplyr 0.4.3` 
+* `stringr 1.0.0`
+* `reshape 0.8.5`
+* `gplot2 2.0.0`
+
+
+## References
+1. [**How many specues of flowering plants are there?**][4] Lucas N. Joppa, David L. Roberts, Stuart L. Pimm; Proc. R. Soc. B 2010 -; DOI: 10.1098/rspb.2010.1004. Published 7 July 2010 
+2. [**How many endangered species remian to be discovered in Brazil?**][5] Pimm, SL; Jenkins, CN; Joppa, LN; Roberts, DL; Russell, GJ; Natureza a Conservacao 2010; DOI: 10.4322/natcon.00801011
+3. [**Biodiversity hotspots house most undiscovered plant species**][6] Lucas N. Joppa, David L. Roberts, Norman Myers, and Stuart L. Pimm; PNAS 2011 108 (32) 13171-13176; published ahead of print July 5, 2011, doi:10.1073/pnas.1109389108
+4. [**The population ecology and social behaviour of taxonomists**][7] Lucas N. Joppa, David L. Roberts and Stuart L. Pimm; Trends in Ecology & Evolution 26, 551–553; doi:10.1016/j.tree.2011.07.010
+5. W.D. Clayton, R. Govaerts, K.T. Harman, H. Williamson & M. Vorontsova (2016). World Checklist of Poaceae. Facilitated by the Royal Botanic Gardens, Kew. Published on the Internet; http://apps.kew.org/wcsp/ Retrieved 2016-07-05
 
 [1]: http://www.kew.org/
 [2]: http://apps.kew.org/wcsp/
 [3]: http://www.tdwg.org/
+[4]: http://rspb.royalsocietypublishing.org/content/early/2010/07/07/rspb.2010.1004#fn-group-1
+[5]: http://doi.editoracubo.com.br/10.4322/natcon.00801011
+[6]: http://www.pnas.org/content/108/32/13171.full
+[7]: http://www.sciencedirect.com/science/article/pii/S0169534711002084
 
 [img1]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img1.jpg "Species Left to be Discovered"
 [img2]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img2.jpg "Taxonomiic Effort"
