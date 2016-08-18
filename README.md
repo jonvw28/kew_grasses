@@ -197,10 +197,10 @@ These are the remaining input variables in both scripts which the user if free t
 
 | Input Variable 	| Default 						| Explanation |
 |:---------------------:|:-----------------------------------------------------:| ----------- |	
-| `global.CV`		| `FALSE`						| When set to TRUE this will run the cross-validation regime on the complete data set (or on each subset in complete_pipeline_filter.r)	|
-| `region.CV`		| `FALSE`						| When set to TRUE this will run the cross-validation regime on each valid region (within each subset in complete_pipeline_filter.r)	|
-| `global.grad`		| `FALSE`						| When set to TRUE this will run the gradient descent search method on the complete data set (or on each subset in complete_pipeline_filter.r)	|
-| `region.grad`		| `FALSE`						| When set to TRUE this will run the gradient descent search method on each valid region (within each subset in complete_pipeline_filter.r) **WARNING: This will be very slow**|
+| `global.CV`		| `FALSE`						| When set to `TRUE` this will run the cross-validation regime on the complete data set (or on each subset in complete_pipeline_filter.r)	|
+| `region.CV`		| `FALSE`						| When set to `TRUE` this will run the cross-validation regime on each valid region (within each subset in complete_pipeline_filter.r)	|
+| `global.grad`		| `FALSE`						| When set to `TRUE` this will run the gradient descent search method on the complete data set (or on each subset in complete_pipeline_filter.r)	|
+| `region.grad`		| `FALSE`						| When set to `TRUE` this will run the gradient descent search method on each valid region (within each subset in complete_pipeline_filter.r) **WARNING: This will be very slow**|
 | `spec.dir`		| `"species_data"`					| Name for the sub-directory within the output directory in which the aggregated species data will go|
 | `tax.dir`		| `"taxon_data"`						| Name for the sub-directory within the output directory in which the aggregated taxonomist data will go|
 | `reg.dir`		| `"regression_search"`					| Name for the sub-directory within the output directory in which the regression search results will go|
@@ -213,7 +213,71 @@ These are the remaining input variables in both scripts which the user if free t
 |:---------------------:|:-------------:| ------------------------------------- |
 | `id.ind`		| `c(1,2)`	| The indices of the columns containing the plant name IDs in the species and distribution datasets respectively. The deafutls are for a WCSP download. The second index is only necessary if the the geographic model is required.|
 | `yr.ind`		| `15`		| The index of the column in the species dataset which contains the year of publication|
+| `auth.ind`		| `11`		| The index of the primary authors column in the species dataset|
+| `loc.ind`		| `c(4,6)`	| If a geographic model is being applied then this is where the indices of the columns for each geographic level need to be supplied. Each column should refer to each level set via `levels`, in the same order|
+| `n.spec`		| `50`		| For geographic models this is the minimum number of total species recorded to date required in a given region in order for the model to be applied|
 
+#### Author Name Processing
+
+| Input Variable 	| Default 	| Explanation				|
+|:---------------------:|:-------------:| ------------------------------------- |
+| `comma`		| `TRUE`	| If set to `TRUE` then the string of author names will be split on the string `','`|
+| `in.tag`		| `TRUE`	| If set to `TRUE` then the string of author names will be split on the string `'in'`|
+| `in.inc`		| `TRUE`	| If set to `TRUE` then names to the right of the string `'in'` will be included|
+| `ex.tag`		| `TRUE`	| If set to `TRUE` then the string of author names will be split on the stirng `'ex'`|
+| `ex.inc`		| `FALSE`	| If set to `TRUE` then names to the left of the string `'ex'` will be included| 
+
+#### Data Filtering
+
+| Input Variable 	| Default 		| Explanation			|
+|:---------------------:|:---------------------:| ----------------------------- |
+| `filt.ind`		| `c(11,12,13,14,15)`	| When using a geogrpahic model this allows filtering of the distribution dataset to remove data for regions where the species is doubtful, or has been introduced. Here the user sets the indices of the columns where filtering is to be applied|
+| `filt.mk`		| `c(1,1,1,1,1)`	| Set the content for each column in `filt.ind` which is to be removed. If more than one mark is to be filtered in a given column, then enter that index twice in `filt.ind` and enter the two marks in the corresponding locations in `filt.mk`|
+| `spe.tax.stat`	| `TRUE`		| If set to `TRUE` then the species dataset is filtered based on taxonomic status for creating the aggregated species data|
+| `tx.tax.stat`		| `FALSE`		| If set to `TRUE` then the species dataset is filtered based on taxonomic status for creating the aggregated taxonomist data|
+| `stat.ind`		| `17`			| This is the index of the column containing the taxonomic status information in the species dataset|
+|`stat.mk`		| `c("A")`		| This is a vector of all the contents of `stat.ind` that are to be kept. Is possible to add as many as the user desires, but unlike for `filt.ind` there is no need to replicate the index in `stat.ind`|
+| `spe.hyb.stat`	| `TRUE`		| If set to `TRUE` then the species dataset is filtered based on hybrid status for creating the aggregated species data|
+| `tx.hyb.stat`		| `FALSE`		| If set to `TRUE` then the species dataset is filtered based on hybrid status for creating the aggregated taxonomist data|
+| `hyb.ind`		| `c(4,6)`			| This is the index of the column containing the hybrid status information in the species dataset|
+|`hyb.mk`		| `c("×","×")`		| This is a vector of the marks in each column for hybrid status that indicate those data to be removed. Here only one mark is allowed per column, and thus if there are mor ethan one mark in a cloumn, it must be repeated in `hyb.ind` much like `filt.ind`|
+| `spe.rnk.stat`	| `TRUE`		| If set to `TRUE` then the species dataset is filtered based on taxonomic rnak for creating the aggregated species data|
+| `tx.rnk.stat`		| `FALSE`		| If set to `TRUE` then the species dataset is filtered based on taxonomic rank for creating the aggregated taxonomist data|
+| `rnk.ind`		| `23`			| This is the index of the column containing the taxonomic rank information in the species dataset|
+|`rnk.mk`		| `c("Species")`	| This is a vector of all the contents of `rnk.ind` that are to be kept. Is possible to add as many as the user desires, but unlike for `filt.ind` there is no need to replicate the index in `rnk.ind`|
+
+#### Model Parameters
+
+| Input Variable 	| Default 	| Explanation				|
+|:---------------------:|:-------------:| ------------------------------------- |
+| `st.yr`		| `1766`	| This is the year from which the analysis should start|
+| `en.yr`		| `2015`	| This is the year at which the analysis should end|
+| `int.yr`		| `5`		| This is the number of year to be considered in each window|
+
+#### S<sub>T</sub> Search Parameters
+
+| Input Variable 	| Default 	| Explanation				|
+|:---------------------:|:-------------:| ------------------------------------- |
+| `mult`		| `3`		| The multiple of the current cumulative number of species which should be the upper bound for the first round of guesses|
+| `guess.n`		| `500`		| The number of guesses that should be scored per iteration of S<sub>T</sub> search|
+| `ratio`		| `0.2`		| The proportion of guesses that should be kept between iterations once their scores have been ranked.|
+| `stretch`		| `1.5`		| The stretch factor that should be applied to the range of guesses brought forward to the next iteration|
+| `max.it`		| `20`		| Maximum number of iterations that hsould be completed of the S<sub>T</sub> search method|
+
+#### Gradient Descent Parameters
+
+These will only be used if the Gradient Search Descent method is selected by the user.
+
+| Input Variable 	| Default 	| Explanation				|
+|:---------------------:|:-------------:| ------------------------------------- |
+| `scale`		| `c(100,1000)`	| The scaling factor to be used to re-scale the taxonomist numbers and species numbers respectively. A factor of 10 would mean dividing the level of that variable by 10. Years are automatically scaled to fill the range [0,1]|
+| `ab.guesses`		| `c(100,100)`	| The number of initial guesses of a and b to be considered in the grid search.
+| `rng.a`		| `c(-0.1,0.1)	| The range over which to space the initial guesses for a. **NOTE:** this number will be applied to the rescaled data, but the outputted a will be adjusted to apply to the raw input data|
+| `rng.b`		| `c(-0.1,0.1)	| The range over which to space the initial guesses for b. **NOTE:** this number will be applied to the rescaled data, but the outputted b will be adjusted to apply to the raw input data|
+| `alpha`		| `0.01`	| Default step-size for the gradient descent|
+| `min.alp`		| `2e-14`	| Minimum step-size allowed in the adaptive step-size algorithm|
+| `grad.rat`		| `1e-4`	| Ratio of the magnitudes of the gradient to the magnitudes of the parameters at which gradient descent will stop|
+| `max.grad`		| `500`		| The maximum number of steps that each gradient descent will be aloowed to take|
 
 ## References
 
