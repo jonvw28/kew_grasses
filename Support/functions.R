@@ -304,7 +304,8 @@ taxonomic.splitting.function<-function(dataset,taxonomist.column){
         return(start.data1)
 }
 #
-taxonimist.summary<-function(data,yr.col,start.year,end.year,year.interval){
+taxonimist.summary<-function(data,yr.col,start.year,end.year,year.interval,
+                             rolling.years,offset){
         #
         # Heavily modified form of the Joppa et al (2011) function 
         # yearly.summary.function
@@ -320,7 +321,11 @@ taxonimist.summary<-function(data,yr.col,start.year,end.year,year.interval){
         #
         #
         # Set up output
-        yrs<-seq(start.year,end.year,year.interval)	
+        if(rolling.years){
+                yrs <- seq(start.year,end.year,offset)
+        } else {
+                yrs<-seq(start.year,end.year,year.interval)
+        }	
         mat<-matrix(data=0,ncol=2,nrow=length(yrs))
         colnames(mat)<-c("Start_Year","Taxonomists")
         mat[,1]<-yrs

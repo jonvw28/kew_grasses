@@ -52,8 +52,8 @@ interval <- 5
 # If you would like to use rolling windows set the below to TRUE and then set 
 # the number of years you want the offset to be:
 #
-rolling.windows <- FALSE
-offset <- 1
+rolling.windows <- TRUE
+offset <- 3
 #
 #
 # Decide on the method you would like to use for counting the numbers of 

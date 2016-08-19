@@ -339,7 +339,8 @@ author_data <- function(dir.path, spec.file.name, loc.file.name=NULL, id.ind,
 	#
 	# Get table of taxonomist data
 	#
-	overall.tax <- taxonimist.summary(names.data,2,st.yr,en.yr,int.yr)
+	overall.tax <- taxonimist.summary(names.data,2,st.yr,en.yr,int.yr,
+	                                  rolling.years,year.gap)
 	rm(names.data)
 	#
 	# Output aggregated data
@@ -409,7 +410,11 @@ author_data <- function(dir.path, spec.file.name, loc.file.name=NULL, id.ind,
         	#
         	loc.sum <- c()
         	loc.code <-c()
-        	yrs<-seq(st.yr,en.yr,int.yr)
+        	if(rolling.years){
+        	        yrs <- seq(st.yr,en.yr,year.gap)
+        	} else {
+        	        yrs<-seq(st.yr,en.yr,int.yr)
+        	}
         	for (j in 1:(tmp.l-1)){
         		#
         		# Set up summary table for each level
@@ -481,7 +486,7 @@ author_data <- function(dir.path, spec.file.name, loc.file.name=NULL, id.ind,
         			#
         			tmp.end <- end[which(end[,2] == loc.code[[k]][l]),]
         			tmp.res <- taxonimist.summary(tmp.end,3,st.yr,en.yr,
-        							int.yr)
+        							int.yr,rolling.years,year.gap)
         			#
         			# Store aggreated data
         			#
