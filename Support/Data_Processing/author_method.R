@@ -28,9 +28,9 @@ if(taxonomist.method == "all"){
 #
 # Method simply takes all names so no need to filter
 #
-	spe.tax.stat <- FALSE
-	spe.hyb.stat <- FALSE
-	spe.rank.stat <- FALSE
+	tx.tax.stat <- FALSE
+	tx.hyb.stat <- FALSE
+	tx.rnk.stat <- FALSE
 #
 # As all names are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
@@ -43,9 +43,9 @@ if(taxonomist.method == "filtered - not status"){
 #
 # Method only filters on rank and hybrid status
 #
-	spe.tax.stat <- FALSE
-	spe.hyb.stat <- TRUE
-	spe.rank.stat <- TRUE
+        tx.tax.stat <- FALSE
+        tx.hyb.stat <- TRUE
+        tx.rnk.stat <- TRUE
 #
 # As all names are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
@@ -58,9 +58,9 @@ if(taxonomist.method == "filtered - status"){
 #
 # Method applies all filters 
 #
-	spe.tax.stat <- TRUE
-	spe.hyb.stat <- TRUE
-	spe.rank.stat <- TRUE
+        tx.tax.stat <- TRUE
+        tx.hyb.stat <- TRUE
+        tx.rnk.stat <- TRUE
 #
 # As all names are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
@@ -73,9 +73,9 @@ if(taxonomist.method == "all basionyms"){
 #
 # Method applies no filters 
 #
-	spe.tax.stat <- FALSE
-	spe.hyb.stat <- FALSE
-	spe.rank.stat <- FALSE
+        tx.tax.stat <- FALSE
+        tx.hyb.stat <- FALSE
+        tx.rnk.stat <- FALSE
 #
 # As all basionyms are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
@@ -88,9 +88,9 @@ if(taxonomist.method == "basionyms filtered - not status"){
 #
 # Method applies all filters but status
 #
-	spe.tax.stat <- FALSE
-	spe.hyb.stat <- TRUE
-	spe.rank.stat <- TRUE
+        tx.tax.stat <- FALSE
+        tx.hyb.stat <- TRUE
+        tx.rnk.stat <- TRUE
 #
 # As all basionyms are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
@@ -103,9 +103,9 @@ if(taxonomist.method == "basionyms filtered - not status"){
 #
 # Method applies all filters
 #
-	spe.tax.stat <- TRUE
-	spe.hyb.stat <- TRUE
-	spe.rank.stat <- TRUE
+        tx.tax.stat <- TRUE
+        tx.hyb.stat <- TRUE
+        tx.rnk.stat <- TRUE
 #
 # As all basionyms are included, we are interested in the year of publication of
 # each combination so no correction for basionyms

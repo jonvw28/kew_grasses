@@ -18,19 +18,19 @@
 # species and distribution data respectively - second index not required if 
 # not using a geographic model
 #
-id.index <- c(1,2)
+id.ind <- c(1,2)
 #
 #
 # Year column - index of the column where the year of publication is stored in 
 # the species data
 #
-year.index <- 15
+yr.ind <- 15
 #
 #
 # Primary Authors column - index of the column containing the primary authors in 
 # the specis data
 #
-author.index <- 11
+auth.ind <- 11
 #
 #
 # Basionym ID column - index of column containing basionym id for each name.

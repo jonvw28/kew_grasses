@@ -15,12 +15,23 @@
 source("./kew_grasses/Support/packages.R")
 source("./kew_grasses/Support/functions.R")
 #
+# succinct renaming
+#
+st.yr <- start.year
+en.yr <- end.year
+int.yr <- interval
+out.dir <- output.location
+#
 # Loop over each subset
 #
 for(s in 1:length(subsets)){
         #
         # Identifier string
-        id.str <- paste(subsets[s],"_",st.yr,"_",int.yr,"_year",sep = "")
+        id.str <- paste(identifier,"_",subsets[s],"_",st.yr,"_",int.yr,"_year",
+                        sep = "")
+        if(rolling.windows){
+                id.str <- paste(id.str,"_rolling_",offset,"_year",sep="")
+        }
         #
         tmp.dir <- paste(out.dir,"/",id.str,"/",sep="")
         tmp.spec <- paste(spec.file.name,"_",subsets[s],sep="")

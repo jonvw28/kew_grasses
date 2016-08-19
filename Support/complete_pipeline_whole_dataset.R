@@ -14,6 +14,18 @@
 source("./kew_grasses/Support/packages.R")
 source("./kew_grasses/Support/functions.R")
 #
+# succinct renaming
+#
+st.yr <- start.year
+en.yr <- end.year
+int.yr <- interval
+out.dir <- output.location
+#
+id.str <- paste(identifier,"_",st.yr,"_",int.yr,"_year",sep = "")
+if(rolling.windows){
+        id.str <- paste(id.str,"_rolling_",offset,"_year",sep="")
+}
+#
 # Complete the aggregated species data processing
 #
 cat("Processing Aggregate Species Data...\n")

@@ -15,7 +15,8 @@ setwd("~/Kew Summer")
 #
 # Now set the directory within this where the .csv files are held
 #
-dir.path <- "./Data/07_05"
+dir.path <- "./Data/07_05/"
+#
 #
 # Set the names of the species data file (and optional distribution data file)
 # NOTE: these are without the '.csv' at the end
@@ -25,20 +26,28 @@ dir.path <- "./Data/07_05"
 spec.file.name <- "public_checklist_flat_plant_dl_20160705_poaceae"
 loc.file.name <- "Poaceae_distribution"
 #
+#
 # Set the name of the repository within the working directory where you would 
 # like the output to go. if you would like to alter the structure of the output
 # you will need to go into the output options file
 #
 output.location <- "./Output"
 #
+# Set a unique and memorable identfier to be used in all of the output file 
+# names
+identifier <- "grass"
+#
+#
 # Set the start and end years
 #
 start.year <- 1766
 end.year <- 2015
 #
+#
 # Set the window size (in years)
 #
 interval <- 5
+#
 #
 # If you would like to use rolling windows set the below to TRUE and then set 
 # the number of years you want the offset to be:
@@ -46,19 +55,22 @@ interval <- 5
 rolling.windows <- FALSE
 offset <- 1
 #
-# Decide on the methods you would like to use for counting the numbers of 
+#
+# Decide on the method you would like to use for counting the numbers of 
 # species for each window. Select from "all", "filtered - not status",
 # "filtered - status", "filtered - status - basionym dated",  "all basionyms",
 # "basionyms filtered - not status", "basionyms filtered - status"
 #
 species.method <- "all"
 #
-# Decide on the methods you would like to use for counting the numbers of 
+#
+# Decide on the method you would like to use for counting the numbers of 
 # taxonomists for each window. Select from "all", "filtered - not status",
 # "filtered - status", "all basionyms", "basionyms filtered - not status", 
 # "basionyms filtered - status"
 #
 taxonomist.method <- "all"
+#
 #
 # If you would like to use the subsetting method, where the model is fitted to 
 # a list of subsets of the data then set the below to TRUE. You will also need 
@@ -66,8 +78,9 @@ taxonomist.method <- "all"
 # subsetting factors in a vector.
 #
 subsetting <- FALSE
-subset.column <- 3
-subsets <- c("poaceae")
+subset.column <- 5
+subsets <- c("Poa","Agrostis")
+#
 #
 # If you would like to apply the gradient descent search method and/or the
 # regression search cross-validation to be used on the complete data then set 
@@ -75,6 +88,7 @@ subsets <- c("poaceae")
 #
 gradient.descent <- FALSE
 cross.validation <- FALSE
+#
 #
 # Set the below to TRUE if you want to use a geographic model - to customise
 # this from the default will require the user to go to the geographic data file.

@@ -43,7 +43,7 @@ if(gradient.descent || geo.gradient.descent){
 # Call scripts which set parameters to ensure the correct method is applied.
 #
 source("./kew_grasses/Support/Data_Processing/species_method.R")
-source("./kew_grasses/Support/Data_Processing/taxon_method.R")
+source("./kew_grasses/Support/Data_Processing/author_method.R")
 #
 # Call corect script to run analysis
 #

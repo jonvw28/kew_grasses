@@ -31,7 +31,7 @@ if(species.method == "all"){
 #
 	spe.tax.stat <- FALSE
 	spe.hyb.stat <- FALSE
-	spe.rank.stat <- FALSE
+	spe.rnk.stat <- FALSE
 #
 # As all names are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
@@ -46,7 +46,7 @@ if(species.method == "filtered - not status"){
 #
 	spe.tax.stat <- FALSE
 	spe.hyb.stat <- TRUE
-	spe.rank.stat <- TRUE
+	spe.rnk.stat <- TRUE
 #
 # As all names are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
@@ -61,7 +61,7 @@ if(species.method == "filtered - status"){
 #
 	spe.tax.stat <- TRUE
 	spe.hyb.stat <- TRUE
-	spe.rank.stat <- TRUE
+	spe.rnk.stat <- TRUE
 #
 # As all names are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
@@ -76,7 +76,7 @@ if(species.method == "filtered - status - basionym dated"){
 #
 	spe.tax.stat <- TRUE
 	spe.hyb.stat <- TRUE
-	spe.rank.stat <- TRUE
+	spe.rnk.stat <- TRUE
 #
 # Filtered names are given the date of publication of their basionym
 #
@@ -90,7 +90,7 @@ if(species.method == "all basionyms"){
 #
 	spe.tax.stat <- FALSE
 	spe.hyb.stat <- FALSE
-	spe.rank.stat <- FALSE
+	spe.rnk.stat <- FALSE
 #
 # As all basionyms are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
@@ -105,7 +105,7 @@ if(species.method == "basionyms filtered - not status"){
 #
 	spe.tax.stat <- FALSE
 	spe.hyb.stat <- TRUE
-	spe.rank.stat <- TRUE
+	spe.rnk.stat <- TRUE
 #
 # As all basionyms are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
@@ -120,7 +120,7 @@ if(species.method == "basionyms filtered - not status"){
 #
 	spe.tax.stat <- TRUE
 	spe.hyb.stat <- TRUE
-	spe.rank.stat <- TRUE
+	spe.rnk.stat <- TRUE
 #
 # As all basionyms are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
