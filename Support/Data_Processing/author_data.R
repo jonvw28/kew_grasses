@@ -66,6 +66,16 @@
 # name strings based on the string 'ex' (if ex.tag = TRUE) and then whether to
 # include the names to the left of the split (if ex.inc = TRUE)
 #
+# basio.filt - if set to TRUE then the data will be filtered to only include 
+# basionyms
+#
+# basio.ind - optional index of the column containing the basionym id for each
+# name, required if the above methids are used. This will be used to add the 
+# year of basionym publication if desired. Set to NULL if not wanted
+#
+# bas.miss - the mark in the basionym id column column that shows a name is a 
+# basionym
+#
 # tax.stat - if set to true then there will be filtering to only allow authors
 # of species of the taxonomic status(es) specified by argument stat.mk in the
 # column given by the index stat.ind
@@ -114,6 +124,14 @@
 # int.yr - Window Interval - how many years you want aggregation to occur over
 # eg 5
 #
+# rolling.years - If set to TRUE then the output will be a rolling window of 
+# length as set by int.yr. This will be incremented by year.gap. If FALSE the 
+# windows will not overlap
+#
+# year.gap - This is the margin by which each window is offset in a rolling 
+# window approach. By default this is 1.
+#
+#
 # out.dir - Output directory where csv(s) will be saved
 # eg "./Output"
 #
@@ -126,13 +144,15 @@
 #
 #
 author_data <- function(dir.path, spec.file.name, loc.file.name=NULL, id.ind,
-                        yr.ind, auth.ind, comma = TRUE, in.tag=TRUE, 
-                        in.inc=TRUE, ex.tag=TRUE, ex.inc=FALSE, tax.stat=FALSE,
+                        yr.ind,  auth.ind, comma = TRUE, in.tag=TRUE, 
+                        in.inc=TRUE, ex.tag=TRUE, ex.inc=FALSE, 
+                        basio.filt=FALSE, basio.ind=NULL, 
+                        miss.bas=-9998, tax.stat=FALSE,
                         stat.ind=NULL, stat.mk=NULL, hyb.stat=FALSE, 
                         hyb.ind=NULL, hyb.mk=NULL, rnk.stat=FALSE, rnk.ind=NULL,
                         rnk.mk=NULL, filt.ind=NULL, filt.mk=NULL, loc.ind=NULL, 
-                        levels=NULL, st.yr, en.yr, int.yr, out.dir, dir.name, 
-                        id.str){
+                        levels=NULL, st.yr, en.yr, int.yr, rolling.years=FALSE,
+                        year.gap = 1, out.dir, dir.name, id.str){
 	#
 	# Check for directory and create if needed
 	#
@@ -169,6 +189,11 @@ author_data <- function(dir.path, spec.file.name, loc.file.name=NULL, id.ind,
 	}
 	rm(dir.path,spec.file.name)
 	#
+	# If appropriate, filter the data to only include basionyms
+	#
+	if(basio.filt){
+	        spec.data <- spec.data[which(spec.data[,basio.ind]==miss.bas),]
+	}
 	#
 	#### Tidy up publication date data into numeric format, removing brackets ######
 	#

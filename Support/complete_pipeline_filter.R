@@ -10,270 +10,26 @@
 #
 ################################################################################
 #
-# SET DIRECTORY where you have downloaded repository (ie before /kew_grasses)
-#
-setwd("~/Kew Summer")
-#
-############################ SET INPUT VALUES HERE #############################
-#
-################################################################################
-#
-# SET DIRECTORY where you have downloaded repository (ie before /kew_grasses)
-#
-setwd("~/Kew Summer")
-#
-############################ SET INPUT VALUES HERE #############################
-#
-######################## Select models to apply ################################
-#
-#
-# By default, the regression search model will be applied to the global data as 
-# as well as to each level in region data. Cross validation and the Gradient
-# Descent Search method will only be applied if the appropriate variables below 
-# are set to true.
-#
-#
-# Cross Validation on global level
-global.CV <- FALSE
-#
-# Cross Validation on regional data
-region.CV <- FALSE
-#
-# Gradient Descent Search on global level
-global.grad <- FALSE
-#
-# Gradient Descent Search on regional data
-region.grad <- FALSE
-#
-#
-####################### RAW DATA LOCATION - WCSP download ######################
-#
-#
-# Directory path - location of csv input files
-dir.path <- "./Data/07_05/"
-#
-# Species File name - name of csv file with species information 
-#(without .csv at end)
-spec.file.name <- "public_checklist_flat_plant_dl_20160705_poaceae"
-#
-# Location File name - name of csv file with location information 
-#(without .csv at end)
-loc.file.name <- "Poaceae_distribution"
-#
-#
-###################### Filtering to subset data ################################
-#
-#
-# Column where filter is to be applied for species and location data set 
-# respectively - eg family
-subset.col <- 3
-#
-# Each subset to be selected - will apply method to each subset
-subset.mk <- c("Poaceae")
-#
-#
-########################## INDICES IN DATA FILES ###############################
-#
-#
-# Plant ID column - indices of the columns where plant IDs are held for the
-# species and location data respectively
-id.ind <- c(1,2)
-#
-# Year column - index of the column where the year of publication is stored in 
-# the species data
-yr.ind <- 15
-#
-# Primary Authors column - index of the column containing the primary authors in 
-# the specis data
-auth.ind <- 11
-#
-# Location IDs - indices of columns in location data where loactions are stored
-loc.ind <- c(4,6)
-#
-# Names of each level of regions - if set to NULL then there will be no
-# geographic data handling
-levels <- c("TDWG1","TDWG2")
-#
-# Minimum number of species in each region for model to be fitted
-n.spec <- 50
-#
-#
-############################ AUTHOR PROCESSING #################################
-#
-#
-# logical expression respectively decide whether to split 
-# name strings based on the string ',' (splits if true)
-comma <- TRUE
-#
-# logical expressions respectively decide whether to split name strings based on
-# the string 'in' (if in.tag = TRUE) and then whether to include the names to 
-# the right of the split (if in.inc = TRUE)
-in.tag <- TRUE
-in.inc <- TRUE
-#
-# ex.tag, ex.inc - logical expressions respectively decide whether to split 
-# name strings based on the string 'ex' (if ex.tag = TRUE) and then whether to
-# include the names to the left of the split (if ex.inc = TRUE)
-ex.tag <- TRUE
-ex.inc <- TRUE
-#
-#
-############################# DATA FILTERING ###################################
-#
-#
-# Location Filter IDs - any columns in location data that are to be filtered in
-# creating a valid dataset and the marks in these columns for removal 
-# eg remove locations where a species has been introduced
-filt.ind <- c(11,12,13,14,15)
-filt.mk <- c(1,1,1,1,1)
-#
-# FILTERING OF SPECIES - to remove or allow certain taxonomic groups
-#
-# Here setting the spe.tax.stat etc tags will apply the filtering to species
-# data processing and setting the tx.hyb.stat etc tags will apply the filtering
-# to the taxonomist data
-#
-# Taxonomic status filtering - if set to true then there will be filtering to 
-# only allow species of the status specified in the column given
-spe.tax.stat <- TRUE
-tx.tax.stat <- FALSE
-stat.ind <- 17
-stat.mk <- c("A")
-#
-# Hybrid filtering - if set to true then there will be filtering to 
-# remove species which are hybrids
-spe.hyb.stat <- TRUE
-tx.hyb.stat <- FALSE
-hyb.ind <- c(4,6)
-hyb.mk <- c("×","×")
-#
-# Taxonomic rank filtering - if set to true then there will be filtering to 
-# only allow  species of the status specified in the column given
-spe.rnk.stat <- TRUE
-tx.rnk.stat <-FALSE
-rnk.ind <- 23
-rnk.mk <- c("Species")
-#
-#
-####################### MODEL PARAMETERS #######################################
-#
-#
-# Start year
-st.yr <- 1766
-#
-# End year
-en.yr <- 2015
-#
-# Window Interval - how many years you want aggregation to occur over
-int.yr <- 5
-#
-#
-###################### St SEARCH PARAMETERS ####################################
-#
-#
-# multiple of current total species to start at as maxmimum guess for St
-mult <- 3
-#
-# Guesses per round for St values
-guess.n <- 500
-#
-# Ratio of top scoring guesses to keep from all guesses per round
-ratio <- 0.2
-#
-# stretch - Range Stretch to apply at each end (ie 1.25 would mean extend the
-# range in each iteration by 25%)
-stretch <- 1.5
-#
-# Max iteratations of guessing St
-max.it <- 20
-#
-#
-###################### Gradient Descent Parameters #############################
-#
-#
-# Scaling to apply to taxonomist numbers and species numbers respectively
-# (years are dealt with automatically) - This is to help gradient descent
-# efficiency
-scale <- c(100,1000)
-#
-# Range to test for a and b starting point in each gradient 
-# descent - note these are not transformed by the scalings (ie these values will
-# be used as they currently are directly with the scaled data, however a 
-# and b as output are for the raw data) 
-rng.a <- c(-0.1,0.1)
-rng.b <- c(-0.1,0.1)
-#
-# No of initial values of a and b to try
-ab.guesses <- c(100,100)
-#
-# Max repetitions of grad descent to get a,b for each St value
-max.grad <- 500
-#
-# Step size for each gradient descent step
-alpha <- 0.01
-#
-# Minimum step size - program quits if a step smaller than this is required
-min.alp <- 2e-14
-#
-# Ratio for gradient/parameter value where gradient descent should be 
-# terminated - ie once this ratio is reached, gradient descent ends
-grd.rat <- 1e-4
-#
-#
-######################### OUTPUT SAVE LOCATIONS ################################
-#
-#
-# Output directory
-out.dir <- "./Output"
-#
-# Name of sub-directory within the above for processed aggregate species data to
-# go
-spec.dir <- "species_data"
-#
-# Name of sub-directory within the output directory for processed aggregate 
-# taxonomist data to go
-tax.dir <- "taxon_data"
-#
-# Name of sub-directory within the output directory for regression model results 
-# to go
-reg.dir <- "regression_search"
-#
-# Name of sub-directory within the output directory for regression model 
-# cross-validation results to go
-regcv.dir <- "regression_search_cross_validation"
-#
-# Name of sub-directory within the output directory for log difference gradient 
-# descent model results to go
-log.dir <- "grad_descent_search_log_residuals"
-#
-#
-################################################################################
-#                                                                              #
-#                       DO NOT EDIT CODE BELOW THIS LINE                       #            
-#                                                                              #
-################################################################################
-#
-#
 # Install any dependancies and load basic functions
 #
-source("./kew_grasses/packages.R")
-source("./kew_grasses/functions.R")
+source("./kew_grasses/Support/packages.R")
+source("./kew_grasses/Support/functions.R")
 #
 # Loop over each subset
 #
-for(s in 1:length(subset.mk)){
+for(s in 1:length(subsets)){
         #
         # Identifier string
-        id.str <- paste(subset.mk[s],"_",st.yr,"_",int.yr,"_year",sep = "")
+        id.str <- paste(subsets[s],"_",st.yr,"_",int.yr,"_year",sep = "")
         #
         tmp.dir <- paste(out.dir,"/",id.str,"/",sep="")
-        tmp.spec <- paste(spec.file.name,"_",subset.mk[s],sep="")
-        tmp.loc <- paste(loc.file.name,"_",subset.mk[s],sep="")
+        tmp.spec <- paste(spec.file.name,"_",subsets[s],sep="")
+        tmp.loc <- paste(loc.file.name,"_",subsets[s],sep="")
         #
         # Filter for each subset
         #
-        csv_filter(dir.path, paste(spec.file.name,".csv",sep=""), subset.col, 
-                   subset.mk[s], tmp.dir, paste(tmp.spec,".csv",sep=""))
+        csv_filter(dir.path, paste(spec.file.name,".csv",sep=""), subset.column, 
+                   subsets[s], tmp.dir, paste(tmp.spec,".csv",sep=""))
         #
         # Simply copy the location dataset
         #
@@ -284,28 +40,29 @@ for(s in 1:length(subset.mk)){
                            stringsAsFactors = FALSE),
                   file=paste(tmp.dir,tmp.loc,".csv",sep =""),
                   row.names = FALSE)
-        
-        
         #
         # Complete the aggregated species data processing
         #
-        cat("Processing Aggregate Species Data for",subset.mk[s],"...\n")
-        source("./kew_grasses/data_processing/species_data.R")
-        species_data(tmp.dir, tmp.spec, tmp.loc, id.ind, yr.ind, spe.tax.stat,
-                     stat.ind, stat.mk, spe.hyb.stat, hyb.ind, hyb.mk, spe.rnk.stat, rnk.ind,
-                     rnk.mk, filt.ind, filt.mk, loc.ind, levels, st.yr, en.yr, int.yr, 
-                     out.dir, spec.dir, id.str)
+        cat("Processing Aggregate Species Data for",subsets[s],"...\n")
+        source("./kew_grasses/Support/data_processing/species_data.R")
+        species_data(tmp.dir, tmp.spec, tmp.loc, id.ind, yr.ind, basio.filt, 
+                     basio.year, basio.ind, miss.bas, spe.tax.stat,
+                     stat.ind, stat.mk, spe.hyb.stat, hyb.ind, hyb.mk, 
+                     spe.rnk.stat, rnk.ind, rnk.mk, filt.ind, filt.mk, loc.ind, 
+                     levels, st.yr, en.yr, int.yr, rolling.windows, offset,
+                     output.location, spec.dir, id.str)
         cat("Complete!\n\n")
         #
         # Complete the aggregated taxonomist data processing
         #
-        cat("Processing Aggregate Taxonomists Data for",subset.mk[s],"...\n")
-        source("./kew_grasses/data_processing/author_data.R")
+        cat("Processing Aggregate Taxonomists Data for",subsets[s],"...\n")
+        source("./kew_grasses/Support/data_processing/author_data.R")
         author_data(tmp.dir, tmp.spec, tmp.loc, id.ind, yr.ind,auth.ind,
-		    comma, in.tag, in.inc, ex.tag, ex.inc,
-                    tx.tax.stat, stat.ind, stat.mk, tx.hyb.stat, hyb.ind, hyb.mk, tx.rnk.stat,
-                    rnk.ind, rnk.mk, filt.ind, filt.mk, loc.ind, levels, st.yr, en.yr, 
-                    int.yr, out.dir, tax.dir, id.str)
+		    comma, in.tag, in.inc, ex.tag, ex.inc, basio.filt, 
+		    basio.ind, miss.bas, tx.tax.stat, stat.ind, stat.mk, 
+		    tx.hyb.stat, hyb.ind, hyb.mk, tx.rnk.stat, rnk.ind, rnk.mk, 
+		    filt.ind, filt.mk, loc.ind, levels, st.yr, en.yr, int.yr,
+		    rolling.windows, offset, output.location, tax.dir, id.str)
         cat("Complete!\n\n")
         #
         # locations of the aggregate output
@@ -323,8 +80,8 @@ for(s in 1:length(subset.mk)){
         #
         # Run complete normal regression search method for global data
         #
-        cat("Computing Regression Search Model for",subset.mk[s],"...\n")
-        source("./kew_grasses/model/regression_search.R")
+        cat("Computing Regression Search Model for",subsets[s],"...\n")
+        source("./kew_grasses/Support/model/regression_search.R")
         regression_search(spec.data, tax.data, en.yr, mult, guess.n, ratio, stretch, 
                           max.it, out.dir, id.str, mod.dir=reg.dir)
         cat("Complete!\n\n")
@@ -332,9 +89,9 @@ for(s in 1:length(subset.mk)){
         # Run complete normal regression search method cross validation for global data
         # if selected
         #
-        if(global.CV){
-                cat("Computing Regression Search Model cross validation for",subset.mk[s],"...\n")
-                source("./kew_grasses/model/regression_search_cross_validation.R")
+        if(cross.validation){
+                cat("Computing Regression Search Model cross validation for",subsets[s],"...\n")
+                source("./kew_grasses/Support/model/regression_search_cross_validation.R")
                 regression_search_cross_validation(spec.data, tax.data, en.yr, mult, guess.n, 
                                                    ratio, stretch, max.it, out.dir, id.str, 
                                                    mod.dir=regcv.dir)
@@ -344,9 +101,9 @@ for(s in 1:length(subset.mk)){
         # Run Joppa inspired difference in logs via (a,b) gradient descent combined with
         # St search if selected
         #
-        if(global.grad){
-                cat("Computing Log Difference Gradient Descent Search Model for",subset.mk[s],"...\n")
-                source("./kew_grasses/model/grad_descent_search_log_residuals.R")
+        if(gradient.descent){
+                cat("Computing Log Difference Gradient Descent Search Model for",subsets[s],"...\n")
+                source("./kew_grasses/Support/model/grad_descent_search_log_residuals.R")
                 grad_descent_search_log_residuals(spec.data, tax.data, en.yr, mult, guess.n,
                                                   ratio, stretch, max.it, scale, rng.a, rng.b,
                                                   ab.guesses, max.grad, alpha, min.alp, 
@@ -362,11 +119,11 @@ for(s in 1:length(subset.mk)){
                 # Set up collection for predictions and later adjustments
                 #
                 predictions <- list()
-                if(region.CV){
-                        source("./kew_grasses/model/regression_search_cross_validation.R")
+                if(geo.cross.validation){
+                        source("./kew_grasses/Support/model/regression_search_cross_validation.R")
                 }
-                if(region.grad){
-                        source("./kew_grasses/model/grad_descent_search_log_residuals.R")
+                if(geo.gradient.descent){
+                        source("./kew_grasses/Support/model/grad_descent_search_log_residuals.R")
                 }
                 for(i in 1:length(levels)){
                         spec.data <- read.csv(paste(agg.loc,spec.dir,"/",levels[i],"/",
@@ -391,7 +148,7 @@ for(s in 1:length(subset.mk)){
                                         next()
                                 }
                 
-                                cat("Fitting models for",subset.mk[s],"for",levels[i],tmp.reg,"\n")
+                                cat("Fitting models for",subsets[s],"for",levels[i],tmp.reg,"\n")
                                 capture.output(regression_search(spec.data[,c(1,j+1,j+n.region+1)], 
                                                   tax.data[,c(1,grep(names(spec.data)[j+1],names(tax.data)))], 
                                                   en.yr, mult, guess.n, 
@@ -402,7 +159,7 @@ for(s in 1:length(subset.mk)){
                                                   ),
                                                file='NUL'
                                 )
-                                if(region.CV){
+                                if(geo.cross.validation){
                                         capture.output(regression_search_cross_validation(spec.data[,c(1,j+1,j+n.region+1)], 
                                                                            tax.data[,c(1,grep(names(spec.data)[j+1],names(tax.data)))],
                                                                            en.yr, mult, guess.n, 
@@ -414,7 +171,7 @@ for(s in 1:length(subset.mk)){
                                                        file='NUL'
                                         )
                                 }
-                                if(region.grad){
+                                if(geo.gradient.descent){
                                         capture.output(grad_descent_search_log_residuals(spec.data[,c(1,j+1,j+n.region+2)], 
                                                                           tax.data[,c(1,grep(names(spec.data)[j+1],names(tax.data)))], 
                                                                           en.yr, mult,
@@ -471,7 +228,3 @@ for(s in 1:length(subset.mk)){
                 rm(tmp.dir,tmp.spec,tmp.loc)
         }
 }
-#
-# Clear the workspace
-#
-rm(list = ls())
