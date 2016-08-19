@@ -90,8 +90,8 @@ regression_search <- function(spec.data, tax.data, en.yr, mult, guess.n, ratio,
 	#
 	# Install any dependancies and load functions
 	#
-	source("./kew_grasses/packages.R")
-	source("./kew_grasses/functions.R")
+	source("./kew_grasses/Support/packages.R")
+	source("./kew_grasses/Support/functions.R")
 	#
 	#
 	########################### DATA PROCESSING ####################################

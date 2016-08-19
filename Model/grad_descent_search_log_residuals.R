@@ -172,8 +172,8 @@ grad_descent_search_log_residuals <- function(spec.data, tax.data, en.yr, mult,
         #
         # Install any dependancies and load functions
         #
-        source("./kew_grasses/packages.R")
-        source("./kew_grasses/functions.R")
+        source("./kew_grasses/Support/packages.R")
+        source("./kew_grasses/Support/functions.R")
         #
         #
         ########################### DATA PROCESSING ####################################        #

@@ -125,8 +125,8 @@ species_data <- function(dir.path, spec.file.name, loc.file.name = NULL, id.ind,
 	#
 	# Install any dependancies and load functions
 	#
-	source("./kew_grasses/packages.R")
-	source("./kew_grasses/functions.R")
+	source("./kew_grasses/Support/packages.R")
+	source("./kew_grasses/Support/functions.R")
 	#
 	# Import data
 	#
