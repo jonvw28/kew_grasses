@@ -506,7 +506,7 @@ author_data <- function(dir.path, spec.file.name, loc.file.name=NULL, id.ind,
         		# Deal with non-endogenous data
         		#
         		nend <- tmp.data[which(tmp.data[,ncol(tmp.data)]=="NE"),]
-        		tmp.res <- taxonimist.summary(nend,3,st.yr,en.yr,int.yr)
+        		tmp.res <- taxonimist.summary(nend,3,st.yr,en.yr,int.yr,rolling.years,offset)
         		loc.sum[[k]][,leng+2] <- tmp.res[[1]][,2]
         		write.csv(tmp.res[[2]],
         			  file=paste(lvl.dir,id.str,"_",levels[k],

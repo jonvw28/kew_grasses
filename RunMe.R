@@ -52,7 +52,7 @@ interval <- 5
 # If you would like to use rolling windows set the below to TRUE and then set 
 # the number of years you want the offset to be:
 #
-rolling.windows <- TRUE
+rolling.windows <- FALSE
 offset <- 3
 #
 #
@@ -95,7 +95,7 @@ cross.validation <- FALSE
 # You can also set the option of gradient descent search and cross-validation 
 # for each region.
 #
-geo.model <- FALSE
+geo.model <- TRUE
 geo.gradient.descent <- FALSE
 geo.cross.validation <- FALSE
 #

@@ -346,9 +346,18 @@ species_data <- function(dir.path, spec.file.name, loc.file.name = NULL, id.ind,
 		tmp <- which(
 			spec.data[,2] >= yrs[q] & spec.data[,2] < yrs[q]+int.yr)
 		spec.sum[q,2] <- length(tmp)
-		if(q >1){
-			spec.sum[q,3] <- spec.sum[q-1,3] + spec.sum[q-1,2]
+		if(rolling.years){
+			tmp2 <- which(spec.data[,2] >= yrs[q] & spec.data[,2] < yrs[q]+year.gap)
+			if(q < length(yrs)){
+				spec.sum[q+1,3] <- spec.sum[q,3] + length(tmp2)
+			}
+			rm(tmp2)
+		}else{
+			if(q>1){
+				spec.sum[q,3] <- spec.sum[q-1,3] + spec.sum[q-1,2]
+			}
 		}
+		
 		rm(tmp)
 	}
 	rm(q)
@@ -428,23 +437,48 @@ species_data <- function(dir.path, spec.file.name, loc.file.name = NULL, id.ind,
         				tmp.data[,3] >= yrs[p] & tmp.data[,3] < yrs[p]+int.yr),]
         			non.end <- tmp[which(tmp[,4]=="NE"),]
         			loc.sum[[k]][p,leng+2] <- length(unique(non.end[,1]))
-        			if (p > 1){
-        				loc.sum[[k]][p,2*leng+3] <- (loc.sum[[k]][p-1,2*leng+3] 
-        						     + loc.sum[[k]][p-1,leng+2])
-        			}
+				if(rolling.years){
+					tmp2<- tmp.data[which(tmp.data[,3] >= yrs[p] & tmp.data[,3] < yrs[p]+year.gap),]
+					non.end2 <- tmp2[which(tmp[,4]=="NE"),]
+					non.end.num <- 	length(unique(non.end2[,1]))
+					if(p < length(yrs)){
+						loc.sum[[k]][p+1,2*leng+3] <- (loc.sum[[k]][p,2*leng+3] 
+        						     + non.end.num)
+					}
+					rm(non.end.num,non.end2)
+				}else{
+					if (p > 1){
+						loc.sum[[k]][p,2*leng+3] <- (loc.sum[[k]][p-1,2*leng+3] 
+								     + loc.sum[[k]][p-1,leng+2])
+					}
+				}
         			rm(non.end)
         			end <- tmp[which(tmp[,4]=="E"),]
+				if(rolling.years){
+					end2 <-  tmp2[which(tmp[,4]=="E"),]
+				}
         			for(r in 1:leng){
         				tmp.inf <- end[which(end[,2] == loc.code[[k]][r]),]
         				loc.sum[[k]][p,r+1] <- nrow(tmp.inf)
-        				if (p > 1){ 
-        					loc.sum[[k]][p,leng+2+r] <- (loc.sum[[k]][p-1,
-        										  leng+r+2] 
-        								+ loc.sum[[k]][[p-1,r+1]])
-        				}
+					if(rolling.years){
+						tmp.inf2 <- end2[which(end2[,2] == loc.code[[k]][r]),]
+						temp.num <- nrow(tmp.inf2)
+						if(p < length(yrs)){
+							loc.sum[[k]][p+1,leng+2+r] <- (loc.sum[[k]][p,leng+r+2] + temp.num)
+						}
+						rm(tmp.inf2,temp.num)
+					}else{
+						if (p > 1){ 
+							loc.sum[[k]][p,leng+2+r] <- (loc.sum[[k]][p-1,leng+r+2]+ 
+										loc.sum[[k]][[p-1,r+1]])
+						}
+					}
         				rm(tmp.inf)
         			}
         			rm(tmp,end,r)
+				if(rolling.years){
+					rm(tmp2,end2)
+				}
         		}
         		rm(p,leng,tmp.data)
         	}
