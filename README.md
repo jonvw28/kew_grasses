@@ -51,10 +51,13 @@ As a general outline, each method tries guesses of the total number of species, 
 
 Details of the fitting methods can be found in the detailed section [here][link4]
 
-
 ### Cross Validation
 
 In order to test the reliability of the results from the methods above a cross-validation regime was also implemented. This works by applying a jack-knife approach and fitting the model whilst leaving out one time window at a time. The complete set of S<sub>T</sub> predictions can then be compared to the prediction made by the model on the complete data. Owing to how exhaustive this is, the method has only been implemented for the primary regression search method. However a very similar implementation could relatively easily be applied to the gradient descent search method.
+
+### Family Filtering
+
+It is also possible to subset the dataset before applying the model to select certain families of interest. This script will then apply the above pipelines to each family in turn. This is designed for applying the model to specific sub-groups of interest and can be set in the global options below.
 
 ## Geographical Methods
 
@@ -62,95 +65,73 @@ To address the question of where the gaps in our knowledge lie, the above method
 
 The output will be a summary of the number of species predicted in each region as well as a comparison with the current number of species descibed in each region. For full details of how the method works see [here][link5]
 
-
-
-
-
-
-
-
-In this method the total number of species globally is first calculated using the regression search method. Following this, the species data is mapped to the distribution data at the desired TDWG level. The distribution data is then filtered to remove any location where there is doubt or only artifically introduced presence of the species. Each species is then classified as endogenous or not at this level. Here endogeny refers to any species that is only present in one region at the given TDWG level.
-
-For each region, the regression search model is then used to predict the total number of endogenous species in that region (regions with fewer than a user-defined cumulative endogenous species to date are excluded as the model is unrelaible with too little data, the example being 50). The same model is then applied to the non-endogenous species.
-
-The predictions for the regions and non-endogenous species are then collated. For regions where the model couldn't be applied, the prediction for total number of species is calculated by finding the ratio of aggregate predictions to aggregate current species recorded for the regions that succeeded and non-endogenous species. This is then used to multiply the current recorded species in these as-yet-unscored regions to get a predicted total of species.
-
-The total number of predicted species across all regions and non-endogenous species is then computed and compared to the earlier global prediction. At this point all of the regional predictions as well as non-endogenous species are scaled by a constant ratio such that the total of the regional analysis is equal to the global total. The final results are then reported, as well as the percentage of the predicted total of species in each region that have so far been recorded. 
-
-### Family Filtering
-
-This repository contains two main scripts for this analysis. The main script is desgined to be used for a WCSP download where the analysis is to be applied to all species included in the data, this is designed to calculate global gaps in knowledge across all included plant data. There is an altered script that allows additional filtering of the raw download, for example, to select on certain families of interest. This script will then apply the above pipelines to each family in turn. This is designed for applying the model to specific sub-groups of interest.
-
 ## Utilising the Scripts
 
 In order to run this repository, the user must first download a copy to their local machine.
 
-There are two scripts in this repository which can be used to re-create the analysis described above. Both scripts will require the input of a .csv file of a download of WCSP data and a posisble extra .csv file of the distribution data from the WCSP. These files should be located a directory at the same level as the downloaded repository. That is to say you should have a structure of this form `./location/kew_grasses` with your data in a directory of the form `./location/data` or similar.
+The script will require the input of a .csv file of a download of WCSP data and a posisble extra .csv file of the distribution data from the WCSP. These files should be located a directory at the same level as the downloaded repository. That is to say you should have a structure of this form `./location/kew_grasses` with your data in a directory of the form `./location/data` or similar.
 
-The user should then decide whether they desire a geographic breakdown, and whether they want the analysis to be on the entire dataset or if they would like it subsetted in some way. The table below shows which script to use in which case, and which csv files will be needed.
+To run the pipeline, a user should then open the script `RunMe.R`. First the user must set the working directory to the location where the download was made. To use the above example, this will be `"./location" and set the variables as per the table below. The script can then be run and will output the results of the run to the output folder as set in `RunMe.R` If the user wishes to see more about this structure they can do so [here][link6].
 
-| Model Desired 		| Script 				| Required .csv 		|
-|:-----------------------------:|:-------------------------------------:|:-----------------------------:|
-| Global only - Entire Dataset	| `complete_pipeline_whole_dataset.r`	| Species Data only		|
-| Global only - Subsets		| `complete_pipeline_filter.r`		| Species Data only		|
-| Geographic - Entire Dataset 	| `complete_pipeline_whole_dataset.r`	| Species Data and Distribution	|
-| Geographic - Subsets		| `complete_pipeline_filter.r`		| Species Data and Distribution	|
+Furthermore, any other alterations to the methods can be set per the instructions in the below:
 
-With knowledge of the required script and the input files in place the user should then load the script they need and edit any of the input variables as explained in the table below. Any non-essential input variables can be left as they are, but are left for the user to alter should they wish to do so.
+[Indices in Data][link1]
+[Data Processing Methods][link2]
+[Name Processing][link3]
+[Model Fitting][link4]
+[Geographic Models][link5]
+[Output Structure][link6]
 
-Both scripts will create a sub-directory within the output directory for their analysis. This sub-directory will then have further sub-directories created within it. One of these will be filled with aggregated species discovery data, broken down by each time window and with an additional file for each geographic level of interest showing this breakdown by region.
+The variables in the `RunMe.R` file are explained below:
 
-Next of these will be a subdirectory created and populated with aggreagted taxonomist data. Here there will be a summary file, with a breakdown by time window. There is also a detailed breakdown file showing the names of all authors in each time window, and how many papers they authored, broken down by number of co-authors. This analysis is then repeated at each geogrpahic level where appropriate. Here there is a summary file with sregional summary data broken down by time window. There is then an additional file for each region with the full author breakdown as per the overall data analysis.
-
-For each model that is fitted, there is also a sub-directory created. Within each of these there is a model summary file showing the key model parameters. There is then a full model file showing the estimates for each time window. There are also three plots ocmpleted. One shows the squared residuals score for the best fitting model for the initial guesses of S<sub>T</sub>. Another shows the trends in number of taxonomists and new species discovered over time, with the model fit overlaid. The final plot shows the number of species per taxonomist with the fitted model theoretical species per taxonomist overlaid. Within this directory, if appropriate, there are then subdirectories containing the same information for the models fitted for different regions.
-
-Finally the scripts output a csv file showing the regional predictions and percentage of species seen at each geographic lebvel if appropriate, at the top level output directory.
-
-### Essential inputs
+###Locations
 
 | Input Variable 	| Default 						| Explanation |
-|:---------------------:|:-----------------------------------------------------:| ----------- |		
-| `setwd()`		| `"~/Kew Summer"`					| This is where the user can set the parent directory within which the "kew_grasses" directory (and .csv files (or their directory) are)|
-| `dir.path`		| `"./Data/07_05/"`					| This is the location within the above directory where the .csv files are stored (can simply be "./")|
+|:---------------------:|:-----------------------------------------------------:| ----------- |
+| `dir.path`		| `"./Data/07_05/"`					| This is the location within the working directory where the .csv files are stored (can simply be "./")|
 | `spec.file.name`	| `"public_checklist_flat_plant_dl_20160705_poaceae"`	| This is the name of the WCSP species data file (**NOTE**: without the .csv at the end)|
 | `loc.file.name`	| `"Poaceae_distribution"`				| If a geographic breakdown model is desired then this needs to be the name of the WCSP distribution data file (**NOTE**: without .csv). If no geographic breakdown is desired then this can be ignored, but does not need to be altered as it will be ignored|
-| `out.dir`		| `"./Output"`						| This is the location of the directory within the working directory where the output should go (in default this would mean `"~/Kew Summer/Output/"`)
+| `output.location`	| `"./Output"`						| This is the location of the directory within the working directory where the output should go (in default this would mean `"~/Kew Summer/Output/"`)
+| `identifier`		| `"grass"`						| This is a string that the user sets to be used in all of the output file names to help identify each model run|
 
-#### Subsetting Essential Inputs
-
-These are the variables that are only available in the script `complete_pipeline_whole_dataset.r` which must be set in order to allow subsetting.
-
-| Input Variable 	| Default 						| Explanation |
-|:---------------------:|:-----------------------------------------------------:| ----------- |		
-| `subset.col`		| `3`							| Index of the cloumn which contains the varibale uon which the data is to be subsetted|
-| `subset.mk`		| `c("Poaceae")`					|The values within `subset.col` which are ot be the basis of the subset. Requires a vector, where each element represents a distinct subset|
-  
-  
-### Optional Inputs
-
-These are the remaining input variables in both scripts which the user if free to alter to adapt the method to their needs.
-
-#### Model Options and Output Locations
-
-| Input Variable 	| Default 						| Explanation |
-|:---------------------:|:-----------------------------------------------------:| ----------- |	
-| `global.CV`		| `FALSE`						| When set to `TRUE` this will run the cross-validation regime on the complete data set (or on each subset in complete_pipeline_filter.r)	|
-| `region.CV`		| `FALSE`						| When set to `TRUE` this will run the cross-validation regime on each valid region (within each subset in complete_pipeline_filter.r)	|
-| `global.grad`		| `FALSE`						| When set to `TRUE` this will run the gradient descent search method on the complete data set (or on each subset in complete_pipeline_filter.r)	|
-| `region.grad`		| `FALSE`						| When set to `TRUE` this will run the gradient descent search method on each valid region (within each subset in complete_pipeline_filter.r) **WARNING: This will be very slow**|
-| `spec.dir`		| `"species_data"`					| Name for the sub-directory within the output directory in which the aggregated species data will go|
-| `tax.dir`		| `"taxon_data"`						| Name for the sub-directory within the output directory in which the aggregated taxonomist data will go|
-| `reg.dir`		| `"regression_search"`					| Name for the sub-directory within the output directory in which the regression search results will go|
-| `regcv.dir`		| `"regression_search_cross_validation"`		| Name for the sub-directory within the output directory in which the regression search cross validation results will go (if selected)|
-| `log.dir`		| `"grad_descent_search_log_residuals"`			| Name for the sub-directory within the output directory in which the gradient descent search results will go (if selected)|
-
-#### Model Parameters
+### Time Window Settings
 
 | Input Variable 	| Default 	| Explanation				|
 |:---------------------:|:-------------:| ------------------------------------- |
 | `st.yr`		| `1766`	| This is the year from which the analysis should start|
 | `en.yr`		| `2015`	| This is the year at which the analysis should end|
 | `int.yr`		| `5`		| This is the number of year to be considered in each window|
+| `rolling.windows`	| `FALSE`	| If set to `TRUE` then the model will use sliding windows with an offset as set below|
+| `offset`		| `3`		| This is the number of years for each sliding window to be offset|
+
+### Data Summarising Methods
+
+| Input Variable 	| Default 	| Explanation				|
+|:---------------------:|:-------------:| ------------------------------------- |
+| `species.method`	| `all`		| This can be set to any of the methods laid out [here][link2] depending on the needs of the user|
+| `taxonomist.method`	| `all`		| This can be set to any of the methods laid out [here][link2] depending on the needs of the user|
+
+### Options for Subsetting
+
+| Input Variable 	| Default 						| Explanation |
+|:---------------------:|:-----------------------------------------------------:| ----------- |	
+| `subsetting`		| `FALSE`						| If set to `TRUE` then the data subsetting will used, as described above|
+| `subset.col`		| `3`							| Index of the cloumn which contains the varibale uon which the data is to be subsetted|
+| `subset.mk`		| `c("Poaceae")`					|The values within `subset.col` which are ot be the basis of the subset. Requires a vector, where each element represents a distinct subset|
+
+### Model Options
+
+| Input Variable 	| Default 						| Explanation |
+|:---------------------:|:-----------------------------------------------------:| ----------- |	
+| `gradient.descent`	| `FALSE`						| When set to `TRUE` this will run the gradient descent search algorithm on the complete data set (or on each subset)	|
+| `cross.validation`	| `FALSE`						| When set to `TRUE` this will run the cross-validation regime on the complete datset (or on each subset)	|
+
+### Geopgraphical Model
+
+| `geo.model`		| `FALSE`						| When set to `TRUE` this will fit geographical models with the settings as per [here][link5]	|
+| `geo.gradient.descent`| `FALSE`						| When set to `TRUE` this will run the gradient descent search algorithm on each valid region (or on each region in each subset)	|
+| `geo.cross.validation`| `FALSE`						| When set to `TRUE` this will run the cross-validation regime on each valid region (or on each region in each subset)	|
+
 
 
 ## Technical Information
@@ -161,6 +142,10 @@ The code presented here was prepared in R studio using R version `3.2.3` in a Wi
 * `stringr 1.0.0`
 * `reshape 0.8.5`
 * `gplot2 2.0.0`
+
+## Acknowledgements
+
+I would like to thank Maria Vorontsova and Eimear Nic Lughadha for arranging the project and for offering continued support throught out. I'd also like to thank Antonio Remiro for his very helpful teamwork and for continuing the project as my time at kew came to an end.
 
 
 ## References
@@ -183,6 +168,7 @@ The code presented here was prepared in R studio using R version `3.2.3` in a Wi
 [link3]: https://github.com/jonvw28/kew_grasses/tree/master/Documents/name_splitting.md
 [link4]: https://github.com/jonvw28/kew_grasses/tree/master/Documents/model_fitting.md
 [link5]: https://github.com/jonvw28/kew_grasses/tree/master/Documents/geographic_model.md
+[link6]: https://github.com/jonvw28/kew_grasses/tree/master/Documents/outputs.md
 
 [img1]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img1.jpg "Species Left to be Discovered"
 [img2]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img2.jpg "Taxonomiic Effort"
