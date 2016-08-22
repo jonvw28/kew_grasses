@@ -10,7 +10,7 @@ In counting the number of names in each time window, the raw list of names is fi
 | Method Name				| Explanation				|
 | -------------------------------------	| ------------------------------------- |
 | `"all"`				| This method will simply take all names in the data set|
-| `"filtered - not status"`		| This method will filter all of the names to remove those for hybrids and names that are not at the specified taxonomic rank(s) (by defualt this is species)|
+| `"filtered - not status"`		| This method will filter all of the names to remove those for hybrids and names that are not at the specified taxonomic rank(s) (by default this is species)|
 | `"filtered - status"`			| This method will apply the filters of the above method and in addition only include names currently of the set taxonomic statuses (by default this will only be accepted names)|
 | `"all basionyms"`			| This method will select only names which are basionyms|
 | `"basionyms filtered - not status"`	| This method will select only the basionyms and will filter these to remove hybrids and those that are not at the specified taxonomic rank(s) (by defualt this is species)|

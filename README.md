@@ -69,18 +69,18 @@ The output will be a summary of the number of species predicted in each region a
 
 In order to run this repository, the user must first download a copy to their local machine.
 
-The script will require the input of a .csv file of a download of WCSP data and a posisble extra .csv file of the distribution data from the WCSP. These files should be located a directory at the same level as the downloaded repository. That is to say you should have a structure of this form `./location/kew_grasses` with your data in a directory of the form `./location/data` or similar.
+The script will require the input of a .csv file of a download of WCSP data and a posisble extra .csv file of the distribution data from the WCSP. These files should be located in a directory at the same level as the downloaded repository. That is to say you should have a structure of this form `./location/kew_grasses` with your data in a directory of the form `./location/data` or similar.
 
-To run the pipeline, a user should then open the script `RunMe.R`. First the user must set the working directory to the location where the download was made. To use the above example, this will be `"./location" and set the variables as per the table below. The script can then be run and will output the results of the run to the output folder as set in `RunMe.R` If the user wishes to see more about this structure they can do so [here][link6].
+To run the pipeline, a user should then open the script `RunMe.R`. First the user must set the working directory to the location where the download was made. To use the above example, this will be `"./location"` and set the variables as per the table below. The script can then be run and will output the results of the run to the output folder as set in `RunMe.R` If the user wishes to see more about this structure they can do so [here][link6].
 
 Furthermore, any other alterations to the methods can be set per the instructions in the below:
 
-[Indices in Data][link1]
-[Data Processing Methods][link2]
-[Name Processing][link3]
-[Model Fitting][link4]
-[Geographic Models][link5]
-[Output Structure][link6]
+* [Indices in Data][link1]
+* [Data Processing Methods][link2]
+* [Name Processing][link3]
+* [Model Fitting][link4]
+* [Geographic Models][link5]
+* [Output Structure][link6]
 
 The variables in the `RunMe.R` file are explained below:
 
@@ -116,18 +116,20 @@ The variables in the `RunMe.R` file are explained below:
 | Input Variable 	| Default 						| Explanation |
 |:---------------------:|:-----------------------------------------------------:| ----------- |	
 | `subsetting`		| `FALSE`						| If set to `TRUE` then the data subsetting will used, as described above|
-| `subset.col`		| `3`							| Index of the cloumn which contains the varibale uon which the data is to be subsetted|
+| `subset.col`		| `3`							| Index of the column which contains the varibale upon which the data is to be subsetted|
 | `subset.mk`		| `c("Poaceae")`					|The values within `subset.col` which are ot be the basis of the subset. Requires a vector, where each element represents a distinct subset|
 
 ### Model Options
 
 | Input Variable 	| Default 						| Explanation |
-|:---------------------:|:-----------------------------------------------------:| ----------- |	
+|:---------------------:|:-----------------------------------------------------:| ----------- |
 | `gradient.descent`	| `FALSE`						| When set to `TRUE` this will run the gradient descent search algorithm on the complete data set (or on each subset)	|
 | `cross.validation`	| `FALSE`						| When set to `TRUE` this will run the cross-validation regime on the complete datset (or on each subset)	|
 
-### Geopgraphical Model
+### Geographical Model
 
+| Input Variable 	| Default 						| Explanation |
+|:---------------------:|:-----------------------------------------------------:| ----------- |
 | `geo.model`		| `FALSE`						| When set to `TRUE` this will fit geographical models with the settings as per [here][link5]	|
 | `geo.gradient.descent`| `FALSE`						| When set to `TRUE` this will run the gradient descent search algorithm on each valid region (or on each region in each subset)	|
 | `geo.cross.validation`| `FALSE`						| When set to `TRUE` this will run the cross-validation regime on each valid region (or on each region in each subset)	|

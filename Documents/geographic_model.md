@@ -5,7 +5,7 @@
 
 In this method the total number of species globally is first calculated using the regression search method. Following this, the species data is mapped to the distribution data at the desired TDWG level. The distribution data is then filtered to remove any location where there is doubt or only artifically introduced presence of the species. Each species is then classified as endogenous or not at this level. Here endogeny refers to any species that is only present in one region at the given TDWG level.
 
-For each region, the regression search model is then used to predict the total number of endogenous species in that region (regions with fewer than a user-defined cumulative endogenous species to date are excluded as the model is unrelaible with too little data, the example being 50). The same model is then applied to the non-endogenous species.
+For each region, the regression search model is then used to predict the total number of endogenous species in that region (regions with fewer than a user-defined cumulative endogenous species to date are excluded as the model is unreliable with too little data, the example being 50). The same model is then applied to the non-endogenous species.
 
 The predictions for the regions and non-endogenous species are then collated. For regions where the model couldn't be applied, the prediction for total number of species is calculated by finding the ratio of aggregate predictions to aggregate current species recorded for the regions that succeeded and non-endogenous species. This is then used to multiply the current recorded species in these as-yet-unscored regions to get a predicted total of species.
 
