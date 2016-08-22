@@ -86,7 +86,7 @@ if(cross.validation){
 # St search if selected
 #
 if(gradient.descent){
-        cat("Computing Log Difference Gradient Descent Search Model...\n")
+        cat("Computing Gradient Descent Search Model...\n")
         source("./kew_grasses/Support/model/grad_descent_search_log_residuals.R")
         grad_descent_search_log_residuals(spec.data, tax.data, en.yr, mult, guess.n,
                                           ratio, stretch, max.it, scale, rng.a, rng.b,

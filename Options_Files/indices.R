@@ -53,8 +53,8 @@ stat.mk <- c("A")
 # of each name and the allowed ranks to be kept if rank filtering is 
 # applied
 #
-rank.ind <- 23
-hyb.mk <- c("Species")
+rnk.ind <- 23
+rnk.mk <- c("Species")
 #
 #
 # hybrid status columns - indices of the columns containing the hybrid status
