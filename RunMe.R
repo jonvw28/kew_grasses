@@ -86,7 +86,7 @@ subsets <- c("Poa","Agrostis")
 # regression search cross-validation to be used on the complete data then set 
 # the below to TRUE
 #
-gradient.descent <- TRUE
+gradient.descent <- FALSE
 cross.validation <- FALSE
 #
 #
