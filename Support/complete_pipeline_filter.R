@@ -56,8 +56,8 @@ for(s in 1:length(subsets)){
         #
         cat("Processing Aggregate Species Data for",subsets[s],"...\n")
         source("./kew_grasses/Support/data_processing/species_data.R")
-        species_data(tmp.dir, tmp.spec, tmp.loc, id.ind, yr.ind, basio.filt, 
-                     basio.year, basio.ind, miss.bas, spe.tax.stat,
+        species_data(tmp.dir, tmp.spec, tmp.loc, id.ind, yr.ind, spe.basio.filt, 
+                     spe.basio.year, basio.ind, miss.bas, spe.tax.stat,
                      stat.ind, stat.mk, spe.hyb.stat, hyb.ind, hyb.mk, 
                      spe.rnk.stat, rnk.ind, rnk.mk, filt.ind, filt.mk, loc.ind, 
                      levels, st.yr, en.yr, int.yr, rolling.windows, offset,
@@ -69,7 +69,7 @@ for(s in 1:length(subsets)){
         cat("Processing Aggregate Taxonomists Data for",subsets[s],"...\n")
         source("./kew_grasses/Support/data_processing/author_data.R")
         author_data(tmp.dir, tmp.spec, tmp.loc, id.ind, yr.ind,auth.ind,
-		    comma, in.tag, in.inc, ex.tag, ex.inc, basio.filt, 
+		    comma, in.tag, in.inc, ex.tag, ex.inc, tx.basio.filt, 
 		    basio.ind, miss.bas, tx.tax.stat, stat.ind, stat.mk, 
 		    tx.hyb.stat, hyb.ind, hyb.mk, tx.rnk.stat, rnk.ind, rnk.mk, 
 		    filt.ind, filt.mk, loc.ind, levels, st.yr, en.yr, int.yr,

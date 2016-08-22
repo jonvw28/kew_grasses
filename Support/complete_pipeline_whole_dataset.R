@@ -31,7 +31,7 @@ if(rolling.windows){
 cat("Processing Aggregate Species Data...\n")
 source("./kew_grasses/Support/data_processing/species_data.R")
 species_data(dir.path, spec.file.name, loc.file.name, id.ind, yr.ind, 
-             basio.filt, basio.year, basio.ind, miss.bas, spe.tax.stat,
+             spe.basio.filt, spe.basio.year, basio.ind, miss.bas, spe.tax.stat,
              stat.ind, stat.mk, spe.hyb.stat, hyb.ind, hyb.mk, spe.rnk.stat, 
              rnk.ind, rnk.mk, filt.ind, filt.mk, loc.ind, levels, st.yr, en.yr, 
              int.yr, rolling.windows, offset, output.location, spec.dir, id.str)
@@ -42,7 +42,7 @@ cat("Complete!\n\n")
 cat("Processing Aggregate Taxonomists Data...\n")
 source("./kew_grasses/Support/data_processing/author_data.R")
 author_data(dir.path, spec.file.name, loc.file.name, id.ind, yr.ind,auth.ind,
-	    comma, in.tag, in.inc, ex.tag, ex.inc, basio.filt, basio.ind, 
+	    comma, in.tag, in.inc, ex.tag, ex.inc, tx.basio.filt, basio.ind, 
             miss.bas, tx.tax.stat, stat.ind, stat.mk, tx.hyb.stat, hyb.ind, 
             hyb.mk, tx.rnk.stat, rnk.ind, rnk.mk, filt.ind, filt.mk, loc.ind,
             levels, st.yr, en.yr, int.yr, rolling.windows, offset,

@@ -36,8 +36,8 @@ if(species.method == "all"){
 # As all names are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
 #
-	basio.year <- FALSE
-	basio.filt <- FALSE
+	spe.basio.year <- FALSE
+	spe.basio.filt <- FALSE
 #
 # Modify the ID string
 identifier <- paste(identifier,"_spec_filt_all",sep="")	
@@ -55,8 +55,8 @@ if(species.method == "filtered - not status"){
 # As all names are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
 #
-	basio.year <- FALSE
-	basio.filt <- FALSE
+	spe.basio.year <- FALSE
+	spe.basio.filt <- FALSE
 #
 # Modify the ID string
 identifier <- paste(identifier,"_spec_filt_not_stat",sep="")	
@@ -74,8 +74,8 @@ if(species.method == "filtered - status"){
 # As all names are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
 #
-	basio.year <- FALSE
-	basio.filt <- FALSE
+	spe.basio.year <- FALSE
+	spe.basio.filt <- FALSE
 #
 # Modify the ID string
 identifier <- paste(identifier,"_spec_filt_stat",sep="")	
@@ -92,8 +92,8 @@ if(species.method == "filtered - status - basionym dated"){
 #
 # Filtered names are given the date of publication of their basionym
 #
-	basio.year <- TRUE
-	basio.filt <- FALSE
+	spe.basio.year <- TRUE
+	spe.basio.filt <- FALSE
 #
 # Modify the ID string
 identifier <- paste(identifier,"_spec_filt_basio_dated",sep="")	
@@ -111,8 +111,8 @@ if(species.method == "all basionyms"){
 # As all basionyms are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
 #
-	basio.year <- FALSE
-	basio.filt <- TRUE
+	spe.basio.year <- FALSE
+	spe.basio.filt <- TRUE
 #
 # Modify the ID string
 identifier <- paste(identifier,"_spec_all_basio",sep="")	
@@ -130,8 +130,8 @@ if(species.method == "basionyms filtered - not status"){
 # As all basionyms are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
 #
-	basio.year <- FALSE
-	basio.filt <- TRUE
+	spe.basio.year <- FALSE
+	spe.basio.filt <- TRUE
 #
 # Modify the ID string
 identifier <- paste(identifier,"_spec_filt_basio_not_stat",sep="")	
@@ -149,8 +149,8 @@ if(species.method == "basionyms filtered - not status"){
 # As all basionyms are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
 #
-	basio.year <- FALSE
-	basio.filt <- TRUE
+	spe.basio.year <- FALSE
+	spe.basio.filt <- TRUE
 #
 # Modify the ID string
 identifier <- paste(identifier,"_spec_filt_basio_stat",sep="")	

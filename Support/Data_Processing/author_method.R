@@ -35,8 +35,8 @@ if(taxonomist.method == "all"){
 # As all names are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
 #
-	basio.year <- FALSE
-	basio.filt <- FALSE
+	tx.basio.year <- FALSE
+	tx.basio.filt <- FALSE
 #
 # Modify the ID string
 identifier <- paste(identifier,"_tax_filt_all",sep="")	
@@ -54,8 +54,8 @@ if(taxonomist.method == "filtered - not status"){
 # As all names are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
 #
-	basio.year <- FALSE
-	basio.filt <- FALSE
+        tx.basio.year <- FALSE
+        tx.basio.filt <- FALSE
 #
 # Modify the ID string
 identifier <- paste(identifier,"_tax_filt_not_stat",sep="")	
@@ -73,8 +73,8 @@ if(taxonomist.method == "filtered - status"){
 # As all names are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
 #
-	basio.year <- FALSE
-	basio.filt <- FALSE
+        tx.basio.year <- FALSE
+        tx.basio.filt <- FALSE
 #
 # Modify the ID string
 identifier <- paste(identifier,"_tax_filt_stat",sep="")	
@@ -92,8 +92,8 @@ if(taxonomist.method == "all basionyms"){
 # As all basionyms are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
 #
-	basio.year <- FALSE
-	basio.filt <- TRUE
+        tx.basio.year <- FALSE
+        tx.basio.filt <- TRUE
 #
 # Modify the ID string
 identifier <- paste(identifier,"_tax_all_basio",sep="")	
@@ -111,8 +111,8 @@ if(taxonomist.method == "basionyms filtered - not status"){
 # As all basionyms are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
 #
-	basio.year <- FALSE
-	basio.filt <- TRUE
+        tx.basio.year <- FALSE
+        tx.basio.filt <- TRUE
 #
 # Modify the ID string
 identifier <- paste(identifier,"_tax_filt_basio_not_stat",sep="")	
@@ -130,8 +130,8 @@ if(taxonomist.method == "basionyms filtered - status"){
 # As all basionyms are included, we are interested in the year of publication of
 # each combination so no correction for basionyms
 #
-	basio.year <- FALSE
-	basio.filt <- TRUE
+        tx.basio.year <- FALSE
+        tx.basio.filt <- TRUE
 #
 # Modify the ID string
 identifier <- paste(identifier,"_tax_filt_basio_stat",sep="")	
