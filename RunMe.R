@@ -61,7 +61,7 @@ offset <- 3
 # "filtered - status", "filtered - status - basionym dated",  "all basionyms",
 # "basionyms filtered - not status", "basionyms filtered - status"
 #
-species.method <- "filtered - not status"
+species.method <- "all"
 #
 #
 # Decide on the method you would like to use for counting the numbers of 
