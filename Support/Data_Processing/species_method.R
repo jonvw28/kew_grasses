@@ -38,6 +38,10 @@ if(species.method == "all"){
 #
 	basio.year <- FALSE
 	basio.filt <- FALSE
+#
+# Modify the ID string
+identifier <- paste(identifier,"_spec_filt_all",sep="")	
+#
 }
 #
 if(species.method == "filtered - not status"){
@@ -53,6 +57,10 @@ if(species.method == "filtered - not status"){
 #
 	basio.year <- FALSE
 	basio.filt <- FALSE
+#
+# Modify the ID string
+identifier <- paste(identifier,"_spec_filt_not_stat",sep="")	
+#
 }
 #
 if(species.method == "filtered - status"){
@@ -68,6 +76,10 @@ if(species.method == "filtered - status"){
 #
 	basio.year <- FALSE
 	basio.filt <- FALSE
+#
+# Modify the ID string
+identifier <- paste(identifier,"_spec_filt_stat",sep="")	
+#
 }
 #
 if(species.method == "filtered - status - basionym dated"){
@@ -82,6 +94,10 @@ if(species.method == "filtered - status - basionym dated"){
 #
 	basio.year <- TRUE
 	basio.filt <- FALSE
+#
+# Modify the ID string
+identifier <- paste(identifier,"_spec_filt_basio_dated",sep="")	
+#
 }
 #
 if(species.method == "all basionyms"){
@@ -97,6 +113,10 @@ if(species.method == "all basionyms"){
 #
 	basio.year <- FALSE
 	basio.filt <- TRUE
+#
+# Modify the ID string
+identifier <- paste(identifier,"_spec_all_basio",sep="")	
+#
 }
 #
 if(species.method == "basionyms filtered - not status"){
@@ -112,6 +132,10 @@ if(species.method == "basionyms filtered - not status"){
 #
 	basio.year <- FALSE
 	basio.filt <- TRUE
+#
+# Modify the ID string
+identifier <- paste(identifier,"_spec_filt_basio_not_stat",sep="")	
+#
 }
 #
 if(species.method == "basionyms filtered - not status"){
@@ -127,4 +151,8 @@ if(species.method == "basionyms filtered - not status"){
 #
 	basio.year <- FALSE
 	basio.filt <- TRUE
+#
+# Modify the ID string
+identifier <- paste(identifier,"_spec_filt_basio_stat",sep="")	
+#
 }

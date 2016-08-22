@@ -37,6 +37,10 @@ if(taxonomist.method == "all"){
 #
 	basio.year <- FALSE
 	basio.filt <- FALSE
+#
+# Modify the ID string
+identifier <- paste(identifier,"_tax_filt_all",sep="")	
+#
 }
 #
 if(taxonomist.method == "filtered - not status"){
@@ -52,6 +56,10 @@ if(taxonomist.method == "filtered - not status"){
 #
 	basio.year <- FALSE
 	basio.filt <- FALSE
+#
+# Modify the ID string
+identifier <- paste(identifier,"_tax_filt_not_stat",sep="")	
+#
 }
 #
 if(taxonomist.method == "filtered - status"){
@@ -67,6 +75,10 @@ if(taxonomist.method == "filtered - status"){
 #
 	basio.year <- FALSE
 	basio.filt <- FALSE
+#
+# Modify the ID string
+identifier <- paste(identifier,"_tax_filt_stat",sep="")	
+#
 }
 #
 if(taxonomist.method == "all basionyms"){
@@ -82,6 +94,10 @@ if(taxonomist.method == "all basionyms"){
 #
 	basio.year <- FALSE
 	basio.filt <- TRUE
+#
+# Modify the ID string
+identifier <- paste(identifier,"_tax_all_basio",sep="")	
+#
 }
 #
 if(taxonomist.method == "basionyms filtered - not status"){
@@ -97,6 +113,10 @@ if(taxonomist.method == "basionyms filtered - not status"){
 #
 	basio.year <- FALSE
 	basio.filt <- TRUE
+#
+# Modify the ID string
+identifier <- paste(identifier,"_tax_filt_basio_not_stat",sep="")	
+#
 }
 #
 if(taxonomist.method == "basionyms filtered - status"){
@@ -112,4 +132,8 @@ if(taxonomist.method == "basionyms filtered - status"){
 #
 	basio.year <- FALSE
 	basio.filt <- TRUE
+#
+# Modify the ID string
+identifier <- paste(identifier,"_tax_filt_basio_stat",sep="")	
+#
 }

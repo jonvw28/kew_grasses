@@ -45,7 +45,7 @@ if(gradient.descent || geo.gradient.descent){
 source("./kew_grasses/Support/Data_Processing/species_method.R")
 source("./kew_grasses/Support/Data_Processing/author_method.R")
 #
-# Call corect script to run analysis
+# Call correct script to run analysis
 #
 if(subsetting){
 	source("./kew_grasses/support/complete_pipeline_filter.R")
