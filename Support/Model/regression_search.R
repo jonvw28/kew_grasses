@@ -196,7 +196,6 @@ regression_search <- function(spec.data, tax.data, en.yr, mult, guess.n, ratio,
 		#
 		#
 	}
-	rm(results,guesses)
 	#
 	# Calculate a and b for the best choice of St output and store these in the
 	# variable 'param'
@@ -304,7 +303,8 @@ regression_search <- function(spec.data, tax.data, en.yr, mult, guess.n, ratio,
 			  file=paste(tmp.dir,id.str,"_regression_search",
 			             "_model_summary.csv",sep=""),
 			  row.names = FALSE)
+		rm(tmp,out.dat,pred)
 	}
 	rm(mult,stretch,max.it,ratio,mark,flag,guess.n,start,guesses,results,params)
-	rm(out.dat,data,pred,tmp,tmp.dir,id.str)
+	rm(data,tmp.dir,id.str)
 }

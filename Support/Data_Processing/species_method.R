@@ -138,7 +138,7 @@ identifier <- paste(identifier,"_spec_filt_basio_not_stat",sep="")
 #
 }
 #
-if(species.method == "basionyms filtered - not status"){
+if(species.method == "basionyms filtered - status"){
 #
 # Method applies all filters
 #

@@ -34,4 +34,4 @@ regcv.dir <- "regression_search_cross_validation"
 #
 # Name of sub-directory within the output directory for gradient descent 
 # search results to go
-grad.dir <- "grad_descent_search_log_residuals"
+grad.dir <- "grad_descent_search"

@@ -19,4 +19,4 @@ Finally the scripts output a csv file showing the regional predictions and perce
 | `tax.dir`		| `"taxon_data"`						| Name for the sub-directory within the output directory in which the aggregated taxonomist data will go|
 | `reg.dir`		| `"regression_search"`					| Name for the sub-directory within the output directory in which the regression search results will go|
 | `regcv.dir`		| `"regression_search_cross_validation"`		| Name for the sub-directory within the output directory in which the regression search cross validation results will go (if selected)|
-| `grad.dir`		| `"grad_descent_search_log_residuals"`			| Name for the sub-directory within the output directory in which the gradient descent search results will go (if selected)|
+| `grad.dir`		| `"grad_descent_search"`			| Name for the sub-directory within the output directory in which the gradient descent search results will go (if selected)|
