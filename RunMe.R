@@ -86,7 +86,7 @@ subsets <- c("Poa","Agrostis")
 # regression search cross-validation to be used on the complete data then set 
 # the below to TRUE
 #
-gradient.descent <- FALSE
+gradient.descent <- TRUE
 cross.validation <- FALSE
 #
 #
@@ -95,7 +95,7 @@ cross.validation <- FALSE
 # You can also set the option of gradient descent search and cross-validation 
 # for each region.
 #
-geo.model <- TRUE
+geo.model <- FALSE
 geo.gradient.descent <- FALSE
 geo.cross.validation <- FALSE
 #

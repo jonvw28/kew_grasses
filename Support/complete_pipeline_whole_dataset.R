@@ -91,7 +91,7 @@ if(gradient.descent){
         grad_descent_search_log_residuals(spec.data, tax.data, en.yr, mult, guess.n,
                                           ratio, stretch, max.it, scale, rng.a, rng.b,
                                           ab.guesses, max.grad, alpha, min.alp, 
-                                          grad.rat, out.dir,id.str, mod.dir=log.dir)
+                                          grad.rat, out.dir,id.str, mod.dir=grad.dir)
         cat("Complete!\n\n")  
 }
 rm(spec.data,tax.data)
@@ -162,7 +162,7 @@ if(!is.null(levels)){
                                                                   scale, rng.a, rng.b, ab.guesses, 
                                                                   max.grad, alpha, min.alp, 
                                                                   grad.rat, out.dir,id.str, 
-                                                                  mod.dir=paste(reg.dir,"/",levels[i],"/",
+                                                                  mod.dir=paste(grad.dir,"/",levels[i],"/",
                                                                                 tmp.reg,sep="")
                                                                   ),
                                                file = 'NUL'
