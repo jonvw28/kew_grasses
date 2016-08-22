@@ -40,7 +40,7 @@ if(species.method == "all"){
 	spe.basio.filt <- FALSE
 #
 # Modify the ID string
-identifier <- paste(identifier,"_spec_filt_all",sep="")	
+identifier <- paste(identifier,"_spec_all",sep="")	
 #
 }
 #

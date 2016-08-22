@@ -39,7 +39,7 @@ if(taxonomist.method == "all"){
 	tx.basio.filt <- FALSE
 #
 # Modify the ID string
-identifier <- paste(identifier,"_tax_filt_all",sep="")	
+identifier <- paste(identifier,"_tax_all",sep="")	
 #
 }
 #
