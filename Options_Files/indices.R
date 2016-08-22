@@ -57,7 +57,6 @@ rank.ind <- 23
 hyb.mk <- c("Species")
 #
 #
-#
 # hybrid status columns - indices of the columns containing the hybrid status
 # of each name and the marks that signal those names to be removed if hybrid
 # filtering is to be applied. If there is more than one mark per column, then 

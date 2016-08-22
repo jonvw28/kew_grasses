@@ -112,6 +112,10 @@ These will only be used if the Gradient Search Descent method is selected by the
 2. [**How many endangered species remian to be discovered in Brazil?**][5] Pimm, SL; Jenkins, CN; Joppa, LN; Roberts, DL; Russell, GJ; Natureza a Conservacao 2010; DOI: 10.4322/natcon.00801011
 3. [**Biodiversity hotspots house most undiscovered plant species**][6] Lucas N. Joppa, David L. Roberts, Norman Myers, and Stuart L. Pimm; PNAS 2011 108 (32) 13171-13176; published ahead of print July 5, 2011, doi:10.1073/pnas.1109389108
 
+[4]: http://rspb.royalsocietypublishing.org/content/early/2010/07/07/rspb.2010.1004#fn-group-1
+[5]: http://doi.editoracubo.com.br/10.4322/natcon.00801011
+[6]: http://www.pnas.org/content/108/32/13171.full
+
 
 [img5]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img5.jpg "Regression Search Model"
 [img6]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img6.jpg "Regression Search equation"

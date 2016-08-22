@@ -31,7 +31,21 @@ Thus the model is parameterised by the the coefficients of the efficiency term, 
 
 ### Species Discovery
 
-The raw data for the project were taken from a [World Checklist of Selected Plant Families (WCSP)][2]<sup>5</sup> download that was made on 5th July 2016 for the Poaceae family. From this, two unaltered comma-seperated value files were extracted, one giving the species data, and the other containing the distribution information.
+The raw data for the project were taken from a [World Checklist of Selected Plant Families (WCSP)][2]<sup>5</sup> download that was made on 5th July 2016 for the Poaceae family. From this, two unaltered comma-seperated value files were extracted, one giving the species data, and the other containing the distribution information. This is the format in which the default method will require the data to be for column references to be correct. Should the user wish to alter these column references then they should look [here][link1]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Before counting the numbers of species published in each time window the data was first filtered so as to only select those currently accepted species. To do this the WCSP species data was filtered to select only entries with accepted taxonomic status, and only entries with a listed rank of species were included (removing sub-species). Finally any hybrids at the genus and/or species level were removed to leave only natural accepted species.
 
@@ -49,7 +63,7 @@ The method for fitting the model can be selected to be one of two methods inspir
 
 As a general outline, each method tries guesses of the total number of species, and then finds the values of a and b which best fit the model for these guesses. An iterative process is then applied where the best fitting values for total species are used to decide a new round of guesses. This repeats until the convergence of the method upon a final value of S<sub>T</sub>.
 
-Details of the fitting methods can be found in the detailed section [here][link3]
+Details of the fitting methods can be found in the detailed section [here][link4]
 
 
 ### Cross Validation
@@ -140,9 +154,6 @@ These are the remaining input variables in both scripts which the user if free t
 
 | Input Variable 	| Default 	| Explanation				|
 |:---------------------:|:-------------:| ------------------------------------- |
-| `id.ind`		| `c(1,2)`	| The indices of the columns containing the plant name IDs in the species and distribution datasets respectively. The deafutls are for a WCSP download. The second index is only necessary if the the geographic model is required.|
-| `yr.ind`		| `15`		| The index of the column in the species dataset which contains the year of publication|
-| `auth.ind`		| `11`		| The index of the primary authors column in the species dataset|
 | `loc.ind`		| `c(4,6)`	| If a geographic model is being applied then this is where the indices of the columns for each geographic level need to be supplied. Each column should refer to each level set via `levels`, in the same order|
 | `n.spec`		| `50`		| For geographic models this is the minimum number of total species recorded to date required in a given region in order for the model to be applied|
 
@@ -164,16 +175,10 @@ These are the remaining input variables in both scripts which the user if free t
 | `filt.mk`		| `c(1,1,1,1,1)`	| Set the content for each column in `filt.ind` which is to be removed. If more than one mark is to be filtered in a given column, then enter that index twice in `filt.ind` and enter the two marks in the corresponding locations in `filt.mk`|
 | `spe.tax.stat`	| `TRUE`		| If set to `TRUE` then the species dataset is filtered based on taxonomic status for creating the aggregated species data|
 | `tx.tax.stat`		| `FALSE`		| If set to `TRUE` then the species dataset is filtered based on taxonomic status for creating the aggregated taxonomist data|
-| `stat.ind`		| `17`			| This is the index of the column containing the taxonomic status information in the species dataset|
-|`stat.mk`		| `c("A")`		| This is a vector of all the contents of `stat.ind` that are to be kept. Is possible to add as many as the user desires, but unlike for `filt.ind` there is no need to replicate the index in `stat.ind`|
 | `spe.hyb.stat`	| `TRUE`		| If set to `TRUE` then the species dataset is filtered based on hybrid status for creating the aggregated species data|
 | `tx.hyb.stat`		| `FALSE`		| If set to `TRUE` then the species dataset is filtered based on hybrid status for creating the aggregated taxonomist data|
-| `hyb.ind`		| `c(4,6)`			| This is the index of the column containing the hybrid status information in the species dataset|
-|`hyb.mk`		| `c("×","×")`		| This is a vector of the marks in each column for hybrid status that indicate those data to be removed. Here only one mark is allowed per column, and thus if there are mor ethan one mark in a cloumn, it must be repeated in `hyb.ind` much like `filt.ind`|
 | `spe.rnk.stat`	| `TRUE`		| If set to `TRUE` then the species dataset is filtered based on taxonomic rnak for creating the aggregated species data|
 | `tx.rnk.stat`		| `FALSE`		| If set to `TRUE` then the species dataset is filtered based on taxonomic rank for creating the aggregated taxonomist data|
-| `rnk.ind`		| `23`			| This is the index of the column containing the taxonomic rank information in the species dataset|
-|`rnk.mk`		| `c("Species")`	| This is a vector of all the contents of `rnk.ind` that are to be kept. Is possible to add as many as the user desires, but unlike for `filt.ind` there is no need to replicate the index in `rnk.ind`|
 
 #### Model Parameters
 
@@ -183,20 +188,6 @@ These are the remaining input variables in both scripts which the user if free t
 | `en.yr`		| `2015`	| This is the year at which the analysis should end|
 | `int.yr`		| `5`		| This is the number of year to be considered in each window|
 
-#### Gradient Descent Parameters
-
-These will only be used if the Gradient Search Descent method is selected by the user.
-
-| Input Variable 	| Default 	| Explanation				|
-|:---------------------:|:-------------:| ------------------------------------- |
-| `scale`		| `c(100,1000)`	| The scaling factor to be used to re-scale the taxonomist numbers and species numbers respectively. A factor of 10 would mean dividing the level of that variable by 10. Years are automatically scaled to fill the range [0,1]|
-| `ab.guesses`		| `c(100,100)`	| The number of initial guesses of a and b to be considered in the grid search.
-| `rng.a`		| `c(-0.1,0.1)`	| The range over which to space the initial guesses for a. **NOTE:** this number will be applied to the rescaled data, but the outputted a will be adjusted to apply to the raw input data|
-| `rng.b`		| `c(-0.1,0.1)`	| The range over which to space the initial guesses for b. **NOTE:** this number will be applied to the rescaled data, but the outputted b will be adjusted to apply to the raw input data|
-| `alpha`		| `0.01`	| Default step-size for the gradient descent|
-| `min.alp`		| `2e-14`	| Minimum step-size allowed in the adaptive step-size algorithm|
-| `grad.rat`		| `1e-4`	| Ratio of the magnitudes of the gradient to the magnitudes of the parameters at which gradient descent will stop|
-| `max.grad`		| `500`		| The maximum number of steps that each gradient descent will be aloowed to take|
 
 ## Technical Information
 
@@ -223,7 +214,9 @@ The code presented here was prepared in R studio using R version `3.2.3` in a Wi
 [6]: http://www.pnas.org/content/108/32/13171.full
 [7]: http://www.sciencedirect.com/science/article/pii/S0169534711002084
 
-[link3]: https://github.com/jonvw28/kew_grasses/tree/master/Documents/model_fitting.md
+[link1]: https://github.com/jonvw28/kew_grasses/tree/master/Documents/indices.md
+[link2]: https://github.com/jonvw28/kew_grasses/tree/master/Documents/data_methods.md
+[link4]: https://github.com/jonvw28/kew_grasses/tree/master/Documents/model_fitting.md
 
 [img1]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img1.jpg "Species Left to be Discovered"
 [img2]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img2.jpg "Taxonomiic Effort"
