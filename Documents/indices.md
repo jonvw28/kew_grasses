@@ -3,6 +3,10 @@
 ### *Jonathan Williams*
 ### *2016*
 
+In order to edit the index references in the piepline, the user should first open the file `./Options_Files/indices.R`
+
+### Essential Indices
+
 Below are the essential indices required in all models and filters
 
 | Input Variable 	| Default 	| Explanation				|
@@ -11,12 +15,16 @@ Below are the essential indices required in all models and filters
 | `yr.ind`		| `15`		| The index of the column in the species dataset which contains the year of publication|
 | `auth.ind`		| `11`		| The index of the primary authors column in the species dataset|
 
+### Basionym Indices
+
 If the user selects a data processing method which makes use of basionym data then the following inputs need to be set:
 
 | Input Variable 	| Default 	| Explanation				|
 |:---------------------:|:-------------:| ------------------------------------- |
 | `basio.ind`		| `20`		| The index of the column containing the basionym id in the species data set|
 | `miss.bas`		| `-9998`	| The value that occurs in this column when a given name is a basionym (like an NA marker)|
+
+### Filtering Indices
 
 If the user selects a data processing method that include filtering then the following inputs will need ot be set. The exact set of methods for filtering can be read [here][link2]
 

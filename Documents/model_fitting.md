@@ -79,7 +79,7 @@ This method requires a huge number of computations for the gradient descent appr
 
 ## Utilising the Scripts
 
-When simply using the `RunMe.R` the default values for these methods will be used. The choice of which method(s) to be applied can be set within the RunMe.R file. Should the user wish to alter the parameters from the default, they can do so by altering the settings within the following two files. Each table explains the parameters within each file.
+When simply using the `RunMe.R` the default values for these methods will be used. The choice of which method(s) to be applied can be set within the `RunMe.R` file. Should the user wish to alter the parameters from the default, they can do so by altering the settings within the following two files. Each table explains the parameters within each file.
 
 `./Options_Files/search_parameters.R`
 

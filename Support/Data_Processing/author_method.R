@@ -99,7 +99,7 @@ if(taxonomist.method == "basionyms filtered - not status"){
 	basio.filt <- TRUE
 }
 #
-if(taxonomist.method == "basionyms filtered - not status"){
+if(taxonomist.method == "basionyms filtered - status"){
 #
 # Method applies all filters
 #

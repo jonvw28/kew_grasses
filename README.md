@@ -33,29 +33,15 @@ Thus the model is parameterised by the the coefficients of the efficiency term, 
 
 The raw data for the project were taken from a [World Checklist of Selected Plant Families (WCSP)][2]<sup>5</sup> download that was made on 5th July 2016 for the Poaceae family. From this, two unaltered comma-seperated value files were extracted, one giving the species data, and the other containing the distribution information. This is the format in which the default method will require the data to be for column references to be correct. Should the user wish to alter these column references then they should look [here][link1]
 
+Before counting the numbers of species published in each time window the data is first filtered. To do this the user can select one of 7 methods. The default is to accept all names. Full details of the different methods that can be set are laid out [here][link2]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-Before counting the numbers of species published in each time window the data was first filtered so as to only select those currently accepted species. To do this the WCSP species data was filtered to select only entries with accepted taxonomic status, and only entries with a listed rank of species were included (removing sub-species). Finally any hybrids at the genus and/or species level were removed to leave only natural accepted species.
-
-The above data set was then summarised, collecting the number of species first published in each time window. Where a species didn't have a year of publication it was excluded. The cumulative number of species up to each time window were also calculated.
+The data is then summarised into time windows as set by the user. Where the year of publication for a name is missing, it is excluded.
 
 ### Taxonomists
 
-The number of taxonomists was calculated by taking WCSP data set and collecting the entries for each time window. In this instance the filtering of the species as per above was not used as it was deemed appropriate to keep all of the data: this representing the effort in grass taxonomy at the time. This includes authors whose work is later moved into synonomy or who were working on various sub-species and hybrids. It is however possible to set the script to apply such filters should the user desire.
+The number of taxonomists active in each time window is calculated by taking the primary authors on names published in each window. The names which are used to calculate this are filtered by using the methods as outlined [here][link2].
 
-For the collected data for each time winow, the primary authors are then collected. To these strings the names are split based upon commas, '&' and the specific taxonomic symbols 'in' and 'ex'. By default the string of names is split wherever a comma is found. Also the default is for the authors after the string 'in' to be included as these represent authors on the paper that published the species description, and hence were active at the time of publication (the authors before the 'in' are always included as these are the authors of the description). For the string 'ex' the authors to the right are always included (as these are the authors of the descriptions), but by default the names to the left are excluded as these represent the taxonomist to whom the name is attributed, but this can be historic and so does not necessarily represent taxonomic effort at the time. The user is able to alter these settings.
+For each plant name, the primary authors are given as a string. In order to count the number of authors this string is split into the individual author names. The splits occur on the string `"&"` and optionally on the strings `","`, `"in"` and `"ex"`. The full details of this splitting can be seen [here][link3]. The number of authors is then counted in a method similar to that used by Joppa et al 2011<sup>4</sup>. 
 
 ## Model Fitting
 
@@ -70,9 +56,18 @@ Details of the fitting methods can be found in the detailed section [here][link4
 
 In order to test the reliability of the results from the methods above a cross-validation regime was also implemented. This works by applying a jack-knife approach and fitting the model whilst leaving out one time window at a time. The complete set of S<sub>T</sub> predictions can then be compared to the prediction made by the model on the complete data. Owing to how exhaustive this is, the method has only been implemented for the primary regression search method. However a very similar implementation could relatively easily be applied to the gradient descent search method.
 
-### Geographical Methods
+## Geographical Methods
 
 To address the question of where the gaps in our knowledge lie, the above methods were extended to predict the total number of species which exist in each geographic region of interest. This is supported at any [Taxonomic Database Working Group (TDWG)][3] level.
+
+The output will be a summary of the number of species predicted in each region as well as a comparison with the current number of species descibed in each region. For full details of how the method works see [here][link5]
+
+
+
+
+
+
+
 
 In this method the total number of species globally is first calculated using the regression search method. Following this, the species data is mapped to the distribution data at the desired TDWG level. The distribution data is then filtered to remove any location where there is doubt or only artifically introduced presence of the species. Each species is then classified as endogenous or not at this level. Here endogeny refers to any species that is only present in one region at the given TDWG level.
 
@@ -118,7 +113,6 @@ Finally the scripts output a csv file showing the regional predictions and perce
 | `setwd()`		| `"~/Kew Summer"`					| This is where the user can set the parent directory within which the "kew_grasses" directory (and .csv files (or their directory) are)|
 | `dir.path`		| `"./Data/07_05/"`					| This is the location within the above directory where the .csv files are stored (can simply be "./")|
 | `spec.file.name`	| `"public_checklist_flat_plant_dl_20160705_poaceae"`	| This is the name of the WCSP species data file (**NOTE**: without the .csv at the end)|
-| `levels`		| `c("TDWG1",TDWG2")`					| These are the names for the geographic levels to be used in output filenames (can be any string the user desires). **For a global only model this will need to be set to `NULL`**
 | `loc.file.name`	| `"Poaceae_distribution"`				| If a geographic breakdown model is desired then this needs to be the name of the WCSP distribution data file (**NOTE**: without .csv). If no geographic breakdown is desired then this can be ignored, but does not need to be altered as it will be ignored|
 | `out.dir`		| `"./Output"`						| This is the location of the directory within the working directory where the output should go (in default this would mean `"~/Kew Summer/Output/"`)
 
@@ -149,36 +143,6 @@ These are the remaining input variables in both scripts which the user if free t
 | `reg.dir`		| `"regression_search"`					| Name for the sub-directory within the output directory in which the regression search results will go|
 | `regcv.dir`		| `"regression_search_cross_validation"`		| Name for the sub-directory within the output directory in which the regression search cross validation results will go (if selected)|
 | `log.dir`		| `"grad_descent_search_log_residuals"`			| Name for the sub-directory within the output directory in which the gradient descent search results will go (if selected)|
-
-#### Indices in the Data Files
-
-| Input Variable 	| Default 	| Explanation				|
-|:---------------------:|:-------------:| ------------------------------------- |
-| `loc.ind`		| `c(4,6)`	| If a geographic model is being applied then this is where the indices of the columns for each geographic level need to be supplied. Each column should refer to each level set via `levels`, in the same order|
-| `n.spec`		| `50`		| For geographic models this is the minimum number of total species recorded to date required in a given region in order for the model to be applied|
-
-#### Author Name Processing
-
-| Input Variable 	| Default 	| Explanation				|
-|:---------------------:|:-------------:| ------------------------------------- |
-| `comma`		| `TRUE`	| If set to `TRUE` then the string of author names will be split on the string `','`|
-| `in.tag`		| `TRUE`	| If set to `TRUE` then the string of author names will be split on the string `'in'`|
-| `in.inc`		| `TRUE`	| If set to `TRUE` then names to the right of the string `'in'` will be included|
-| `ex.tag`		| `TRUE`	| If set to `TRUE` then the string of author names will be split on the stirng `'ex'`|
-| `ex.inc`		| `FALSE`	| If set to `TRUE` then names to the left of the string `'ex'` will be included| 
-
-#### Data Filtering
-
-| Input Variable 	| Default 		| Explanation			|
-|:---------------------:|:---------------------:| ----------------------------- |
-| `filt.ind`		| `c(11,12,13,14,15)`	| When using a geogrpahic model this allows filtering of the distribution dataset to remove data for regions where the species is doubtful, or has been introduced. Here the user sets the indices of the columns where filtering is to be applied|
-| `filt.mk`		| `c(1,1,1,1,1)`	| Set the content for each column in `filt.ind` which is to be removed. If more than one mark is to be filtered in a given column, then enter that index twice in `filt.ind` and enter the two marks in the corresponding locations in `filt.mk`|
-| `spe.tax.stat`	| `TRUE`		| If set to `TRUE` then the species dataset is filtered based on taxonomic status for creating the aggregated species data|
-| `tx.tax.stat`		| `FALSE`		| If set to `TRUE` then the species dataset is filtered based on taxonomic status for creating the aggregated taxonomist data|
-| `spe.hyb.stat`	| `TRUE`		| If set to `TRUE` then the species dataset is filtered based on hybrid status for creating the aggregated species data|
-| `tx.hyb.stat`		| `FALSE`		| If set to `TRUE` then the species dataset is filtered based on hybrid status for creating the aggregated taxonomist data|
-| `spe.rnk.stat`	| `TRUE`		| If set to `TRUE` then the species dataset is filtered based on taxonomic rnak for creating the aggregated species data|
-| `tx.rnk.stat`		| `FALSE`		| If set to `TRUE` then the species dataset is filtered based on taxonomic rank for creating the aggregated taxonomist data|
 
 #### Model Parameters
 
@@ -216,7 +180,9 @@ The code presented here was prepared in R studio using R version `3.2.3` in a Wi
 
 [link1]: https://github.com/jonvw28/kew_grasses/tree/master/Documents/indices.md
 [link2]: https://github.com/jonvw28/kew_grasses/tree/master/Documents/data_methods.md
+[link3]: https://github.com/jonvw28/kew_grasses/tree/master/Documents/name_splitting.md
 [link4]: https://github.com/jonvw28/kew_grasses/tree/master/Documents/model_fitting.md
+[link5]: https://github.com/jonvw28/kew_grasses/tree/master/Documents/geographic_model.md
 
 [img1]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img1.jpg "Species Left to be Discovered"
 [img2]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img2.jpg "Taxonomiic Effort"
