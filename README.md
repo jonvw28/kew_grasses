@@ -7,6 +7,8 @@
 
 This repository contains the code used for the project "Where are the Missing Grasses?". This was a summer project based at the [Royal Botanic Garden Kew][1]. The aim of the project was to build on existing work such as Joppa et al 2010<sup>1</sup> and 2011<sup>3,4</sup> and Pimm et al. 2010<sup>2</sup> and to extend it to look at the problem of where we expect the gaps in our knowledge of plant species to be. Here the rate of discovery of new species is assumed to be proportional to both the number of remaining species to be discovered and the taxonomic effort at the time. In this particular project the goal was to apply this model to the grasses family (Poaceae) and to use this to try to determine where we expect the grasses currently unknown to science to be.
 
+Within this repository there is also a script to facilitate the comparison of taxonomic effort to global scientific effort. This can be found in the [subdirectory here][link7]. This enables the user to analyse the issue of whether taxonomy is a science keeping up with other disciplines.
+
 ## Model
 
 The base of the model is that as has been introduced and used by Joppa et al 2010<sup>1</sup>. Here the discovery of species is considered in aggregated time windows. This is to help deal with issues such as the publication of monographs which give rise to a large variation in year on year species publication. The base model uses a time window of five years when summarising the data, with 10 years being tried as a measure of validation for the model.
@@ -171,6 +173,7 @@ I would like to thank Maria Vorontsova and Eimear Nic Lughadha for arranging the
 [link4]: https://github.com/jonvw28/kew_grasses/tree/master/Documents/model_fitting.md
 [link5]: https://github.com/jonvw28/kew_grasses/tree/master/Documents/geographic_model.md
 [link6]: https://github.com/jonvw28/kew_grasses/tree/master/Documents/outputs.md
+[link7]:  https://github.com/jonvw28/kew_grasses/tree/master/Taxonomic_effort_comparison/ReadMe.md
 
 [img1]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img1.jpg "Species Left to be Discovered"
 [img2]: https://github.com/jonvw28/kew_grasses/blob/master/Figures/img2.jpg "Taxonomiic Effort"
