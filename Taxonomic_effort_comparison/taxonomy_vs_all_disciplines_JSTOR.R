@@ -85,7 +85,7 @@ comp.table[,2] <- tax.effort[,2]
 # Bring in JSTOR info
 #
 for(i in start.year:end.year){
-        ind <- which(sci.effort[,sci.year.col]==yrs[i])
+        ind <- which(sci.effort[,sci.year.col]==i)
         if(length(ind)==0){
                 tmp <- 0
         } else{
