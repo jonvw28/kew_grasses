@@ -92,7 +92,7 @@ for(i in start.year:end.year){
                 tmp <- sci.effort[ind,sci.pubs.col]
         }
         comp.table[i-start.year+1,3] <- tmp
-        rm(tmp,ind,tmp.in)
+        rm(tmp,ind)
 }
 #
 # Compute ratio
